@@ -189,6 +189,34 @@ namespace ELO_Bot.Commands
             await ReplyAsync("", embed: embed.Build());
         }
 
+        [Command("Suggest", RunMode = RunMode.Async)]
+        [Summary("Suggest")]
+        [Remarks("Suggest a feature to be added to the bot.")]
+        public async Task Suggest([Remainder] string message = "")
+        {
+            var embed = new EmbedBuilder();
+
+            embed.AddField("Suggestion", $"To Suggest a feature, visit the developer's server 'PassiveNation'\n" +
+                                         $"https://discord.gg/ZKXqt2a");
+            embed.Color = Color.Blue;
+            embed.WithFooter("ELO BOT by: PassiveModding");
+            await ReplyAsync("", false, embed.Build());
+        }
+
+        [Command("BugReport", RunMode = RunMode.Async)]
+        [Summary("BugReport")]
+        [Remarks("Suggest a feature to be added to the bot.")]
+        public async Task BugReport([Remainder] string message = "")
+        {
+            var embed = new EmbedBuilder();
+
+            embed.AddField("Bug Report", $"To Report a bug, visit the developer's server 'PassiveNation'\n" +
+                                         $"https://discord.gg/ZKXqt2a");
+            embed.Color = Color.Blue;
+            embed.WithFooter("ELO BOT by: PassiveModding");
+            await ReplyAsync("", false, embed.Build());
+        }
+
         /*
         /// <summary>
         ///     report an issue directly to the bot owner
@@ -273,80 +301,33 @@ namespace ELO_Bot.Commands
         }
         */
 
-
-        [Command("Suggest", RunMode = RunMode.Async)]
-        [Summary("Suggest <feature>")]
-        [Remarks("Suggest a feature to be added to the bot.")]
-        public async Task Suggest([Remainder] string message)
-        {
-            if (message == null)
-            {
-                await ReplyAsync("Please supply a suggestion :)");
-                return;
-            }
-            var embed = new EmbedBuilder();
-
-            embed.AddField("Suggestion", $"From: {Context.User.Username}\n" +
-                                         $"Server: {Context.Guild.Name}\n" +
-                                         $"Channel: {Context.Channel.Name}\n" +
-                                         $"Invite: {((SocketGuildChannel) Context.Channel).CreateInviteAsync(0).Result}\n" +
-                                         "Suggestion:\n" +
-                                         $"{message}");
-            embed.Color = Color.Green;
-            var e = await Context.Client.GetApplicationInfoAsync();
-
-            try
-            {
-                var m = await Context.Channel.GetMessagesAsync(10).Flatten();
-                await e.Owner.SendMessageAsync($"-----**SUGGESTION**-----");
-                foreach (var itemMessage in m)
-                    try
+        /*
+                [Command("Suggest", RunMode = RunMode.Async)]
+                [Summary("Suggest <feature>")]
+                [Remarks("Suggest a feature to be added to the bot.")]
+                public async Task Suggest([Remainder] string message)
+                {
+                    if (message == null)
                     {
-                        if (itemMessage.Content != "")
-                            await e.Owner.SendMessageAsync($"**{itemMessage.Author}**: \n {itemMessage.Content}");
-                        if (itemMessage.Embeds.Count > 0)
-                        {
-                            var embed1 = itemMessage.Embeds.First();
-                            var newembed = new EmbedBuilder
-                            {
-                                Title = embed1.Title,
-                                Description = embed1.Description,
-                                Url = embed1.Url,
-                                Timestamp = embed1.Timestamp
-                            };
-
-                            if (embed1.Fields != null)
-                                foreach (var field in embed1.Fields)
-                                    newembed.AddField($"{field.Name}", $"{field.Value}");
-                            if (embed1.Footer != null)
-                                newembed.Footer = new EmbedFooterBuilder
-                                {
-                                    Text = embed1.Footer.Value.Text
-                                };
-
-                            await e.Owner.SendMessageAsync($"", false, newembed.Build());
-                        }
-
-
-                        await Task.Delay(1000);
+                        await ReplyAsync("Please supply a suggestion :)");
+                        return;
                     }
-                    catch
-                    {
-                        //
-                    }
+                    var embed = new EmbedBuilder();
 
-                await e.Owner.SendMessageAsync($"---------------");
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-            }
-
-            await e.Owner.SendMessageAsync("", false, embed.Build());
+                    embed.AddField("Suggestion", $"From: {Context.User.Username}\n" +
+                                                 $"Server: {Context.Guild.Name}\n" +
+                                                 $"Channel: {Context.Channel.Name}\n" +
+                                                 $"Invite: {((SocketGuildChannel) Context.Channel).CreateInviteAsync(0).Result}\n" +
+                                                 "Suggestion:\n" +
+                                                 $"{message}");
+                    embed.Color = Color.Green;
+                    var e = await Context.Client.GetApplicationInfoAsync();
+                    await e.Owner.SendMessageAsync("", false, embed.Build());
 
 
-            await ReplyAsync(
-                "Thankyou! Your suggestion has been sent to the bot owner, along with some information about you and this current server.");
-        }
+                    await ReplyAsync(
+                        "Thankyou! Your suggestion has been sent to the bot owner, along with some information about you and this current server.");
+                }
+                */
     }
 }
