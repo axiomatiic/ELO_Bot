@@ -189,10 +189,10 @@ namespace ELO_Bot.Commands.Admin
 
             if (CommandHandler.Keys.Contains(key))
             {
-                if (server.IsPremium)
+                if (server.Expiry < DateTime.UtcNow && server.IsPremium)
                 {
                     embed.AddField("ERROR",
-                        "This server is already premium, to avoid wasting your key, you may use it on any other server that isnt premium");
+                        $"This server is already premium (expires {server.Expiry}), to avoid wasting your key, you may use it on any other server that isnt premium");
                     embed.Color = Color.Red;
                     await ReplyAsync("", false, embed.Build());
                     return;
@@ -203,8 +203,9 @@ namespace ELO_Bot.Commands.Admin
 
                 server.IsPremium = true;
                 server.PremiumKey = key;
+                server.Expiry = DateTime.UtcNow + TimeSpan.FromDays(31);
                 embed.AddField("SUCCESS",
-                    "This server has been upgraded to premium, userlimits for registrations is now greater than 20!");
+                    $"This server has been upgraded to premium for one month (expires {server.Expiry}), userlimits for registrations is now unrestricted.");
                 embed.Color = Color.Green;
                 await ReplyAsync("", false, embed.Build());
             }
@@ -540,7 +541,10 @@ namespace ELO_Bot.Commands.Admin
                 embed.AddField("Announcements Channel", "N/A");
             }
 
-            embed.AddField("Is Premium?", $"{server.IsPremium}");
+            embed.AddField("Is Premium?", $"Premium: {server.IsPremium}\n" +
+                                            $"Expires: {server.Expiry}");
+
+            
             embed.AddField("Points Per Win/Loss", $"{server.Winamount}/{server.Lossamount}");
 
             try

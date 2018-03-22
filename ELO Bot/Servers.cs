@@ -15,6 +15,7 @@ namespace ELO_Bot
         {
             public bool IsPremium { get; set; } = false;
             public string PremiumKey { get; set; } = "";
+            public DateTime Expiry { get; set; } = DateTime.MaxValue;
 
             public ulong ServerId { get; set; }
             public ulong RegisterRole { get; set; }

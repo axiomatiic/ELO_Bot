@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -83,14 +84,22 @@ namespace ELO_Bot.Commands.Admin
                 };
 
                 var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
-                if (server.UserList.Count >= 20)
-                    if (!server.IsPremium)
+                if (server.UserList.Count >= 20 && !server.IsPremium)
                     {
                         embed.AddField("ERROR",
                             "Free User limit has been hit. To upgrade the limit from 20 users to unlimited users, Purchase premium here: https://rocketr.net/buy/0e79a25902f5");
                         await ReplyAsync("", false, embed.Build());
                         return;
                     }
+
+                if (server.Expiry < DateTime.UtcNow)
+                {
+                    embed.AddField("ERROR",
+                        $"Premium for this server expired at {server.Expiry.ToString(CultureInfo.InvariantCulture)}. To renew, purchase premium here: https://rocketr.net/buy/0e79a25902f5");
+                    await ReplyAsync("", false, embed.Build());
+                    embed.WithColor(Color.Blue);
+                    return;
+                }
 
                 if (server.UserList.Any(member => member.UserId == user.Id))
                 {
