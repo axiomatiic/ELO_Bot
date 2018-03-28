@@ -32,8 +32,6 @@ namespace ELO_Bot.Commands
                     AppContext.BaseDirectory,
                     $"{Context.Message.Id}.txt")));
 
-            //await ReplyAsync(JsonConvert.SerializeObject(user));
-
             var pages = new List<string>();
             var p = user.player;
 
@@ -78,6 +76,9 @@ namespace ELO_Bot.Commands
             };
 
             await PagedReplyAsync(msg);
+
+            File.Delete(Path.Combine(AppContext.BaseDirectory,$"{Context.Message.Id}.txt"));
+            
         }
     }
 }

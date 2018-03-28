@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 using Newtonsoft.Json;
 
 namespace ELO_Bot.Commands.Admin
@@ -56,6 +57,46 @@ namespace ELO_Bot.Commands.Admin
             var keyobject = JsonConvert.SerializeObject(CommandHandler.Keys, Formatting.Indented);
             File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "setup/keys.json"), keyobject);
         }
+
+        /// <summary>
+        ///     Announce message to all servers
+        /// </summary>
+        /// <param name="announcement"></param>
+        /// <returns></returns>
+        [Command("announce")]
+        [Summary("announce <announcement>")]
+        [Remarks("Bot Creator Command")]
+        public async Task Addpremium(string announcement)
+        {
+            var embed = new EmbedBuilder();
+            embed.AddField("IMPORTANT ANNOUNCEMENT FROM DEV", announcement);
+            foreach (var guild in Context.Client.Guilds)
+            {
+                try
+                {
+                    foreach (var channel in ((SocketGuild)guild).TextChannels)
+                    {
+                        try
+                        {
+                            await channel.SendMessageAsync("", false, embed);
+                            break;
+                        }
+                        catch
+                        {
+                            //
+                        }
+                    }
+                }
+                catch
+                {
+                    //
+                }
+
+            }
+
+            await ReplyAsync("Complete");
+        }
+
 
         /// <summary>
         ///     rename the bot using a the provided input
