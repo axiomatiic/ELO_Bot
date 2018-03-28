@@ -59,8 +59,7 @@ namespace ELO_Bot.Commands
 
             pages.Add("**Links**\n" +
                       $"[Support Server]({Config.Load().DiscordInvite})\n" +
-                      "[Patreon](https://www.patreon.com/passivebot)\n" +
-                      "[Invite the BOT](https://goo.gl/mbfnjj)");
+                      "[Patreon](https://www.patreon.com/passivebot)");
 
             var msg = new PaginatedMessage
             {
@@ -197,7 +196,7 @@ namespace ELO_Bot.Commands
             var embed = new EmbedBuilder();
 
             embed.AddField("Suggestion", $"To Suggest a feature, visit the developer's server 'PassiveNation'\n" +
-                                         $"https://discord.gg/ZKXqt2a");
+                                         $"https://discord.gg/tu7ec3C");
             embed.Color = Color.Blue;
             embed.WithFooter("ELO BOT by: PassiveModding");
             await ReplyAsync("", false, embed.Build());
@@ -211,7 +210,7 @@ namespace ELO_Bot.Commands
             var embed = new EmbedBuilder();
 
             embed.AddField("Bug Report", $"To Report a bug, visit the developer's server 'PassiveNation'\n" +
-                                         $"https://discord.gg/ZKXqt2a");
+                                         $"https://discord.gg/tu7ec3C");
             embed.Color = Color.Blue;
             embed.WithFooter("ELO BOT by: PassiveModding");
             await ReplyAsync("", false, embed.Build());

@@ -187,7 +187,7 @@ namespace ELO_Bot
                 embed.AddField("Command", $"#: **{context.Message}**");
                 embed.AddField("Report",
                     $"#: To report this error, please join the discord and contact Passive\n" +
-                    $"https://discord.gg/ZKXqt2a");
+                    $"https://discord.gg/tu7ec3C");
 
                 embed.Color = Color.Red;
                 await context.Channel.SendMessageAsync("", false, embed.Build());
