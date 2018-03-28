@@ -67,7 +67,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("announce")]
         [Summary("announce <announcement>")]
         [Remarks("Bot Creator Command")]
-        public async Task Addpremium(string announcement)
+        public async Task Addpremium([Remainder]string announcement)
         {
             var embed = new EmbedBuilder();
             embed.AddField("IMPORTANT ANNOUNCEMENT FROM DEV", announcement);
