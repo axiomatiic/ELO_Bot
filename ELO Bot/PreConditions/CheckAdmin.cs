@@ -112,6 +112,22 @@ namespace ELO_Bot.Preconditions
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public sealed class BotOwner : PreconditionAttribute
+    {
+        public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command,
+            IServiceProvider prov)
+        {
+            var own = await context.Client.GetApplicationInfoAsync();
+            if (own.Owner.Id == context.User.Id || context.User.Id == 290763860179156993)
+                return await Task.FromResult(PreconditionResult.FromSuccess());
+
+            return await Task.FromResult(
+                PreconditionResult.FromError(
+                    "This Command can only be performed by the Bot Owner"));
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class CheckRegistered : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command,

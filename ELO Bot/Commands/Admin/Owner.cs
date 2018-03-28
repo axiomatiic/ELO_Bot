@@ -7,11 +7,12 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using ELO_Bot.Preconditions;
 using Newtonsoft.Json;
 
 namespace ELO_Bot.Commands.Admin
 {
-    [RequireOwner]
+    [BotOwner]
     public class Owner : InteractiveBase
     {
         /// <summary>
