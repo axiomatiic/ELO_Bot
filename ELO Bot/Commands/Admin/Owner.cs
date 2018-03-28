@@ -64,7 +64,7 @@ namespace ELO_Bot.Commands.Admin
         /// </summary>
         /// <param name="announcement"></param>
         /// <returns></returns>
-        [Command("announce")]
+        [Command("announce", RunMode = RunMode.Async)]
         [Summary("announce <announcement>")]
         [Remarks("Bot Creator Command")]
         public async Task Addpremium([Remainder]string announcement)
