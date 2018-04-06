@@ -1061,6 +1061,22 @@ namespace ELO_Bot.Commands
             await Announce(currentqueue, host, currentqueue.ChannelGametype, team1Userlist, team2Userlist);
         }
 
+        public static (IEnumerable<T> first, IEnumerable<T> second) Split<T>(IEnumerable<T> source, Func<T, int> selector)
+        {
+            var e = source.Select(item => (Item: item, Value: selector(item)))
+                .OrderByDescending(item => item.Value);
+            var a = new List<T>();
+            var b = new List<T>();
+            foreach (var (item, _) in e)
+            {
+                if (a.Sum(selector) < b.Sum(selector))
+                    a.Add(item);
+                else
+                    b.Add(item);
+            }
+            return (a, b);
+        }
+
         /// <summary>
         ///     if a queue is full, check if captains and go into picking mode
         ///     otherwise, auto assign teams.
