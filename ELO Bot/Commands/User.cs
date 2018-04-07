@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace ELO_Bot.Commands
 
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
 
-            if (server.UserList.Count >= 20 && !server.IsPremium )
+            if (server.UserList.Count >= 20 && !server.IsPremium)
             {
                 embed.AddField("ERROR",
                     "Free User limit has been hit. To upgrade the limit from 20 users to unlimited users, Purchase premium here: https://rocketr.net/buy/0e79a25902f5");
@@ -72,13 +73,13 @@ namespace ELO_Bot.Commands
                         return;
                     }
 
-                    if (!((IGuildUser) Context.User).RoleIds.Contains(server.RegisterRole) && server.RegisterRole != 0)
+                    if (!((IGuildUser)Context.User).RoleIds.Contains(server.RegisterRole) && server.RegisterRole != 0)
                         try
                         {
                             var serverrole = Context.Guild.GetRole(server.RegisterRole);
                             try
                             {
-                                await ((IGuildUser) Context.User).AddRoleAsync(serverrole);
+                                await ((IGuildUser)Context.User).AddRoleAsync(serverrole);
                             }
                             catch
                             {
@@ -141,7 +142,7 @@ namespace ELO_Bot.Commands
                     var serverrole = Context.Guild.GetRole(server.RegisterRole);
                     try
                     {
-                        await ((IGuildUser) Context.User).AddRoleAsync(serverrole);
+                        await ((IGuildUser)Context.User).AddRoleAsync(serverrole);
                     }
                     catch
                     {
@@ -191,94 +192,78 @@ namespace ELO_Bot.Commands
         [Command("Leaderboard")]
         [Summary("Leaderboard <wins, losses, points>")]
         [Remarks("Displays Rank Leaderboard (Top 20 )")]
-        public async Task LeaderBoard(string arg = null)
+        public async Task LeaderBoard([Remainder]string arg = "point")
         {
-            var embed = new EmbedBuilder();
+
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
-            var desc = "";
-            try
+            var page = new List<string>();
+            var pagecontent = "";
+            var i = 0;
+            var total = 0;
+            string argtype;
+            List<Servers.Server.User> sorttype;
+            if (arg.ToLower().Contains("win"))
             {
-                if (arg != null && arg.Contains("win"))
-                {
-                    var orderlist = server.UserList.OrderBy(x => x.Wins).Reverse().ToList();
-
-                    var i = 0;
-                    foreach (var user in orderlist)
-                    {
-                        i++;
-                        if (i <= 20)
-                            desc += $"{i}. {user.Username} - {user.Wins}\n";
-                    }
-                    embed.WithFooter(x =>
-                    {
-                        x.Text = $"Usercount = {i}";
-                        x.IconUrl = Context.Client.CurrentUser.GetAvatarUrl();
-                    });
-                    embed.AddField("LeaderBoard Wins", desc);
-                    embed.Color = Color.Blue;
-                    await ReplyAsync("", false, embed.Build());
-                }
-                else if (arg != null && arg.Contains("los"))
-                {
-                    var orderlist = server.UserList.OrderBy(x => x.Losses).Reverse().ToList();
-
-                    var i = 0;
-                    foreach (var user in orderlist)
-                    {
-                        i++;
-                        if (i <= 20)
-                            desc += $"{i}. {user.Username} - {user.Losses}\n";
-                    }
-                    embed.WithFooter(x =>
-                    {
-                        x.Text = $"Usercount = {i}";
-                        x.IconUrl = Context.Client.CurrentUser.GetAvatarUrl();
-                    });
-                    embed.AddField("LeaderBoard Losses", desc);
-                    embed.Color = Color.Blue;
-                    await ReplyAsync("", false, embed.Build());
-                }
-                else
-                {
-                    var orderlist = server.UserList.OrderBy(x => x.Points).Reverse().ToList();
-
-                    var i = 0;
-                    foreach (var user in orderlist)
-                    {
-                        i++;
-                        if (i <= 20)
-                            desc += $"{i}. {user.Username} - {user.Points}\n";
-                    }
-                    embed.WithFooter(x =>
-                    {
-                        x.Text = $"Usercount = {i}";
-                        x.IconUrl = Context.Client.CurrentUser.GetAvatarUrl();
-                    });
-                    embed.AddField("LeaderBoard Points", desc);
-                    embed.Color = Color.Blue;
-                    await ReplyAsync("", false, embed.Build());
-                }
-            }
-            catch
-            {
-                var orderlist = server.UserList.OrderBy(x => x.Points).Reverse().ToList();
-
-                var i = 0;
-                foreach (var user in orderlist)
+                argtype = "Leaderboard Wins";
+                sorttype = server.UserList.OrderBy(x => x.Wins).Reverse().ToList();
+                foreach (var user in sorttype)
                 {
                     i++;
-                    if (i <= 20)
-                        desc += $"{i}. {user.Username} - {user.Points}\n";
+                    total++;
+                    pagecontent += $"{total}. {user.Username} - {user.Wins}\n";
+                    if (i >= 20)
+                    {
+                        page.Add(pagecontent);
+                        pagecontent = "";
+                        i = 0;
+                    }
                 }
-                embed.WithFooter(x =>
-                {
-                    x.Text = $"Usercount = {i}";
-                    x.IconUrl = Context.Client.CurrentUser.GetAvatarUrl();
-                });
-                embed.AddField("LeaderBoard Points", desc);
-                embed.Color = Color.Blue;
-                await ReplyAsync("", false, embed.Build());
             }
+            else if (arg.ToLower().Contains("los"))
+            {
+                argtype = "Leaderboard Losses";
+                sorttype = server.UserList.OrderBy(x => x.Losses).Reverse().ToList();
+                foreach (var user in sorttype)
+                {
+                    i++;
+                    total++;
+                    pagecontent += $"{total}. {user.Username} - {user.Losses}\n";
+                    if (i >= 20)
+                    {
+                        page.Add(pagecontent);
+                        pagecontent = "";
+                        i = 0;
+                    }
+                }
+            }
+            else
+            {
+                argtype = "Leaderboard Points";
+                sorttype = server.UserList.OrderBy(x => x.Points).Reverse().ToList();
+                foreach (var user in sorttype)
+                {
+                    i++;
+                    total++;
+                    pagecontent += $"{total}. {user.Username} - {user.Points}\n";
+                    if (i >= 20)
+                    {
+                        page.Add(pagecontent);
+                        pagecontent = "";
+                        i = 0;
+                    }
+                }
+            }
+
+            page.Add(pagecontent);
+            var msg = new PaginatedMessage
+            {
+                Title = $"{argtype} (Users = {sorttype.Count})",
+                Pages = page,
+                Color = new Color(114, 137, 218)
+            };
+
+            await PagedReplyAsync(msg);
+
         }
 
         /// <summary>
@@ -358,27 +343,27 @@ namespace ELO_Bot.Commands
             //await UserRename(server.UsernameSelection, u, user.Username, user.Points);
             if (usernameSelection == 1)
             {
-                await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"{userpoints} ~ {username}"; });
+                await ((IGuildUser)user).ModifyAsync(x => { x.Nickname = $"{userpoints} ~ {username}"; });
 
                 if (CommandHandler.VerifiedUsers != null)
                     if (CommandHandler.VerifiedUsers.Contains(Context.User.Id))
-                        await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"👑{userpoints} ~ {username}"; });
+                        await ((IGuildUser)user).ModifyAsync(x => { x.Nickname = $"👑{userpoints} ~ {username}"; });
             }
             else if (usernameSelection == 2)
             {
-                await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"[{userpoints}] {username}"; });
+                await ((IGuildUser)user).ModifyAsync(x => { x.Nickname = $"[{userpoints}] {username}"; });
 
                 if (CommandHandler.VerifiedUsers != null)
                     if (CommandHandler.VerifiedUsers.Contains(Context.User.Id))
-                        await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"👑[{userpoints}] {username}"; });
+                        await ((IGuildUser)user).ModifyAsync(x => { x.Nickname = $"👑[{userpoints}] {username}"; });
             }
             else if (usernameSelection == 3)
             {
-                await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"{username}"; });
+                await ((IGuildUser)user).ModifyAsync(x => { x.Nickname = $"{username}"; });
 
                 if (CommandHandler.VerifiedUsers != null)
                     if (CommandHandler.VerifiedUsers.Contains(Context.User.Id))
-                        await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"👑{username}"; });
+                        await ((IGuildUser)user).ModifyAsync(x => { x.Nickname = $"👑{username}"; });
             }
         }
     }
