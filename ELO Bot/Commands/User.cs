@@ -176,7 +176,7 @@ namespace ELO_Bot.Commands
                     embed.AddField($"{usr.Username}", $"Points: {usr.Points}\n" +
                                                       $"Wins: {usr.Wins}\n" +
                                                       $"Losses: {usr.Losses}\n" +
-                                                      $"Leaderboard Rank: {orderlist.FindIndex(x => x.UserId == user.Id) + 1}");
+                                                      $"Leaderboard Rank: {orderlist.FindIndex(x => x.UserId == user.Id)}");
                     await ReplyAsync("", false, embed.Build());
                     return;
                 }

@@ -489,7 +489,7 @@ namespace ELO_Bot.Commands.Admin
                 await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"{userpoints} ~ {username}"; });
 
                 if (CommandHandler.VerifiedUsers != null)
-                    if (CommandHandler.VerifiedUsers.Contains(Context.User.Id))
+                    if (CommandHandler.VerifiedUsers.Contains(user.Id))
                         await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"👑{userpoints} ~ {username}"; });
             }
             else if (usernameSelection == 2)
@@ -497,7 +497,7 @@ namespace ELO_Bot.Commands.Admin
                 await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"[{userpoints}] {username}"; });
 
                 if (CommandHandler.VerifiedUsers != null)
-                    if (CommandHandler.VerifiedUsers.Contains(Context.User.Id))
+                    if (CommandHandler.VerifiedUsers.Contains(user.Id))
                         await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"👑[{userpoints}] {username}"; });
             }
             else if (usernameSelection == 3)
@@ -505,7 +505,7 @@ namespace ELO_Bot.Commands.Admin
                 await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"{username}"; });
 
                 if (CommandHandler.VerifiedUsers != null)
-                    if (CommandHandler.VerifiedUsers.Contains(Context.User.Id))
+                    if (CommandHandler.VerifiedUsers.Contains(user.Id))
                         await ((IGuildUser) user).ModifyAsync(x => { x.Nickname = $"👑{username}"; });
             }
         }
