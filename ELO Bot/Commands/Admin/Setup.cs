@@ -130,6 +130,21 @@ namespace ELO_Bot.Commands.Admin
             await ReplyAsync("", false, embed.Build());
         }
 
+        [Command("SetRegisterPoints")]
+        [Summary("SetRegisterPoints <points>")]
+        [Remarks("Sets theamount of points users are given upon registering")]
+        public async Task SetRegisterPoints(int i = 0)
+        {
+            var embed = new EmbedBuilder();
+
+
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            server.registerpoints = i;
+            embed.AddField("Complete!", $"Upon registering, users will now be be given a default of {i} points");
+            embed.WithColor(Color.Blue);
+            await ReplyAsync("", false, embed.Build());
+        }
+
         /// <summary>
         ///     toggle whether users are removed from queues when going idle/offline
         /// </summary>

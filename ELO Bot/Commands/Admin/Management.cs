@@ -76,14 +76,15 @@ namespace ELO_Bot.Commands.Admin
             }
             else
             {
+                var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
                 var usr = new Servers.Server.User
                 {
                     UserId = user.Id,
                     Username = username,
-                    Points = 0
+                    Points = server.registerpoints
                 };
 
-                var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+                
                 if (server.UserList.Count >= 20 && !server.IsPremium)
                     {
                         embed.AddField("ERROR",

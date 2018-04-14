@@ -17,6 +17,104 @@ namespace ELO_Bot.Commands.Admin
     [CheckAdmin]
     public class Lobby : InteractiveBase
     {
+        [Command("CreateLobby", RunMode = RunMode.Async)]
+        [Summary("CreateLobby")]
+        [Remarks("Create A Lobby for the current channel")]
+        public async Task CreateLobby1([Remainder] string overflow = null)
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            var lobbyexists = server.Queue.FirstOrDefault(x => x.ChannelId == Context.Channel.Id);
+            if (lobbyexists != null)
+            {
+                await ReplyAsync("This channel is already a lobby.");
+                return;
+            }
+
+            var TotalPlayers = 0;
+            Servers.Server.PickModes PlayerSortMode = 0;
+            await ReplyAsync(
+                "Please reply with the numbers of players you would like in this lobby. Ie. `10` will give you two teams of 5");
+            var playercount = await NextMessageAsync(timeout: TimeSpan.FromMinutes(1d));
+            if (int.TryParse(playercount.Content, out var i))
+            {
+                if (i % 2 != 0 || i < 2)
+                {
+                    await ReplyAsync("ERROR: Number must be even! Exiting Lobby Setup.");
+                    return;
+                }
+
+                TotalPlayers = i;
+            }
+            else
+            {
+                await ReplyAsync("Error: Please reply with Just a number! Exiting Lobby Setup.");
+                return;
+            }
+
+            await ReplyAsync("Please reply with the team sorting mode you would like for this lobby:\n" +
+                             "`0` __**Completely Random Team sorting**__\n" +
+                             "All teams are chosen completely randomly\n\n" +
+                             "`1` __**Captains Mode**__\n" +
+                             "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
+                             "`2` __**Score Balance Mode**__\n" +
+                             "Players will be automatically selected and teams will be balanced based on player scores");
+            var PickMode = await NextMessageAsync(timeout: TimeSpan.FromMinutes(1d));
+            if (int.TryParse(PickMode.Content, out i))
+            {
+                if (i < 0 || i > 2)
+                {
+                    await ReplyAsync("Error: Please reply with `0`, `1`, or `2` Only! Exiting Lobby Setup.");
+                    return;
+                }
+                PlayerSortMode = (Servers.Server.PickModes) i;
+            }
+            else
+            {
+                await ReplyAsync("Error: Please reply with Just a number! Exiting Lobby Setup.");
+                return;
+            }
+            await ReplyAsync("Please specify a description for this lobby:\n" +
+                             "ie. \"Ranked Gamemode, 5v5 ELITE Players Only!\"");
+            var LobbyDesc = await NextMessageAsync(timeout: TimeSpan.FromMinutes(1d));
+
+            var PickString = "";
+            switch (PlayerSortMode)
+            {
+                case Servers.Server.PickModes.CompleteRandom:
+                    PickString = "Random";
+                    break;
+                case Servers.Server.PickModes.Captains:
+                    PickString = "Captains";
+                    break;
+                case Servers.Server.PickModes.SortByScore:
+                    PickString = "Score Sort";
+                    break;
+            }
+
+            server.Queue.Add(new Servers.Server.Q
+            {
+                ChannelId = Context.Channel.Id,
+                ChannelGametype = LobbyDesc.Content,
+                PickMode = PlayerSortMode,
+                Users = new List<ulong>(),
+                UserLimit = TotalPlayers
+            });
+
+            var embed = new EmbedBuilder
+            {
+                Title = "Success Lobby Created",
+                Description = $"Lobby Name: {Context.Channel.Name}\n" +
+                              $"Players: {TotalPlayers}\n" +
+                              $"Pick Mode: {PickString}\n" +
+                              $"Description:\n" +
+                              $"{LobbyDesc.Content}",
+                Color = Color.Blue
+            };
+            await ReplyAsync("", false, embed.Build());
+        }
+
+/*
+
         /// <summary>
         ///     creates a lobby
         ///     requires the user to provide the following:
@@ -91,7 +189,7 @@ namespace ELO_Bot.Commands.Admin
                 await ReplyAsync(
                     $"ERROR: Current channel is already a lobby OR Command timed out. {Context.User.Mention}");
             }
-        }
+        }*/
 
         /// <summary>
         ///     removes the current channel from being used as a lobby if applicable
@@ -141,6 +239,61 @@ namespace ELO_Bot.Commands.Admin
             q.T2Captain = 0;
 
             await ReplyAsync($"{Context.Channel.Name}'s queue has been cleared!");
+        }
+
+        [Command("PickMode")]
+        [Summary("PickMode <mode number>")]
+        [Remarks("Set the way teams are sorted")]
+        public async Task PickMode(int mode = 999)
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            var lobby = server.Queue.FirstOrDefault(x => x.ChannelId == Context.Channel.Id);
+            if (lobby == null)
+            {
+                await ReplyAsync("Current channel is not a lobby!");
+                return;
+            }
+            if (mode == 999)
+            {
+                await ReplyAsync($"Please use `{Config.Load().Prefix}pickmode <mode number>` with the team sorting mode you would like for this lobby:\n" +
+                                 "`0` __**Completely Random Team sorting**__\n" +
+                                 "All teams are chosen completely randomly\n\n" +
+                                 "`1` __**Captains Mode**__\n" +
+                                 "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
+                                 "`2` __**Score Balance Mode**__\n" +
+                                 "Players will be automatically selected and teams will be balanced based on player scores");
+                return;
+            }
+
+            if (mode < 0 || mode > 2)
+            {
+                await ReplyAsync("Invalid Mode!");
+                return;
+            }
+
+            var PickString = "";
+            switch ((Servers.Server.PickModes)mode)
+            {
+                case Servers.Server.PickModes.CompleteRandom:
+                    PickString = "Random";
+                    break;
+                case Servers.Server.PickModes.Captains:
+                    PickString = "Captains";
+                    break;
+                case Servers.Server.PickModes.SortByScore:
+                    PickString = "Score Sort";
+                    break;
+            }
+            var embed = new EmbedBuilder
+            {
+                Description = "Success! The Current Channel's Sorting Mode is now:\n" +
+                              $"{PickString}"
+            };
+
+            lobby.PickMode = (Servers.Server.PickModes) mode;
+
+
+            await ReplyAsync("", false, embed.Build());
         }
 
         /// <summary>

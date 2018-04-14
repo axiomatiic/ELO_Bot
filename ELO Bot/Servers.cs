@@ -19,6 +19,7 @@ namespace ELO_Bot
 
             public ulong ServerId { get; set; }
             public ulong RegisterRole { get; set; }
+            public int registerpoints { get; set; } = 0;
             public List<Ranking> Ranks { get; set; } = new List<Ranking>();
             public ulong AdminRole { get; set; } = 0;
             public ulong ModRole { get; set; } = 0;
@@ -48,7 +49,6 @@ namespace ELO_Bot
                 public int TeamLimit { get; set; } = 8;
                 public int PlayerLimit { get; set; } = 5;
 
-
                 public List<Team> Teams { get; set; }
 
                 public class Team
@@ -67,6 +67,13 @@ namespace ELO_Bot
                 public string Reason { get; set; } = null;
             }
 
+            public enum PickModes
+            {
+                CompleteRandom,
+                Captains,
+                SortByScore
+            }
+
             public class Q
             {
                 public List<ulong> Users { get; set; } = new List<ulong>();
@@ -76,8 +83,10 @@ namespace ELO_Bot
                 public int Games { get; set; } = 0;
                 public List<string> Maps { get; set; } = new List<string>();
 
-                public bool Captains { get; set; } = false;
+                //public bool Captains { get; set; } = false;
                 public bool IsPickingTeams { get; set; } = false;
+
+                public PickModes PickMode { get; set; } = PickModes.CompleteRandom;
 
                 public bool NoPairs { get; set; } = false;
 

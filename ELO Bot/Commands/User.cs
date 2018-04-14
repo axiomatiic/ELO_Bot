@@ -122,7 +122,7 @@ namespace ELO_Bot.Commands
             {
                 UserId = Context.User.Id,
                 Username = username,
-                Points = 0
+                Points = server.registerpoints
             };
 
             server.UserList.Add(user);
@@ -169,7 +169,7 @@ namespace ELO_Bot.Commands
             var embed = new EmbedBuilder();
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
             var userlist = server.UserList;
-            var orderlist = server.UserList.OrderBy(x => x.Points).Reverse().ToList();
+            var orderlist = server.UserList.OrderByDescending(x => x.Points).ToList();
             foreach (var usr in userlist)
                 if (usr.UserId == user.Id)
                 {

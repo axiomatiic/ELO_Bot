@@ -143,13 +143,26 @@ namespace ELO_Bot.Commands
 
                 if (lobbyexists.ChannelGametype == null)
                     lobbyexists.ChannelGametype = "Unknown";
+                var PickString = "";
+                switch (lobbyexists.PickMode)
+                {
+                    case Servers.Server.PickModes.CompleteRandom:
+                        PickString = "Random";
+                        break;
+                    case Servers.Server.PickModes.Captains:
+                        PickString = "Captains";
+                        break;
+                    case Servers.Server.PickModes.SortByScore:
+                        PickString = "Score Sort";
+                        break;
+                }
 
                 embed.AddField("Lobby Info", "**Player Limit:**\n" +
                                              $"{lobbyexists.UserLimit}\n" +
                                              "**Game Number:**\n" +
                                              $"{lobbyexists.Games + 1}\n" +
-                                             "**Automatic Teams:**\n" +
-                                             $"{!lobbyexists.Captains}\n" +
+                                             "**Sort Mode:**\n" +
+                                             $"{PickString}\n" +
                                              "**Gamemode Description:**\n" +
                                              $"{lobbyexists.ChannelGametype}");
             }
@@ -1099,7 +1112,7 @@ namespace ELO_Bot.Commands
                 .ToList();
 
             //order list by User Points
-            if (currentqueue.Captains)
+            if (currentqueue.PickMode == Servers.Server.PickModes.Captains)
             {
                 //randomly select the captains on each team.
                 var rnd = new Random();
@@ -1154,80 +1167,90 @@ namespace ELO_Bot.Commands
                 return;
             }
 
-
-            //automatically select teams evenly based on points
-            var sortedlist = userlist.OrderBy(x => x.Points).Reverse().ToList();
-
-
-            var team1 = new List<Servers.Server.User>();
-            var team2 = new List<Servers.Server.User>();
-
-            if (currentqueue.Pairs.Any(
-                    x => currentqueue.Users.Contains(x.User1) && currentqueue.Users.Contains(x.User2)) &&
-                !currentqueue.NoPairs)
+            var sortedlist = userlist.OrderByDescending(x => x.Points).ToList();
+                var team1 = new List<Servers.Server.User>();
+                var team2 = new List<Servers.Server.User>();
+            if (currentqueue.PickMode == Servers.Server.PickModes.SortByScore)
             {
-                var validpairs = currentqueue.Pairs.Where(x =>
-                    currentqueue.Users.Contains(x.User1) && currentqueue.Users.Contains(x.User2));
-                foreach (var pair in validpairs)
+                //automatically select teams evenly based on points
+                if (currentqueue.Pairs.Any(
+                        x => currentqueue.Users.Contains(x.User1) && currentqueue.Users.Contains(x.User2)) &&
+                    !currentqueue.NoPairs)
+                {
+                    var validpairs = currentqueue.Pairs.Where(x =>
+                        currentqueue.Users.Contains(x.User1) && currentqueue.Users.Contains(x.User2));
+                    foreach (var pair in validpairs)
+                        if (team1.Count > team2.Count)
+                        {
+                            team2.Add(server.UserList.First(x => x.UserId == pair.User1));
+                            team2.Add(server.UserList.First(x => x.UserId == pair.User2));
+                        }
+                        else
+                        {
+                            team1.Add(server.UserList.First(x => x.UserId == pair.User1));
+                            team1.Add(server.UserList.First(x => x.UserId == pair.User2));
+                        }
+                    foreach (var user in currentqueue.Users)
+                        if (team1.Any(x => x.UserId == user) || team2.Any(x => x.UserId == user))
+                        {
+                            //
+                        }
+                        else
+                        {
+                            if (team1.Count > team2.Count)
+                                team2.Add(server.UserList.First(x => x.UserId == user));
+                            else
+                                team1.Add(server.UserList.First(x => x.UserId == user));
+                        }
+
                     if (team1.Count > team2.Count)
                     {
-                        team2.Add(server.UserList.First(x => x.UserId == pair.User1));
-                        team2.Add(server.UserList.First(x => x.UserId == pair.User2));
+                        team2.Add(team1.Last());
+                        team1.Remove(team1.Last());
                     }
-                    else
+                    else if (team2.Count > team1.Count)
                     {
-                        team1.Add(server.UserList.First(x => x.UserId == pair.User1));
-                        team1.Add(server.UserList.First(x => x.UserId == pair.User2));
+                        team1.Add(team2.Last());
+                        team2.Remove(team2.Last());
                     }
-                foreach (var user in currentqueue.Users)
-                    if (team1.Any(x => x.UserId == user) || team2.Any(x => x.UserId == user))
-                    {
-                        //
-                    }
-                    else
-                    {
-                        if (team1.Count > team2.Count)
-                            team2.Add(server.UserList.First(x => x.UserId == user));
-                        else
-                            team1.Add(server.UserList.First(x => x.UserId == user));
-                    }
-
-                if (team1.Count > team2.Count)
-                {
-                    team2.Add(team1.Last());
-                    team1.Remove(team1.Last());
-                }
-                else if (team2.Count > team1.Count)
-                {
-                    team1.Add(team2.Last());
-                    team2.Remove(team2.Last());
-                }
-            }
-            else
-            {
-                if (sortedlist.Count == 10)
-                {
-                    team1.Add(sortedlist[0]);
-                    team1.Add(sortedlist[3]);
-                    team1.Add(sortedlist[5]);
-                    team1.Add(sortedlist[7]);
-                    team1.Add(sortedlist[9]);
-
-                    team2.Add(sortedlist[1]);
-                    team2.Add(sortedlist[2]);
-                    team2.Add(sortedlist[4]);
-                    team2.Add(sortedlist[6]);
-                    team2.Add(sortedlist[8]);
                 }
                 else
                 {
-                    foreach (var user in sortedlist)
-                        if (team1.Count > team2.Count)
-                            team2.Add(user);
-                        else
-                            team1.Add(user);
+                    if (sortedlist.Count == 10)
+                    {
+                        team1.Add(sortedlist[0]);
+                        team1.Add(sortedlist[3]);
+                        team1.Add(sortedlist[5]);
+                        team1.Add(sortedlist[7]);
+                        team1.Add(sortedlist[9]);
+
+                        team2.Add(sortedlist[1]);
+                        team2.Add(sortedlist[2]);
+                        team2.Add(sortedlist[4]);
+                        team2.Add(sortedlist[6]);
+                        team2.Add(sortedlist[8]);
+                    }
+                    else
+                    {
+                        foreach (var user in sortedlist)
+                            if (team1.Count > team2.Count)
+                                team2.Add(user);
+                            else
+                                team1.Add(user);
+                    }
                 }
             }
+
+            if (currentqueue.PickMode == Servers.Server.PickModes.CompleteRandom)
+            {
+                sortedlist = userlist.OrderBy(x => new Random().Next()).Reverse().ToList();
+                foreach (var user in sortedlist)
+                    if (team1.Count > team2.Count)
+                        team2.Add(user);
+                    else
+                        team1.Add(user);
+            }
+
 
 
             //creating the info for each team
