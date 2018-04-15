@@ -21,7 +21,7 @@ namespace ELO_Bot.Commands.Admin
         /// </summary>
         /// <param name="userlist">a seperated list of users ie. @user1 @user2 @user3...</param>
         /// <returns></returns>
-        [Command("Win")]
+        [Command("Win", RunMode = RunMode.Async)]
         [Summary("Win <users>")]
         [Remarks("Add a win + win points for the specified users")]
         public async Task Win(params IUser[] userlist)
@@ -39,7 +39,7 @@ namespace ELO_Bot.Commands.Admin
         /// </summary>
         /// <param name="userlist">a seperated list of users ie. @user1 @user2 @user3...</param>
         /// <returns></returns>
-        [Command("Lose")]
+        [Command("Lose", RunMode = RunMode.Async)]
         [Summary("Lose <users>")]
         [Remarks("Add a loss to the specified users")]
         public async Task Lose(params IUser[] userlist)
@@ -62,7 +62,7 @@ namespace ELO_Bot.Commands.Admin
         /// <param name="gamenumber">game number for the specified lobby</param>
         /// <param name="team">winning team ie. Team2 or Team2</param>
         /// <returns></returns>
-        [Command("UndoGame")]
+        [Command("UndoGame", RunMode = RunMode.Async)]
         [Summary("UndoGame <lobbyname> <gamenumber> <winningteam>")]
         [Remarks("Undo the results of a previous game")]
         public async Task UnWin(string lobbyname, int gamenumber, [Remainder] string team)

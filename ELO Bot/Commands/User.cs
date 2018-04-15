@@ -173,10 +173,24 @@ namespace ELO_Bot.Commands
             foreach (var usr in userlist)
                 if (usr.UserId == user.Id)
                 {
-                    embed.AddField($"{usr.Username}", $"Points: {usr.Points}\n" +
-                                                      $"Wins: {usr.Wins}\n" +
-                                                      $"Losses: {usr.Losses}\n" +
-                                                      $"Leaderboard Rank: {orderlist.FindIndex(x => x.UserId == user.Id)}");
+                    if (server.showkd == false)
+                    {
+                        embed.AddField($"{usr.Username}", $"Points: {usr.Points}\n" +
+                                                          $"Wins: {usr.Wins}\n" +
+                                                          $"Losses: {usr.Losses}\n" +
+                                                          $"Leaderboard Rank: {orderlist.FindIndex(x => x.UserId == user.Id)}");
+                    }
+                    else
+                    {
+                        embed.AddField($"{usr.Username}", $"Points: {usr.Points}\n" +
+                                                          $"Wins: {usr.Wins}\n" +
+                                                          $"Losses: {usr.Losses}\n" +
+                                                          $"Kills: {usr.kills}\n" +
+                                                          $"Deaths: {usr.deaths}\n" +
+                                                          $"KD: {usr.kills/(usr.deaths == 0 ? 1 : usr.deaths)}\n" +
+                                                          $"Leaderboard Rank: {orderlist.FindIndex(x => x.UserId == user.Id)}");
+                    }
+
                     await ReplyAsync("", false, embed.Build());
                     return;
                 }

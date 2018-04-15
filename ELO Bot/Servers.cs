@@ -138,6 +138,11 @@ namespace ELO_Bot
                 public int Points { get; set; } = 0;
                 public int Wins { get; set; } = 0;
                 public int Losses { get; set; } = 0;
+
+
+                public int draws { get; set; } = 0;
+                public int kills { get; set; } = 0;
+                public int deaths { get; set; } = 0;
             }
         }
     }

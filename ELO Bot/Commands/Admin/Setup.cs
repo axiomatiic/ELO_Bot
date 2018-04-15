@@ -64,6 +64,16 @@ namespace ELO_Bot.Commands.Admin
             await ReplyAsync("GameAnnouncements will now be posted in this channel");
         }
 
+        [Command("ToggleKD")]
+        [Summary("ToggleKD")]
+        [Remarks("Toggle wether or not to use K/D in the server")]
+        public async Task ToggleKD()
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            server.showkd = !server.showkd;
+            await ReplyAsync($"ShowKD = {server.showkd}");
+        }
+
         [Command("SetNicknameFormat")]
         [Summary("SetNicknameFormat [ID]")]
         [Remarks("Set how scores are displayed in player nicknames")]

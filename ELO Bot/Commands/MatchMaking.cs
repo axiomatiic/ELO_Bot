@@ -355,36 +355,11 @@ namespace ELO_Bot.Commands
 
                     var cap1 = await ((IGuild) Context.Guild).GetUserAsync(lobby.T1Captain);
                     var cap2 = await ((IGuild) Context.Guild).GetUserAsync(lobby.T2Captain);
-                    foreach (var us in lobby.Team1)
-                        try
-                        {
-                            var u = await ((IDiscordClient) Context.Client).GetUserAsync(us);
-                            t1List += $"{u.Mention} ";
-                        }
-                        catch
-                        {
-                            t1List += $"{us} ";
-                        }
-                    foreach (var us in lobby.Team2)
-                        try
-                        {
-                            var u = await ((IDiscordClient) Context.Client).GetUserAsync(us);
-                            t2List += $"{u.Mention} ";
-                        }
-                        catch
-                        {
-                            t2List += $"{us} ";
-                        }
-                    foreach (var us in lobby.Users)
-                        try
-                        {
-                            var u = await ((IDiscordClient) Context.Client).GetUserAsync(us);
-                            users += $"{u.Mention} ";
-                        }
-                        catch
-                        {
-                            users += $"{us} ";
-                        }
+
+                    t1List = string.Join(" ", lobby.Team1.Select(x => Context.Client.GetUser(x) == null ? $"N/A ({x})" : Context.Client.GetUser(x).Mention));
+                    t2List = string.Join(" ", lobby.Team2.Select(x => Context.Client.GetUser(x) == null ? $"N/A ({x})" : Context.Client.GetUser(x).Mention));
+                    users = string.Join(" ", lobby.Users.Select(x => Context.Client.GetUser(x) == null ? $"N/A ({x})" : Context.Client.GetUser(x).Mention));
+
                     embed.AddField($"{(user as IGuildUser)?.Nickname} Added",
                         $"[{lobby.Team2.Count}/{lobby.UserLimit / 2}]\n" +
                         $"Team1: {t1List}\n" +
@@ -505,7 +480,7 @@ namespace ELO_Bot.Commands
             }
         }
 
-        [Command("pairs")]
+        [Command("pairs", RunMode = RunMode.Async)]
         [Summary("pairs")]
         [Remarks("list all pairs in this lobby")]
         public async Task Pairs()
@@ -573,7 +548,7 @@ namespace ELO_Bot.Commands
             }
         }
 
-        [Command("leavepair")]
+        [Command("leavepair", RunMode = RunMode.Async)]
         [Summary("leavepair")]
         [Remarks("Leave a pair")]
         public async Task LeavePair()
@@ -618,7 +593,7 @@ namespace ELO_Bot.Commands
         /// </summary>
         /// <returns></returns>
         [Ratelimit(1, 10d, Measure.Seconds)]
-        [Command("Join")]
+        [Command("Join", RunMode = RunMode.Async)]
         [Summary("Join")]
         [Alias("j")]
         [Remarks("Join the current queue")]
@@ -707,7 +682,7 @@ namespace ELO_Bot.Commands
         /// <param name="user"></param>
         /// <returns></returns>
         [Ratelimit(1, 10d, Measure.Seconds)]
-        [Command("subfor")]
+        [Command("subfor", RunMode = RunMode.Async)]
         [Summary("subfor <@user>")]
         [Remarks("replace the given user in the queue")]
         public async Task Sub(IUser user)
@@ -770,7 +745,7 @@ namespace ELO_Bot.Commands
         /// <param name="user"></param>
         /// <returns></returns>
         [Ratelimit(1, 10d, Measure.Seconds)]
-        [Command("replace")]
+        [Command("replace", RunMode = RunMode.Async)]
         [Summary("replace <@user>")]
         [Remarks("replace the specified user in the previously chosen game")]
         public async Task Replace(IUser user)
@@ -857,7 +832,7 @@ namespace ELO_Bot.Commands
         /// </summary>
         /// <returns></returns>
         [Ratelimit(1, 10d, Measure.Seconds)]
-        [Command("Leave")]
+        [Command("Leave", RunMode = RunMode.Async)]
         [Alias("l")]
         [Summary("Leave")]
         [Remarks("Leave the current queue")]
@@ -957,7 +932,7 @@ namespace ELO_Bot.Commands
             await ReplyAsync("", false, embed.Build());
         }
 
-        [Command("showgame")]
+        [Command("showgame", RunMode = RunMode.Async)]
         [Summary("showgame <lobby> <match no.>")]
         [Remarks("Show information about a previous game")]
         public async Task Showgame(string lobbyname, int matchnumber)

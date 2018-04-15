@@ -16,6 +16,7 @@ namespace ELO_Bot
         public string Token { get; set; } = "Token";
         public bool AutoRun { get; set; }
         public string DiscordInvite { get; set; } = "https://discord.me/passive";
+        public string FNToken { get; set; } = "";
 
         public void Save(string dir = "setup/config.json")
         {
