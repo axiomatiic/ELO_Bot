@@ -15,7 +15,7 @@ namespace ELO_Bot.Commands.Admin
     public class Point : ModuleBase
     {
         [Command("AddKills", RunMode = RunMode.Async)]
-        [Summary("AddKills <points> <users>")]
+        [Summary("AddKills <kills> <users>")]
         [Remarks("add points to the specified users")]
         public async Task AddKills(int kills, params IUser[] userlist)
         {

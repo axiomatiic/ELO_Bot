@@ -187,7 +187,7 @@ namespace ELO_Bot.Commands
                                                           $"Losses: {usr.Losses}\n" +
                                                           $"Kills: {usr.kills}\n" +
                                                           $"Deaths: {usr.deaths}\n" +
-                                                          $"KD: {usr.kills/(usr.deaths == 0 ? 1 : usr.deaths)}\n" +
+                                                          $"KD: {(double)usr.kills/(usr.deaths == 0 ? 1 : usr.deaths)}\n" +
                                                           $"Leaderboard Rank: {orderlist.FindIndex(x => x.UserId == user.Id)}");
                     }
 
@@ -242,6 +242,72 @@ namespace ELO_Bot.Commands
                     i++;
                     total++;
                     pagecontent += $"{total}. {user.Username} - {user.Losses}\n";
+                    if (i >= 20)
+                    {
+                        page.Add(pagecontent);
+                        pagecontent = "";
+                        i = 0;
+                    }
+                }
+            }
+            else if (arg.ToLower().Contains("kill"))
+            {
+                if (!server.showkd)
+                {
+                    await ReplyAsync("Server Does not have K/D Enabled");
+                    return;
+                }
+                argtype = "Leaderboard Kills";
+                sorttype = server.UserList.OrderBy(x => x.kills).Reverse().ToList();
+                foreach (var user in sorttype)
+                {
+                    i++;
+                    total++;
+                    pagecontent += $"{total}. {user.Username} - {user.kills}\n";
+                    if (i >= 20)
+                    {
+                        page.Add(pagecontent);
+                        pagecontent = "";
+                        i = 0;
+                    }
+                }
+            }
+            else if (arg.ToLower().Contains("death"))
+            {
+                if (!server.showkd)
+                {
+                    await ReplyAsync("Server Does not have K/D Enabled");
+                    return;
+                }
+                argtype = "Leaderboard Deaths";
+                sorttype = server.UserList.OrderBy(x => x.deaths).Reverse().ToList();
+                foreach (var user in sorttype)
+                {
+                    i++;
+                    total++;
+                    pagecontent += $"{total}. {user.Username} - {user.deaths}\n";
+                    if (i >= 20)
+                    {
+                        page.Add(pagecontent);
+                        pagecontent = "";
+                        i = 0;
+                    }
+                }
+            }
+            else if (arg.ToLower().Contains("kd"))
+            {
+                if (!server.showkd)
+                {
+                    await ReplyAsync("Server Does not have K/D Enabled");
+                    return;
+                }
+                argtype = "Leaderboard K/D";
+                sorttype = server.UserList.OrderBy(x => (double)x.kills/(x.deaths == 0 ? 1 : x.deaths)).Reverse().ToList();
+                foreach (var user in sorttype)
+                {
+                    i++;
+                    total++;
+                    pagecontent += $"{total}. {user.Username} - {(double)user.kills / (user.deaths == 0 ? 1 : user.deaths)}\n";
                     if (i >= 20)
                     {
                         page.Add(pagecontent);
