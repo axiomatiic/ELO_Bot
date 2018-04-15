@@ -951,12 +951,22 @@ namespace ELO_Bot.Commands
 
                 var embed = new EmbedBuilder();
                 var gstring = "";
-                if (game.Result == null)
-                    gstring = "Undecided";
-                else if (game.Result is true)
-                    gstring = "Team1";
-                else if (game.Result is false)
-                    gstring = "Team2";
+
+                if (game.Cancelled)
+                {
+                    gstring = "Cancelled";
+                }
+                else
+                {
+                     if (game.Result == null)
+                        gstring = "Undecided";
+                    else if (game.Result is true)
+                        gstring = "Team1";
+                    else if (game.Result is false)
+                        gstring = "Team2";                   
+                }
+
+
 
                 var team1 = server.UserList.Where(x => game.Team1.Contains(x.UserId)).Select(x => x.Username);
                 var team2 = server.UserList.Where(x => game.Team2.Contains(x.UserId)).Select(x => x.Username);

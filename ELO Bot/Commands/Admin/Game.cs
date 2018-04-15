@@ -68,10 +68,7 @@ namespace ELO_Bot.Commands.Admin
         public async Task UnWin(string lobbyname, int gamenumber, [Remainder] string team)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
-            IMessageChannel channel = null;
-            foreach (var chan in Context.Guild.Channels)
-                if (string.Equals(chan.Name, lobbyname, StringComparison.CurrentCultureIgnoreCase))
-                    channel = chan as IMessageChannel;
+            var channel = Context.Guild.TextChannels.FirstOrDefault(x => string.Equals(x.Name, lobbyname, StringComparison.CurrentCultureIgnoreCase));
 
             if (channel == null)
             {
@@ -94,6 +91,12 @@ namespace ELO_Bot.Commands.Admin
             if (game == null)
             {
                 await ReplyAsync("ERROR: Invalid Game number/channel");
+                return;
+            }
+
+            if (game.Cancelled)
+            {
+                await ReplyAsync("ERROR: Game has been cancelled, use the cancel command again to undo this.");
                 return;
             }
 
@@ -162,13 +165,10 @@ namespace ELO_Bot.Commands.Admin
         [Command("Game", RunMode = RunMode.Async)]
         [Summary("Game <lobbyname> <gamenumber> <winningteam>")]
         [Remarks("Automatically update wins/losses for the selected team")]
-        public async Task Win(string lobbyname, int gamenumber, [Remainder] string team)
+        public async Task DoGame(string lobbyname, int gamenumber, [Remainder] string team)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
-            IMessageChannel channel = null;
-            foreach (var chan in Context.Guild.Channels)
-                if (string.Equals(chan.Name, lobbyname, StringComparison.CurrentCultureIgnoreCase))
-                    channel = chan as IMessageChannel;
+            var channel = Context.Guild.TextChannels.FirstOrDefault(x => string.Equals(x.Name, lobbyname, StringComparison.CurrentCultureIgnoreCase));
 
             if (channel == null)
             {
@@ -195,6 +195,12 @@ namespace ELO_Bot.Commands.Admin
             if (game == null)
             {
                 await ReplyAsync("ERROR: Invalid Game number/channel");
+                return;
+            }
+
+            if (game.Cancelled)
+            {
+                await ReplyAsync("ERROR: Game has been cancelled, use the cancel command again to undo this.");
                 return;
             }
 
@@ -266,6 +272,64 @@ namespace ELO_Bot.Commands.Admin
                     await ReplyAsync(
                         "Please specify a team in the following format `=game <lobby> <number> team1` or `=game <lobby> <number> team2`");
                     break;
+            }
+        }
+
+
+        [Command("Cancel", RunMode = RunMode.Async)]
+        [Summary("Cancel <lobbyname> <gamenumber>")]
+        [Remarks("Cancel a game so the score is not set.")]
+        public async Task Cancel(string lobbyname, int gamenumber)
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            var channel = Context.Guild.TextChannels.FirstOrDefault(x => string.Equals(x.Name, lobbyname, StringComparison.CurrentCultureIgnoreCase));
+
+            if (channel == null)
+            {
+                var queuechannels = "";
+                foreach (var chan in server.Queue)
+                    try
+                    {
+                        var getqueuechannels = await ((IGuild)Context.Guild).GetChannelAsync(chan.ChannelId);
+                        queuechannels += $"{getqueuechannels.Name}\n";
+                    }
+                    catch
+                    {
+                        //
+                    }
+                await ReplyAsync("**ERROR:** Please specify the channel in which queue was created\n" +
+                                 "Here are a list:\n" +
+                                 $"{queuechannels}");
+                return;
+            }
+
+            var game = server.Gamelist.FirstOrDefault(x => x.LobbyId == channel.Id
+                                                           && x.GameNumber == gamenumber);
+
+            if (game == null)
+            {
+                await ReplyAsync("ERROR: Invalid Game number/channel");
+                return;
+            }
+
+            if (game.Result != null)
+            {
+                switch (game.Result)
+                {
+                    case true:
+                        await ReplyAsync("Team1 is already recorded as winning this game.");
+                        break;
+                    case false:
+                        await ReplyAsync("Team2 is already recorded as winning this game.");
+                        break;
+                }
+
+                await ReplyAsync("You cannot cancel a game that has already been played");
+            }
+            else
+            {
+                game.Cancelled = !game.Cancelled;
+                await ReplyAsync("Game has been cancelled");
             }
         }
 

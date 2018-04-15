@@ -455,12 +455,20 @@ namespace ELO_Bot.Commands.Admin
             var pages = new List<string>();
             foreach (var game in games)
             {
-                if (game.Result is true)
-                    gameresults += $"{c.Name} {game.GameNumber} **Team1**\n";
-                else if (game.Result is false)
-                    gameresults += $"{c.Name} {game.GameNumber} **Team2**\n";
+                if (game.Cancelled)
+                {
+                    gameresults += $"{c.Name} {game.GameNumber} **Cancelled**\n";
+                }
                 else
-                    gameresults += $"{c.Name} {game.GameNumber} **Undecided**\n";
+                {
+                    if (game.Result is true)
+                        gameresults += $"{c.Name} {game.GameNumber} **Team1**\n";
+                    else if (game.Result is false)
+                        gameresults += $"{c.Name} {game.GameNumber} **Team2**\n";
+                    else
+                        gameresults += $"{c.Name} {game.GameNumber} **Undecided**\n";                    
+                }
+
                 var numLines = gameresults.Split('\n').Length;
                 if (numLines > 20)
                 {

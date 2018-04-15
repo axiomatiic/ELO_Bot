@@ -112,6 +112,8 @@ namespace ELO_Bot
                 public List<ulong> Team1 { get; set; } = new List<ulong>();
                 public List<ulong> Team2 { get; set; } = new List<ulong>();
 
+                public bool Cancelled { get; set; } = false;
+
                 public bool? Result { get; set; } = null;
                 // result by default is null,
                 //true represents team1
