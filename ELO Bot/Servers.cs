@@ -31,6 +31,7 @@ namespace ELO_Bot
             public bool Autoremove { get; set; } = true;
             public List<string> CmdBlacklist { get; set; } = new List<string>();
             public bool BlockMultiQueueing { get; set; } = false;
+            public bool showkd { get; set; } = false;
 
             public int UsernameSelection { get; set; } = 1;
 
