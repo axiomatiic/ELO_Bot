@@ -32,7 +32,7 @@ namespace ELO_Bot
             public List<string> CmdBlacklist { get; set; } = new List<string>();
             public bool BlockMultiQueueing { get; set; } = false;
             public bool showkd { get; set; } = false;
-
+            public bool AllowNegativeScore { get; set; } = false;
             public int UsernameSelection { get; set; } = 1;
 
             public List<Q> Queue { get; set; } = new List<Q>();

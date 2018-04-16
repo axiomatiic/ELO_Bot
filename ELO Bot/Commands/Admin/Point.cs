@@ -262,7 +262,7 @@ namespace ELO_Bot.Commands.Admin
                     if (subject.UserId == user.Id)
                     {
                         subject.Points = subject.Points - points;
-                        if (subject.Points < 0)
+                        if (subject.Points < 0 && !server.AllowNegativeScore)
                             subject.Points = 0;
                         success = true;
                         userval = subject.Points;
@@ -299,10 +299,10 @@ namespace ELO_Bot.Commands.Admin
         public async Task SetPoints(int points, params IUser[] users)
         {
             var embed = new EmbedBuilder();
-
-            if (points <= 0)
-                points = Math.Abs(points);
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            if (points <= 0 && !server.AllowNegativeScore)
+                points = Math.Abs(points);
+
 
             foreach (var u in users)
                 try
@@ -310,7 +310,7 @@ namespace ELO_Bot.Commands.Admin
                     var user = server.UserList.First(x => x.UserId == u.Id);
 
                     user.Points = points;
-                    if (user.Points < 0)
+                    if (user.Points < 0 && !server.AllowNegativeScore)
                         user.Points = 0;
                     try
                     {

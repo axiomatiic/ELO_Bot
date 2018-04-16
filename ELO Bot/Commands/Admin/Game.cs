@@ -400,7 +400,7 @@ namespace ELO_Bot.Commands.Admin
                         points = Math.Abs(points);
                         usr.Points = usr.Points + points;
                         usr.Losses--;
-                        if (usr.Points < 0)
+                        if (usr.Points < 0 && !server.AllowNegativeScore)
                             usr.Points = 0;
                         embed.AddField($"{usr.Username} [+{points}]", $"Points: **{usr.Points}**\n" +
                                                                       $"W/L: **[{usr.Wins}/{usr.Losses}]**");
@@ -488,7 +488,7 @@ namespace ELO_Bot.Commands.Admin
                         points = Math.Abs(points);
                         usr.Points = usr.Points - points;
                         usr.Losses++;
-                        if (usr.Points < 0)
+                        if (usr.Points < 0 && !server.AllowNegativeScore)
                             usr.Points = 0;
                         embed.AddField($"{usr.Username} LOST (-{points})", $"Points: **{usr.Points}**\n" +
                                                                            $"W/L: **[{usr.Wins}/{usr.Losses}]**");

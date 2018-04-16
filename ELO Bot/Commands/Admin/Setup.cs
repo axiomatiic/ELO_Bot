@@ -30,7 +30,7 @@ namespace ELO_Bot.Commands.Admin
         /// </summary>
         /// <returns></returns>
         [Command("Initialise")]
-        [Summary("Inisialise")]
+        [Summary("Initialise")]
         [Remarks("Run this command to add your server to the serverlist")]
         public async Task Initialise()
         {
@@ -66,12 +66,22 @@ namespace ELO_Bot.Commands.Admin
 
         [Command("ToggleKD")]
         [Summary("ToggleKD")]
-        [Remarks("Toggle wether or not to use K/D in the server")]
+        [Remarks("Toggle whether or not to use K/D in the server")]
         public async Task ToggleKD()
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
             server.showkd = !server.showkd;
             await ReplyAsync($"ShowKD = {server.showkd}");
+        }
+
+        [Command("ToggleNegativeScore")]
+        [Summary("ToggleNegativeScore")]
+        [Remarks("Toggle whether or not to allow negative scores")]
+        public async Task ToggleNegative()
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            server.AllowNegativeScore = !server.AllowNegativeScore;
+            await ReplyAsync($"Allow Negative = {server.AllowNegativeScore}");
         }
 
         [Command("SetNicknameFormat")]
