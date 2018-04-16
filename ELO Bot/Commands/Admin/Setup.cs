@@ -399,9 +399,9 @@ namespace ELO_Bot.Commands.Admin
             var reset = server.UserList.ToList();
             foreach (var user in reset)
             {
-                if (user.Points != 0 || user.Wins != 0 || user.Losses != 0)
+                if (user.Points != server.registerpoints || user.Wins != 0 || user.Losses != 0)
                 {
-                    user.Points = 0;
+                    user.Points = server.registerpoints;
                     user.Wins = 0;
                     user.Losses = 0;
                 }
@@ -410,40 +410,39 @@ namespace ELO_Bot.Commands.Admin
 
             await ReplyAsync("Leaderboard Reset Complete!\n" +
                              "NOTE: Names and ranks will be reset over the next few minutes.\n" +
-                             $"EST time = {reset.Count * 6/60/60} hours");
+                             $"EST time = {(double)reset.Count * 6/60/60} hours");
             var i = 0;
+            var completion = await ReplyAsync($"{i}/{reset.Count} completed");
             foreach (var user in reset)
             {
                 try
                 {
+                    i++;
                     var us = await Context.Guild.GetUserAsync(user.UserId);
-                    if (us.Nickname.StartsWith("0 ~ ")) continue;
+                    if (us.Nickname == null || us.Nickname.Contains(Globals.GetNamePrefix(server, user.UserId, true)) || Context.Guild.OwnerId == us.Id) continue;
                     await us.ModifyAsync(x =>
                     {
-                        x.Nickname = $"0 ~ {user.Username}";
+                        x.Nickname = Globals.GetNamePrefix(server, user.UserId) + $" {user.Username}";
                     });
-                    if (CommandHandler.VerifiedUsers != null)
-                        if (CommandHandler.VerifiedUsers.Contains(us.Id))
-                        {
-                            await Task.Delay(1000);
-                            await us.ModifyAsync(x => { x.Nickname = $"👑0 ~ {user.Username}"; });
-                        }
                     await Task.Delay(5000);
                     await us.RemoveRolesAsync(server.Ranks.Select(x => Context.Guild.GetRole(x.RoleId)));
                     await Task.Delay(1000);
-                    i++;
-                    if (i % 50 == 0)
+                    if (server.Ranks.Count(x => x.Points < user.Points) > 0)
                     {
-                        await ReplyAsync($"{i}/{reset.Count} completed");
+                        var rank = server.Ranks.Where(x => x.Points < user.Points).OrderByDescending(x => x.Points).First();
+                        await us.AddRoleAsync(Context.Guild.GetRole(rank.RoleId));
                     }
+                    var i1 = i;
+                    await completion.ModifyAsync(x => x.Content = $"{i1}/{reset.Count} completed");
+
                 }
-                catch
+                catch (Exception e)
                 {
-                    //
+                    Console.WriteLine(e);
                 }
             }
 
-            await ReplyAsync("Reset fully complete.");
+            await ReplyAsync("Reset complete.");
         }
         
 

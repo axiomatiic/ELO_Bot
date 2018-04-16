@@ -130,7 +130,7 @@ namespace ELO_Bot.Commands
             embed.WithColor(Color.Blue);
             try
             {
-                await UserRename(server.UsernameSelection, Context.User, user.Username, 0);
+                await UserRename(server.UsernameSelection, Context.User, user.Username, server.registerpoints);
             }
             catch
             {
