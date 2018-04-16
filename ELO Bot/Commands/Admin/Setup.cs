@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using ELO_Bot.Preconditions;
 using Newtonsoft.Json;
 
@@ -413,18 +414,38 @@ namespace ELO_Bot.Commands.Admin
                              $"EST time = {(double)reset.Count * 6/60/60} hours");
             var i = 0;
             var completion = await ReplyAsync($"{i}/{reset.Count} completed");
+            var botposition = ((SocketGuild) Context.Guild).Users.First(x => x.Id == Context.Client.CurrentUser.Id)
+                .Roles
+                .OrderByDescending(x => x.Position).First().Position;
             foreach (var user in reset)
             {
                 try
                 {
                     i++;
                     var us = await Context.Guild.GetUserAsync(user.UserId);
-                    if (us.Nickname == null || us.Nickname.Contains(Globals.GetNamePrefix(server, user.UserId, true)) || Context.Guild.OwnerId == us.Id) continue;
-                    await us.ModifyAsync(x =>
+
+                    var nick = us.Nickname ?? "";
+
+                    if (!nick.Contains(Globals.GetNamePrefix(server, user.UserId, true)) &&
+                        Context.Guild.OwnerId != us.Id &&
+                        ((SocketGuildUser) us).Roles.OrderByDescending(x => x.Position).First().Position < botposition)
                     {
-                        x.Nickname = Globals.GetNamePrefix(server, user.UserId) + $" {user.Username}";
-                    });
-                    await Task.Delay(5000);
+                        try
+                        {
+                            await us.ModifyAsync(x =>
+                            {
+                                x.Nickname = Globals.GetNamePrefix(server, user.UserId) + $" {user.Username}";
+                            });
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+
+                    }
+
+                    await Task.Delay(2500);
+
                     await us.RemoveRolesAsync(server.Ranks.Select(x => Context.Guild.GetRole(x.RoleId)));
                     await Task.Delay(1000);
                     if (server.Ranks.Count(x => x.Points < user.Points) > 0)
