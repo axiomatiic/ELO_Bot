@@ -425,7 +425,6 @@ namespace ELO_Bot.Commands.Admin
                     var us = await Context.Guild.GetUserAsync(user.UserId);
 
                     var nick = us.Nickname ?? "";
-
                     if (!nick.Contains(Globals.GetNamePrefix(server, user.UserId, true)) &&
                         Context.Guild.OwnerId != us.Id &&
                         ((SocketGuildUser) us).Roles.OrderByDescending(x => x.Position).First().Position < botposition)
@@ -566,64 +565,21 @@ namespace ELO_Bot.Commands.Admin
             var embed = new EmbedBuilder();
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
 
-            try
-            {
-                var admin = Context.Guild.GetRole(server.AdminRole);
-                embed.AddField("Admin Role", $"{admin.Name}");
-            }
-            catch
-            {
-                embed.AddField("Admin Role", "N/A");
-            }
-
-            try
-            {
-                var admin = Context.Guild.GetRole(server.ModRole);
-                embed.AddField("Mod Role", $"{admin.Name}");
-            }
-            catch
-            {
-                embed.AddField("Mod Role", "N/A");
-            }
-
-            try
-            {
-                var ann = await Context.Guild.GetChannelAsync(server.AnnouncementsChannel);
-                embed.AddField("Announcements Channel", $"{ann.Name}");
-            }
-            catch
-            {
-                embed.AddField("Announcements Channel", "N/A");
-            }
-
+            var admin = Context.Guild.GetRole(server.AdminRole);
+            embed.AddField("Admin Role", $"{admin?.Name ?? "N/A"}");
+            var mod = Context.Guild.GetRole(server.ModRole);
+            embed.AddField("Mod Role", $"{mod?.Name ?? "N/A"}");
+            var ann = await Context.Guild.GetChannelAsync(server.AnnouncementsChannel);
+            embed.AddField("Announcements Channel", $"{ann?.Name ?? "N/A"}");
             embed.AddField("Is Premium?", $"Premium: {server.IsPremium}\n" +
                                             $"Expires: {server.Expiry}");
-
-            
             embed.AddField("Points Per Win/Loss", $"{server.Winamount}/{server.Lossamount}");
-
-            try
-            {
-                embed.AddField("Counts", $"Lobbies: {server.Queue.Count}\n" +
-                                         $"Ranks: {server.Ranks.Count}\n" +
-                                         $"Registered Users: {server.UserList.Count}");
-            }
-            catch
-            {
-                embed.AddField("Counts", "Error");
-            }
-
+            embed.AddField("Counts", $"Lobbies: {server.Queue?.Count}\n" +
+                                        $"Ranks: {server.Ranks?.Count}\n" +
+                                        $"Registered Users: {server.UserList?.Count}");
             embed.AddField("Registration Message", $"{server.Registermessage}");
-
-            try
-            {
-                var ann = Context.Guild.GetRole(server.RegisterRole);
-                embed.AddField("Registration Role", $"{ann.Name}");
-            }
-            catch
-            {
-                embed.AddField("Registration Role", "N/A");
-            }
+            var rrole = Context.Guild.GetRole(server.RegisterRole);
+            embed.AddField("Registration Role", $"{rrole?.Name ?? "N/A"}");
 
             await ReplyAsync("", false, embed.Build());
         }
