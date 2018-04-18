@@ -275,6 +275,175 @@ namespace ELO_Bot.Commands.Admin
             }
         }
 
+        [Command("AddKills", RunMode = RunMode.Async)]
+        [Summary("AddKills <kills> <users>")]
+        [Remarks("add points to the specified users")]
+        public async Task AddKills(int kills, params IUser[] userlist)
+        {
+            var embed = new EmbedBuilder();
+            if (kills <= 0)
+            {
+                embed.AddField("ERROR", "This command is only for adding kills");
+                embed.Color = Color.Red;
+                await ReplyAsync("", false, embed.Build());
+            }
+            else
+            {
+                var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+                if (server.showkd == false)
+                {
+                    embed.AddField("ERROR", "K/D Mode is Disabled");
+                    embed.Color = Color.Red;
+                    await ReplyAsync("", false, embed.Build());
+                    return;
+                }
+                foreach (var user in userlist)
+                {
+                    var success = false;
+                    var userval = 0;
+                    foreach (var subject in server.UserList)
+                        if (subject.UserId == user.Id)
+                        {
+                            subject.kills = subject.kills + kills;
+                            success = true;
+                            userval = subject.kills;
+                        }
+
+                    if (!success)
+                        embed.AddField($"{user.Username} ERROR", "Not Registered");
+                    else
+                        embed.AddField($"{user.Username} MODIFIED", $"Added: +{kills}\n" +
+                                                                    $"Current Kills: {userval}");
+                }
+                embed.Color = Color.Green;
+                await ReplyAsync("", false, embed.Build());
+            }
+        }
+
+        [Command("AddDeaths", RunMode = RunMode.Async)]
+        [Summary("AddDeaths <deaths> <users>")]
+        [Remarks("add deaths to the specified users")]
+        public async Task AddDeaths(int deaths, params IUser[] userlist)
+        {
+            var embed = new EmbedBuilder();
+            if (deaths <= 0)
+            {
+                embed.AddField("ERROR", "This command is only for adding deaths");
+                embed.Color = Color.Red;
+                await ReplyAsync("", false, embed.Build());
+            }
+            else
+            {
+                var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+                if (server.showkd == false)
+                {
+                    embed.AddField("ERROR", "K/D Mode is Disabled");
+                    embed.Color = Color.Red;
+                    await ReplyAsync("", false, embed.Build());
+                    return;
+                }
+                foreach (var user in userlist)
+                {
+                    var success = false;
+                    var userval = 0;
+                    foreach (var subject in server.UserList)
+                        if (subject.UserId == user.Id)
+                        {
+                            subject.deaths = subject.deaths + deaths;
+                            success = true;
+                            userval = subject.deaths;
+                        }
+
+                    if (!success)
+                        embed.AddField($"{user.Username} ERROR", "Not Registered");
+                    else
+                        embed.AddField($"{user.Username} MODIFIED", $"Added: +{deaths}\n" +
+                                                                    $"Current Deaths: {userval}");
+                }
+                embed.Color = Color.Green;
+                await ReplyAsync("", false, embed.Build());
+            }
+        }
+
+        [Command("RemoveKills", RunMode = RunMode.Async)]
+        [Summary("RemoveKills <kills> <users>")]
+        [Remarks("remove kills from the specified users")]
+        public async Task DelKills(int kills, params IUser[] userlist)
+        {
+            var embed = new EmbedBuilder();
+
+            if (kills <= 0)
+                kills = Math.Abs(kills);
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            if (server.showkd == false)
+            {
+                embed.AddField("ERROR", "K/D Mode is Disabled");
+                embed.Color = Color.Red;
+                await ReplyAsync("", false, embed.Build());
+                return;
+            }
+            foreach (var user in userlist)
+            {
+                var success = false;
+                var userval = 0;
+                foreach (var subject in server.UserList)
+                    if (subject.UserId == user.Id)
+                    {
+                        subject.kills = subject.kills - kills;
+                        if (subject.kills < 0)
+                            subject.kills = 0;
+                        success = true;
+                        userval = subject.kills;
+                    }
+                if (!success)
+                    embed.AddField($"{user.Username} ERROR", "Not Registered");
+                else
+                    embed.AddField($"{user.Username} MODIFIED", $"Removed: -{kills}\n" +
+                                                                $"Current Kills: {userval}");
+            }
+            embed.Color = Color.Green;
+            await ReplyAsync("", false, embed.Build());
+        }
+
+        [Command("RemoveDeaths", RunMode = RunMode.Async)]
+        [Summary("RemoveDeaths <deaths> <users>")]
+        [Remarks("remove points from the specified users")]
+        public async Task DelDeaths(int deaths, params IUser[] userlist)
+        {
+            var embed = new EmbedBuilder();
+
+            if (deaths <= 0)
+                deaths = Math.Abs(deaths);
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            if (server.showkd == false)
+            {
+                embed.AddField("ERROR", "K/D Mode is Disabled");
+                embed.Color = Color.Red;
+                await ReplyAsync("", false, embed.Build());
+                return;
+            }
+            foreach (var user in userlist)
+            {
+                var success = false;
+                var userval = 0;
+                foreach (var subject in server.UserList)
+                    if (subject.UserId == user.Id)
+                    {
+                        subject.deaths = subject.deaths - deaths;
+                        if (subject.deaths < 0)
+                            subject.deaths = 0;
+                        success = true;
+                        userval = subject.deaths;
+                    }
+                if (!success)
+                    embed.AddField($"{user.Username} ERROR", "Not Registered");
+                else
+                    embed.AddField($"{user.Username} MODIFIED", $"Removed: -{deaths}\n" +
+                                                                $"Current Deaths: {userval}");
+            }
+            embed.Color = Color.Green;
+            await ReplyAsync("", false, embed.Build());
+        }
 
         [Command("Cancel", RunMode = RunMode.Async)]
         [Summary("Cancel <lobbyname> <gamenumber>")]
