@@ -29,6 +29,21 @@ namespace ELO_Bot
             _client.JoinedGuild += _client_JoinedGuild;
             _client.GuildMemberUpdated += _client_UserUpdated;
             _client.Ready += Client_Ready;
+            _client.UserLeft += _client_UserLeft;
+        }
+
+        private Task _client_UserLeft(SocketGuildUser user)
+        {
+            var serverobject = Servers.ServerList.First(x => x.ServerId == user.Guild.Id);
+            if (serverobject.DeleteProfileOnLeave)
+            {
+                var userprofile = serverobject.UserList.FirstOrDefault(x => x.UserId == user.Id);
+                if (userprofile != null)
+                {
+                    serverobject.UserList.Remove(userprofile);
+                }
+            }
+            return Task.CompletedTask;
         }
 
         public static List<string> Keys { get; set; }

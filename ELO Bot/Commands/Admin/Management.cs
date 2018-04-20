@@ -55,6 +55,56 @@ namespace ELO_Bot.Commands.Admin
             await ReplyAsync("", false, embed.Build());
         }
 
+        [Command("DelUser")]
+        [Summary("DelUser <userID>")]
+        [Remarks("deletes a user from the server's registered list by user ID")]
+        public async Task DelUser(ulong userID)
+        {
+            var embed = new EmbedBuilder();
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            var user = server.UserList.FirstOrDefault(x => x.UserId == userID);
+            if (user == null)
+            {
+                embed.AddField("ERROR", "No user with this ID has been found");
+            }
+            else
+            {
+
+                embed.AddField("User Removed", $"All data has been flushed and name restored.\n" +
+                                               $"Name: {user.Username}\n" +
+                                               $"Points: {user.Points}\n" +
+                                               $"Wins: {user.Wins}\n" +
+                                               $"Losses: {user.Losses}\n" +
+                                               $"Kills: {user.kills}\n" +
+                                               $"Deaths: {user.deaths}");
+                server.UserList.Remove(user);
+            }
+
+            
+            await ReplyAsync("", false, embed.Build());
+        }
+
+        [Command("PruneOldProfiles")]
+        [Summary("PruneOldProfiles")]
+        [Remarks("deletes profiles of all users who are no longer in the server")]
+        public async Task DelProfiles([Remainder] string confirm = null)
+        {
+            if (confirm == null || confirm != "2gb3523f")
+            {
+                await ReplyAsync("Please run the command again using the confirm code:\n" +
+                                 $"`{Config.Load().Prefix}PruneOldProfiles 2gb3523f`\n" +
+                                 $"Note: Doing this is permanent and user profiles cannot be recovered if they join back to the server");
+                return;
+            }
+            var embed = new EmbedBuilder();
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            var initialcount = server.UserList.ToList().Count;
+            var users = server.UserList.Where(x => Context.Guild.Users.Select(y => y.Id).Contains(x.UserId)).ToList();
+            server.UserList = users;
+            embed.AddField("Success", $"{initialcount - users.Count} Removed");
+            await ReplyAsync("", false, embed.Build());
+        }
+
         /// <summary>
         ///     registers a user with the given username
         /// </summary>

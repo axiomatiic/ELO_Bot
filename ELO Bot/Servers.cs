@@ -34,6 +34,7 @@ namespace ELO_Bot
             public bool showkd { get; set; } = false;
             public bool AllowNegativeScore { get; set; } = false;
             public int UsernameSelection { get; set; } = 1;
+            public bool DeleteProfileOnLeave { get; set; } = false;
 
             public List<Q> Queue { get; set; } = new List<Q>();
             public List<PreviouMatches> Gamelist { get; set; } = new List<PreviouMatches>();

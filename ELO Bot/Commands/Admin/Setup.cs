@@ -183,6 +183,19 @@ namespace ELO_Bot.Commands.Admin
                 await ReplyAsync("Users will not be removed from queues if they go offline");
         }
 
+        [Command("ToggleAutoDelete")]
+        [Summary("ToggleAutoDelete")]
+        [Remarks("Set if user profiles are deleted when they leave the server")]
+        public async Task LeaveDelete()
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            server.DeleteProfileOnLeave = !server.DeleteProfileOnLeave;
+            if (server.DeleteProfileOnLeave)
+                await ReplyAsync("User profiles will be deleted if they leave the server");
+            else
+                await ReplyAsync("User profiles will not be deleted if they leave the server");
+        }
+
         /// <summary>
         ///     toggle whether to block users from joining more than one queue at a time.
         /// </summary>
@@ -580,7 +593,8 @@ namespace ELO_Bot.Commands.Admin
             embed.AddField("Registration Message", $"{server.Registermessage}");
             var rrole = Context.Guild.GetRole(server.RegisterRole);
             embed.AddField("Registration Role", $"{rrole?.Name ?? "N/A"}");
-
+            embed.AddField("Auto Remove from queue's if offline", $"{server.Autoremove}");
+            embed.AddField("Auto Delete Profiles if user leaves server", $"{server.DeleteProfileOnLeave}");
             await ReplyAsync("", false, embed.Build());
         }
     }
