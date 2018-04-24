@@ -38,7 +38,7 @@ namespace ELO_Bot.Commands
                 switch (usernameSelection)
                 {
                     case 1:
-                        return $"{user.Points}";
+                        return $"{user.Points} ~";
                     case 2:
                         return $"[{user.Points}]";
                     case 3:
