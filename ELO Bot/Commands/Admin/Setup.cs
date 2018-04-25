@@ -238,14 +238,15 @@ namespace ELO_Bot.Commands.Admin
 
             if (CommandHandler.Keys.Contains(key))
             {
-                if (server.Expiry < DateTime.UtcNow && server.IsPremium)
+                if (server.Expiry > DateTime.UtcNow && server.IsPremium)
                 {
                     embed.AddField("ERROR",
-                        $"This server is already premium (expires {server.Expiry}), to avoid wasting your key, you may use it on any other server that isnt premium");
+                        $"This server is already premium (expires {server.Expiry}), to avoid wasting your key please wait until it expires");
                     embed.Color = Color.Red;
                     await ReplyAsync("", false, embed.Build());
                     return;
                 }
+
                 CommandHandler.Keys.Remove(key);
                 var obj = JsonConvert.SerializeObject(CommandHandler.Keys, Formatting.Indented);
                 File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "setup/keys.json"), obj);
