@@ -148,8 +148,7 @@ namespace ELO_Bot.Commands.Admin
         {
 
             var list = new List<simpleserverobj>();
-            List<SocketGuild> Guilds;
-            Guilds = name == null ? Context.Client.Guilds.ToList() : Context.Client.Guilds.Where(x => x.Name.ToLower().Contains(name.ToLower())).ToList();
+            var Guilds = name == null ? Context.Client.Guilds.ToList() : Context.Client.Guilds.Where(x => x.Name.ToLower().Contains(name.ToLower())).ToList();
 
             var work = await ReplyAsync($"Working 0/{Guilds.Count}");
             var i = 0;
@@ -207,6 +206,7 @@ namespace ELO_Bot.Commands.Admin
                 if (shortstring.Split('\n').Length > 20)
                 {
                     stringlist.Add(shortstring);
+                    shortstring = "";
                 }
             }
             stringlist.Add(shortstring);
