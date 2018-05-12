@@ -1099,32 +1099,85 @@ namespace ELO_Bot.Commands
             //order list by User Points
             if (currentqueue.PickMode == Servers.Server.PickModes.Captains)
             {
-                //randomly select the captains on each team.
-                var rnd = new Random();
 
                 IUser cap1;
                 IUser cap2;
-                var capranks = new List<ulong>();
-                foreach (var user in currentqueue.Users)
+                var rnd = new Random();
+                if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.MostPoints)
                 {
-                    var u = userlist.FirstOrDefault(x => x.UserId == user);
-                    if (u != null && u.Points > 5)
-                        capranks.Add(user);
+                    var CSorted = userlist.OrderByDescending(x => x.Points).ToList();
+                    cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                    cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
                 }
-
-                if (capranks.Count >= 2)
+                else if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.MostWins)
                 {
-                    var cap = Enumerable.Range(0, capranks.Count).OrderBy(x => rnd.Next()).Take(2)
-                        .ToList();
-                    cap1 = await ((IGuild) Context.Guild).GetUserAsync(capranks[cap[0]]);
-                    cap2 = await ((IGuild) Context.Guild).GetUserAsync(capranks[cap[1]]);
+                    var CSorted = userlist.OrderByDescending(x => x.Wins).ToList();
+                    cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                    cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                }
+                else if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.HighestWinLoss)
+                {
+                    var CSorted = userlist.OrderByDescending(x => (double)x.Wins/(x.Losses == 0 ? 1 : x.Losses)).ToList();
+                    cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                    cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                }
+                else if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.Random)
+                {
+                    var CSorted = userlist.OrderByDescending(x => rnd.Next()).ToList();
+                    cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                    cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                }
+                else if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.RandomTop4MostPoints)
+                {
+                    if (userlist.Count >= 4)
+                    {
+                        var CSorted = userlist.OrderByDescending(x => x.Points).Take(4).OrderByDescending(x => rnd.Next()).ToList();
+                        cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                        cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                    }
+                    else
+                    {
+                        var CSorted = userlist.OrderByDescending(x => x.Points).ToList();
+                        cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                        cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                    }
+                }
+                else if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.RandomTop4MostWins)
+                {
+                    if (userlist.Count >= 4)
+                    {
+                        var CSorted = userlist.OrderByDescending(x => x.Wins).Take(4).OrderByDescending(x => rnd.Next()).ToList();
+                        cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                        cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                    }
+                    else
+                    {
+                        var CSorted = userlist.OrderByDescending(x => x.Wins).ToList();
+                        cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                        cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                    }
+                }
+                else if (currentqueue.CaptainSortMode == Servers.Server.CaptainSortMode.RandomTop4HighestWinLoss)
+                {
+                    if (userlist.Count >= 4)
+                    {
+                        var CSorted = userlist.OrderByDescending(x => (double)x.Wins / (x.Losses == 0 ? 1 : x.Losses)).Take(4).OrderByDescending(x => rnd.Next()).ToList();
+                        cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                        cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                    }
+                    else
+                    {
+                        var CSorted = userlist.OrderByDescending(x => (double)x.Wins / (x.Losses == 0 ? 1 : x.Losses)).ToList();
+                        cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                        cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
+                    }
                 }
                 else
                 {
-                    var captains = Enumerable.Range(0, currentqueue.Users.Count).OrderBy(x => rnd.Next()).Take(2)
-                        .ToList();
-                    cap1 = await ((IGuild) Context.Guild).GetUserAsync(currentqueue.Users[captains[0]]);
-                    cap2 = await ((IGuild) Context.Guild).GetUserAsync(currentqueue.Users[captains[1]]);
+                    
+                    var CSorted = userlist.OrderByDescending(x => rnd.Next()).ToList();
+                    cap1 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[0].UserId);
+                    cap2 = await ((IGuild)Context.Guild).GetUserAsync(CSorted[1].UserId);
                 }
 
 
@@ -1133,7 +1186,7 @@ namespace ELO_Bot.Commands
                 {
                     var u = await ((IGuild) Context.Guild).GetUserAsync(user);
                     if (u != cap1 && u != cap2)
-                        players += $"{u.Mention} ";
+                        players += $"{u?.Mention ?? $"MissingPlayer: [{user}]"} ";
                 }
 
                 await ReplyAsync($"**Team 1 Captain:** {cap1.Mention}\n" +

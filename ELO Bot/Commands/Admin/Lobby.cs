@@ -296,6 +296,81 @@ namespace ELO_Bot.Commands.Admin
             await ReplyAsync("", false, embed.Build());
         }
 
+        [Command("CapSortMode")]
+        [Summary("CapSortMode <mode number>")]
+        [Remarks("Set the way captains are chosen (only needed for captains lobbies)")]
+        public async Task CSortMode(int mode = 999)
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            var lobby = server.Queue.FirstOrDefault(x => x.ChannelId == Context.Channel.Id);
+            if (lobby == null)
+            {
+                await ReplyAsync("Current channel is not a lobby!");
+                return;
+            }
+            if (mode == 999)
+            {
+                await ReplyAsync($"Please use `{Config.Load().Prefix}CapSortMode <mode number>` with the captain selection mode you would like for this lobby:\n" +
+                                 "`0` __**Choose Two Players with Highest Wins**__\n" +
+                                 "Selects the two players with the highest amount of Wins\n\n" +
+                                 "`1` __**Choose Two Players with Highest Points**__\n" +
+                                 "Selects the two players with the highest amount of Points\n\n" +
+                                 "`2` __**Selects the two players with the highest Win/Loss Ratio**__\n" +
+                                 "Selects the two players with the highest win/loss ratio\n\n" +
+                                 "`3` __**Random**__\n" +
+                                 "Selects Randomly\n\n" +
+                                 "`4` __**Selects Random from top 4 Most Points**__\n" +
+                                 "Selects Randomly from the top 4 highest ranked players based on points\n\n" +
+                                 "`5` __**Selects Random from top 4 Most Wins**__\n" +
+                                 "Selects Randomly from the top 4 highest ranked players based on wins\n\n" +
+                                 "`6` __**Selects Random from top 4 Highest Win/Loss Ratio**__\n" +
+                                 "Selects Randomly from the top 4 highest ranked players based on win/loss ratio");
+                return;
+            }
+            
+            if (mode < 0 || mode > 6)
+            {
+                await ReplyAsync("Invalid Mode!");
+                return;
+            }
+
+            var PickString = "";
+            switch ((Servers.Server.CaptainSortMode)mode)
+            {
+                case Servers.Server.CaptainSortMode.MostPoints:
+                    PickString = "Most Points";
+                    break;
+                case Servers.Server.CaptainSortMode.MostWins:
+                    PickString = "Most Wins";
+                    break;
+                case Servers.Server.CaptainSortMode.HighestWinLoss:
+                    PickString = "Highest Win/Loss Ratio";
+                    break;
+                case Servers.Server.CaptainSortMode.Random:
+                    PickString = "Random";
+                    break;
+                case Servers.Server.CaptainSortMode.RandomTop4MostPoints:
+                    PickString = "Random Top4 Most Points";
+                    break;
+                case Servers.Server.CaptainSortMode.RandomTop4MostWins:
+                    PickString = "Random Top4 Most Wins";
+                    break;
+                case Servers.Server.CaptainSortMode.RandomTop4HighestWinLoss:
+                    PickString = "Random Top4 Highest Win/Loss Ratio";
+                    break;
+            }
+            var embed = new EmbedBuilder
+            {
+                Description = "Success! The Current Channel's Captain Picking Mode is now:\n" +
+                              $"{PickString}"
+            };
+
+            lobby.CaptainSortMode = (Servers.Server.CaptainSortMode)mode;
+
+
+            await ReplyAsync("", false, embed.Build());
+        }
+
         /// <summary>
         ///     adds a list of maps to the current lobby
         /// </summary>

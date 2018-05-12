@@ -76,6 +76,17 @@ namespace ELO_Bot
                 SortByScore
             }
 
+            public enum CaptainSortMode
+            {
+                MostWins,
+                MostPoints,
+                HighestWinLoss,
+                Random,
+                RandomTop4MostPoints,
+                RandomTop4MostWins,
+                RandomTop4HighestWinLoss
+            }
+
             public class Q
             {
                 public List<ulong> Users { get; set; } = new List<ulong>();
@@ -89,6 +100,7 @@ namespace ELO_Bot
                 public bool IsPickingTeams { get; set; } = false;
 
                 public PickModes PickMode { get; set; } = PickModes.CompleteRandom;
+                public CaptainSortMode CaptainSortMode { get; set; } = CaptainSortMode.MostPoints;
 
                 public bool NoPairs { get; set; } = false;
 
