@@ -99,6 +99,27 @@ namespace ELO_Bot.Commands.Admin
         }
 
 
+        [Command("GuildReset")]
+        [Summary("GuildReset")]
+        [Remarks("Reset the given guild config")]
+        public async Task Help()
+        {
+            var guild = Servers.ServerList.FirstOrDefault(x => x.ServerId == Context.Guild.Id);
+            if (guild == null)
+            {
+                return;
+            }
+
+            guild = new Servers.Server
+            {
+                IsPremium = guild.IsPremium,
+                Expiry = guild.Expiry,
+                ServerId = guild.ServerId,
+                PremiumKey = guild.PremiumKey
+            };
+            await ReplyAsync("Success");
+        }
+
         /// <summary>
         ///     rename the bot using a the provided input
         /// </summary>

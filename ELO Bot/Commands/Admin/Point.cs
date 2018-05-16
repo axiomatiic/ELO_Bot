@@ -37,31 +37,27 @@ namespace ELO_Bot.Commands.Admin
                 var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
                 foreach (var user in userlist)
                 {
-                    var success = false;
                     var userval = 0;
-                    foreach (var subject in server.UserList)
-                        if (subject.UserId == user.Id)
-                        {
-                            subject.Points = subject.Points + points;
-                            success = true;
-                            userval = subject.Points;
-                            try
-                            {
-                                await UserRename(server.UsernameSelection, user, subject.Username, subject.Points);
-                            }
-                            catch
-                            {
-                                embed.AddField("NAME ERROR",
-                                    $"{user.Username}'s username Unable to be modified (Permissions are above the bot)");
-                            }
-                            await CheckRank(server, user, subject);
-                        }
-
-                    if (!success)
+                    var subject = server.UserList.FirstOrDefault(x => x.UserId == user.Id);
+                    if (subject == null)
+                    {
                         embed.AddField($"{user.Username} ERROR", "Not Registered");
-                    else
-                        embed.AddField($"{user.Username} MODIFIED", $"Added: +{points}\n" +
-                                                                    $"Current Points: {userval}");
+                        continue;
+                    }
+                    subject.Points = subject.Points + points;
+                    userval = subject.Points;
+                    try
+                    {
+                        await UserRename(server.UsernameSelection, user, subject.Username, subject.Points);
+                    }
+                    catch
+                    {
+                        embed.AddField("NAME ERROR",
+                            $"{user.Username}'s username Unable to be modified (Permissions are above the bot)");
+                    }
+                    await CheckRank(server, user, subject);
+                    embed.AddField($"{user.Username} MODIFIED", $"Added: +{points}\n" +
+                                                                $"Current Points: {userval}");
                 }
                 embed.Color = Color.Green;
                 await ReplyAsync("", false, embed.Build());
