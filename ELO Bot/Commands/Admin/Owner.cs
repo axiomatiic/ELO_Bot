@@ -104,19 +104,23 @@ namespace ELO_Bot.Commands.Admin
         [Remarks("Reset the given guild config")]
         public async Task Help()
         {
-            var guild = Servers.ServerList.FirstOrDefault(x => x.ServerId == Context.Guild.Id);
-            if (guild == null)
+            var oguild = Servers.ServerList.FirstOrDefault(x => x.ServerId == Context.Guild.Id);
+            if (oguild == null)
             {
                 return;
             }
 
-            guild = new Servers.Server
+            var nguild = new Servers.Server
             {
-                IsPremium = guild.IsPremium,
-                Expiry = guild.Expiry,
-                ServerId = guild.ServerId,
-                PremiumKey = guild.PremiumKey
+                IsPremium = oguild.IsPremium,
+                Expiry = oguild.Expiry,
+                ServerId = oguild.ServerId,
+                PremiumKey = oguild.PremiumKey
             };
+
+            Servers.ServerList.Remove(oguild);
+            Servers.ServerList.Add(nguild);
+
             await ReplyAsync("Success");
         }
 
