@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using ELO_Bot.Preconditions;
 
 namespace ELO_Bot.Commands.Admin
@@ -20,10 +21,11 @@ namespace ELO_Bot.Commands.Admin
         /// <param name="points">points to add</param>
         /// <param name="userlist">users ie. @user1 @user3 @user3....</param>
         /// <returns></returns>
-        [Command("AddPoints", RunMode = RunMode.Async)]
+        ///         
+        [Command("AddPoints")]
         [Summary("AddPoints <points> <users>")]
         [Remarks("add points to the specified users")]
-        public async Task AddPoints(int points, params IUser[] userlist)
+        public async Task AddPoints(int points, params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
             if (points <= 0)
@@ -70,10 +72,10 @@ namespace ELO_Bot.Commands.Admin
         /// <param name="points">points to remove</param>
         /// <param name="userlist">users ie. @user1 @user3 @user3....</param>
         /// <returns></returns>
-        [Command("DelPoints", RunMode = RunMode.Async)]
+        [Command("DelPoints")]
         [Summary("DelPoints <points> <users>")]
         [Remarks("remove points from the specified users")]
-        public async Task DelPoints(int points, params IUser[] userlist)
+        public async Task DelPoints(int points, params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
 
@@ -119,10 +121,10 @@ namespace ELO_Bot.Commands.Admin
         /// <param name="points">points value</param>
         /// <param name="users">list of users to modify the points for</param>
         /// <returns></returns>
-        [Command("SetPoints", RunMode = RunMode.Async)]
+        [Command("SetPoints")]
         [Summary("SetPoints <points> <user>")]
         [Remarks("set a user's exact points")]
-        public async Task SetPoints(int points, params IUser[] users)
+        public async Task SetPoints(int points, params SocketGuildUser[] users)
         {
             var embed = new EmbedBuilder();
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
@@ -209,7 +211,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("DelWin")]
         [Summary("DelWin <users>")]
         [Remarks("remove one win from the specified users")]
-        public async Task DelWin(params IUser[] userlist)
+        public async Task DelWin(params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
 
@@ -245,7 +247,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("DelLose")]
         [Summary("DelLose <users>")]
         [Remarks("remove a single loss from the specified users")]
-        public async Task DelLose(params IUser[] userlist)
+        public async Task DelLose(params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
 

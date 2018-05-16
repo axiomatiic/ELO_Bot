@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 using ELO_Bot.Preconditions;
 
 namespace ELO_Bot.Commands.Admin
@@ -24,14 +25,14 @@ namespace ELO_Bot.Commands.Admin
         [Command("Win", RunMode = RunMode.Async)]
         [Summary("Win <users>")]
         [Remarks("Add a win + win points for the specified users")]
-        public async Task Win(params IUser[] userlist)
+        public async Task Win(params SocketGuildUser[] userlist)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
             var points = server.Winamount;
             if (!(server.Winamount > 0))
                 throw new Exception("ERROR this server's win modifier has not been set up yet.");
 
-            await WinLossPoints(server, userlist.ToList(), true, points);
+            await WinLossPoints(server, userlist.Select(x => (IUser)x).ToList(), true, points);
         }
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("Lose", RunMode = RunMode.Async)]
         [Summary("Lose <users>")]
         [Remarks("Add a loss to the specified users")]
-        public async Task Lose(params IUser[] userlist)
+        public async Task Lose(params SocketGuildUser[] userlist)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
             var points = server.Lossamount;
@@ -50,7 +51,7 @@ namespace ELO_Bot.Commands.Admin
             if (!(server.Lossamount > 0))
                 throw new Exception("ERROR this server's loss modifier has not been set up yet.");
 
-            await WinLossPoints(server, userlist.ToList(), false, points);
+            await WinLossPoints(server, userlist.Select(x => (IUser)x).ToList(), false, points);
         }
 
         /// <summary>
@@ -278,7 +279,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("AddKills", RunMode = RunMode.Async)]
         [Summary("AddKills <kills> <users>")]
         [Remarks("add points to the specified users")]
-        public async Task AddKills(int kills, params IUser[] userlist)
+        public async Task AddKills(int kills, params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
             if (kills <= 0)
@@ -323,7 +324,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("AddDeaths", RunMode = RunMode.Async)]
         [Summary("AddDeaths <deaths> <users>")]
         [Remarks("add deaths to the specified users")]
-        public async Task AddDeaths(int deaths, params IUser[] userlist)
+        public async Task AddDeaths(int deaths, params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
             if (deaths <= 0)
@@ -368,7 +369,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("RemoveKills", RunMode = RunMode.Async)]
         [Summary("RemoveKills <kills> <users>")]
         [Remarks("remove kills from the specified users")]
-        public async Task DelKills(int kills, params IUser[] userlist)
+        public async Task DelKills(int kills, params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
 
@@ -408,7 +409,7 @@ namespace ELO_Bot.Commands.Admin
         [Command("RemoveDeaths", RunMode = RunMode.Async)]
         [Summary("RemoveDeaths <deaths> <users>")]
         [Remarks("remove points from the specified users")]
-        public async Task DelDeaths(int deaths, params IUser[] userlist)
+        public async Task DelDeaths(int deaths, params SocketGuildUser[] userlist)
         {
             var embed = new EmbedBuilder();
 
