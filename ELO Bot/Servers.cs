@@ -21,6 +21,7 @@ namespace ELO_Bot
             public ulong RegisterRole { get; set; }
             public int registerpoints { get; set; } = 0;
             public List<Ranking> Ranks { get; set; } = new List<Ranking>();
+            public ModuleConfig moduleConfig = new ModuleConfig();
             public ulong AdminRole { get; set; } = 0;
             public ulong ModRole { get; set; } = 0;
             public string Registermessage { get; set; } = "Thankyou for Registering";
@@ -29,7 +30,6 @@ namespace ELO_Bot
             public int Winamount { get; set; } = 10;
             public int Lossamount { get; set; } = 5;
             public bool Autoremove { get; set; } = true;
-            public List<string> CmdBlacklist { get; set; } = new List<string>();
             public bool BlockMultiQueueing { get; set; } = false;
             public bool showkd { get; set; } = false;
             public bool AllowNegativeScore { get; set; } = false;
@@ -68,6 +68,29 @@ namespace ELO_Bot
                 public ulong UserId { get; set; }
                 public string Reason { get; set; } = null;
             }
+
+            public class ModuleConfig
+            {
+                public List<string> CmdBlacklist { get; set; } = new List<string>();
+                public List<DisabledType> DisabledTypes { get; set; } = new List<DisabledType>();
+
+                public class DisabledType
+                {
+                    public bool IsCommand { get; set; } = true;
+                    public string Name { get; set; }
+                    public SetupConf Setting { get; set; } = new SetupConf();
+                }
+
+                public class SetupConf
+                {
+                    public bool AdminAllowed { get; set; } = true;
+                    public bool ModAllowed { get; set; } = true;
+                    public bool RegisteredAllowed { get; set; } = true;
+                    public bool UnRegisteredAllowed { get; set; } = false;
+                }
+
+            }
+
 
             public enum PickModes
             {

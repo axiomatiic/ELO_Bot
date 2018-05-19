@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using ELO_Bot.Preconditions;
 using ELO_Bot.PreConditions;
 
 namespace ELO_Bot.Commands
@@ -164,6 +165,7 @@ namespace ELO_Bot.Commands
         [Command("GetUser")]
         [Summary("GetUser <@user>")]
         [Remarks("checks stats about a user")]
+        [CheckBlacklist]
         public async Task GetUser(IUser user)
         {
             var embed = new EmbedBuilder();
@@ -206,6 +208,7 @@ namespace ELO_Bot.Commands
         [Command("Leaderboard")]
         [Summary("Leaderboard <wins, losses, points>")]
         [Remarks("Displays Rank Leaderboard (Top 20 )")]
+        [CheckBlacklist]
         public async Task LeaderBoard([Remainder]string arg = "point")
         {
 
@@ -353,6 +356,7 @@ namespace ELO_Bot.Commands
         [Command("ranks")]
         [Summary("ranks")]
         [Remarks("display all Ranked Roles")]
+        [CheckBlacklist]
         public async Task List()
         {
             var embed = new EmbedBuilder();

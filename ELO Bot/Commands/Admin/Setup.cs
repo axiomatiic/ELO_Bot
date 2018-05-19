@@ -15,8 +15,7 @@ namespace ELO_Bot.Commands.Admin
     ///     ensure only admins can use the commands
     /// </summary>
     [RequireContext(ContextType.Guild)]
-    [CheckBlacklist]
-    [CheckAdmin]
+    [CheckBlacklist(true)]
     public class Setup : ModuleBase
     {
         private readonly CommandService _service;
@@ -492,14 +491,14 @@ namespace ELO_Bot.Commands.Admin
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
 
-            if (server.CmdBlacklist.Count == 0)
+            if (server.moduleConfig.DisabledTypes.Count == 0)
             {
                 await ReplyAsync("There are no blacklisted commands in this server");
                 return;
             }
 
             var embed = new EmbedBuilder();
-            embed.AddField("Blacklist", $"{string.Join("\n", server.CmdBlacklist)}");
+            embed.AddField("Blacklist", $"{string.Join("\n", server.moduleConfig.DisabledTypes.Select(x => $"{(x.IsCommand ? "C: " : "M: ")}{x.Name}\nAdmin: {x.Setting.AdminAllowed}\nMod: {x.Setting.ModAllowed}\nRegistered: {x.Setting.RegisteredAllowed}"))}");
 
             await ReplyAsync("", false, embed);
         }
@@ -507,28 +506,115 @@ namespace ELO_Bot.Commands.Admin
         /// <summary>
         ///     add a command to the blacklist.
         /// </summary>
-        /// <param name="cmdname">command name.</param>
+        /// <param name="selection">a compination of ints and commas indicating the selections</param>
+        /// <param name="name">command or module name.</param>
         /// <returns></returns>
         [Command("BlacklistAdd")]
         [Remarks("Blacklist a command from all regular users.")]
         [Summary("BlacklistAdd <command-name>")]
-        public async Task BlacklistAdd(string cmdname)
+        public async Task BlacklistAdd(string selection, string name)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
 
-            if (_service.Modules.SelectMany(module => module.Commands).Any(command =>
-                string.Equals(command.Name, cmdname, StringComparison.CurrentCultureIgnoreCase)))
+            var modulematch = _service.Modules.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase));
+            var cmdmatch = _service.Commands.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase) || x.Aliases.Any(a => string.Equals(a, name, StringComparison.CurrentCultureIgnoreCase)));
+
+            var intselections = selection.Split(',');
+
+            var bsettings = new Servers.Server.ModuleConfig.SetupConf
             {
-                if (server.CmdBlacklist.Contains(cmdname.ToLower()))
+                AdminAllowed = false,
+                ModAllowed = false,
+                RegisteredAllowed = false,
+                UnRegisteredAllowed = false
+            };
+
+            EmbedBuilder embed;
+            if (int.TryParse(intselections[0], out var zerocheck))
+            {
+
+                    foreach (var s in intselections)
+                        if (int.TryParse(s, out var sint))
+                        {
+                            if (sint < 1 || sint > 4)
+                            {
+                                await ReplyAsync($"Invalid Input {s}\n" +
+                                                 "only 1-4 are accepted.");
+                                return;
+                            }
+
+                            switch (sint)
+                            {
+                                case 1:
+                                    bsettings.AdminAllowed = true;
+                                    break;
+                                case 2:
+                                    bsettings.ModAllowed = true;
+                                    break;
+                                case 3:
+                                    bsettings.RegisteredAllowed = true;
+                                    break;
+                                case 4:
+                                    bsettings.UnRegisteredAllowed = true;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            await ReplyAsync($"Invalid Input {s}");
+                            return;
+                        }
+
+                    embed = new EmbedBuilder
+                    {
+                        Description = $"{name}\n" +
+                                      $"Admin Allowed: {bsettings.AdminAllowed}\n" +
+                                      $"Mod Allowed: {bsettings.ModAllowed}\n" +
+                                      $"Registered Allowed: {bsettings.RegisteredAllowed}\n" +
+                                      $"Unregistered Allowed: {bsettings.UnRegisteredAllowed}"
+                    };
+            }
+            else
+            {
+                await ReplyAsync("Input Error!");
+                return;
+            }
+
+
+            if (cmdmatch != null || modulematch != null)
+            {
+                if (modulematch != null)
                 {
-                    await ReplyAsync("Command already blacklisted.");
+                    if (server.moduleConfig.DisabledTypes.Any(x => string.Equals(x.Name, modulematch.Name, StringComparison.CurrentCultureIgnoreCase)))
+                    {
+                        await ReplyAsync("Command already blacklisted.");
+                        return;
+                    }
+
+                    server.moduleConfig.DisabledTypes.Add(new Servers.Server.ModuleConfig.DisabledType
+                    {
+                        IsCommand = false,
+                        Name = modulematch.Name,
+                        Setting = bsettings
+                    });
                 }
-                else
+
+                if (cmdmatch != null)
                 {
-                    server.CmdBlacklist.Add(cmdname.ToLower());
-                    await ReplyAsync(
-                        "Command added to blacklist. NOTE: Server Moderators and Administrators can still use this command");
+                    if (server.moduleConfig.DisabledTypes.Any(x => string.Equals(x.Name, cmdmatch.Name, StringComparison.CurrentCultureIgnoreCase)))
+                    {
+                        await ReplyAsync("Command already blacklisted.");
+                        return;
+                    }
+
+                    server.moduleConfig.DisabledTypes.Add(new Servers.Server.ModuleConfig.DisabledType
+                    {
+                        IsCommand = true,
+                        Name = cmdmatch.Name,
+                        Setting = bsettings
+                    });
                 }
+                await ReplyAsync("", false, embed.Build());
                 return;
             }
 
@@ -547,23 +633,37 @@ namespace ELO_Bot.Commands.Admin
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
 
-            if (_service.Modules.SelectMany(module => module.Commands).Any(command =>
-                string.Equals(command.Name, cmdname, StringComparison.CurrentCultureIgnoreCase)))
+            var toremove = server.moduleConfig.DisabledTypes.FirstOrDefault(x => string.Equals(x.Name, cmdname, StringComparison.CurrentCultureIgnoreCase));
+            if (toremove == null)
             {
-                if (server.CmdBlacklist.Contains(cmdname.ToLower()))
-                {
-                    server.CmdBlacklist.Remove(cmdname.ToLower());
-                    await ReplyAsync(
-                        "Command removed from blacklist. All users will be able to use it now.");
-                }
-                else
-                {
-                    throw new Exception("Command not blacklisted.");
-                }
-                return;
+                await ReplyAsync("Error, Not Blacklisted");
             }
+            else
+            {
+                server.moduleConfig.DisabledTypes.Remove(toremove);
+                await ReplyAsync("Success, Blacklisted item removed");
+            }
+        }
 
-            await ReplyAsync("No Matching Command.");
+        [Command("BlacklistInfo")]
+        [Remarks("Info on how to use the blacklist command")]
+        [Summary("BlacklistInfo")]
+        public async Task BlacklistInfo()
+        {
+            await ReplyAsync("", false, new EmbedBuilder
+            {
+                Description =
+                    "You can select roles to bypass the blacklist\n" +
+                    "__Key__\n" +
+                    "`1` - Allow Admin\n" +
+                    "`2` - Allow Moderator\n" +
+                    "`3` - Allow RegisteredUser\n" +
+                    "`4` - Allow UnregisteredUser\n\n" +
+                    "Usage\n" +
+                    $"`{Config.Load().Prefix} 1 Leave` - this allows the admin role to use the leave command but no others\n" +
+                    "You can use commas to use multiple Settings on the same item.\n" +
+                    $"`{Config.Load().Prefix} 1,2,3 Join` - this allows admins, moderators and registered users to use the join command"
+            }.Build());
         }
 
         /// <summary>

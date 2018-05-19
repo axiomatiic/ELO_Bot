@@ -6,12 +6,18 @@ using Discord.Commands;
 
 namespace ELO_Bot.Preconditions
 {
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class CheckAdmin : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command,
             IServiceProvider prov)
         {
+            return await Task.FromResult(PreconditionResult.FromSuccess());
+
+
+
+
             try
             {
                 var s1 = Servers.ServerList.First(x => x.ServerId == context.Guild.Id);
@@ -53,6 +59,11 @@ namespace ELO_Bot.Preconditions
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command,
             IServiceProvider prov)
         {
+            return await Task.FromResult(PreconditionResult.FromSuccess());
+
+
+
+
             try
             {
                 var s1 = Servers.ServerList.First(x => x.ServerId == context.Guild.Id);

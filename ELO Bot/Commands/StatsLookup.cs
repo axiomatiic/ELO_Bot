@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using ELO_Bot.Preconditions;
 using ELO_Bot.PreConditions;
 using Newtonsoft.Json;
 
 namespace ELO_Bot.Commands
 {
+    [CheckBlacklist]
     public class StatsLookup : InteractiveBase
     {
         [Command("FortniteStats")]
