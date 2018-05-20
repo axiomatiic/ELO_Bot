@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 namespace ELO_Bot.Commands
 {
     [RequireContext(ContextType.Guild)]
-    [CheckBlacklist]
+    [CheckAccessList]
     public class Other : InteractiveBase
     {
         private readonly CommandService _service;

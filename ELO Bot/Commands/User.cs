@@ -165,7 +165,7 @@ namespace ELO_Bot.Commands
         [Command("GetUser")]
         [Summary("GetUser <@user>")]
         [Remarks("checks stats about a user")]
-        [CheckBlacklist]
+        [CheckAccessList]
         public async Task GetUser(IUser user)
         {
             var embed = new EmbedBuilder();
@@ -208,7 +208,7 @@ namespace ELO_Bot.Commands
         [Command("Leaderboard")]
         [Summary("Leaderboard <wins, losses, points>")]
         [Remarks("Displays Rank Leaderboard (Top 20 )")]
-        [CheckBlacklist]
+        [CheckAccessList]
         public async Task LeaderBoard([Remainder]string arg = "point")
         {
 
@@ -356,7 +356,7 @@ namespace ELO_Bot.Commands
         [Command("ranks")]
         [Summary("ranks")]
         [Remarks("display all Ranked Roles")]
-        [CheckBlacklist]
+        [CheckAccessList]
         public async Task List()
         {
             var embed = new EmbedBuilder();

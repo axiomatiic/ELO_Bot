@@ -13,7 +13,7 @@ namespace ELO_Bot.Commands.Admin
     ///     checks ensure that blacklisted commands are not run
     ///     and that these commands are only used by an admin
     /// </summary>
-    [CheckBlacklist(true)]
+    [CheckAccessList(true)]
     //[CheckAdmin]
     public class Lobby : InteractiveBase
     {

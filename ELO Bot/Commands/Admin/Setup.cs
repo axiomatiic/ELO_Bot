@@ -15,7 +15,7 @@ namespace ELO_Bot.Commands.Admin
     ///     ensure only admins can use the commands
     /// </summary>
     [RequireContext(ContextType.Guild)]
-    [CheckBlacklist(true)]
+    [CheckAccessList(true)]
     public class Setup : ModuleBase
     {
         private readonly CommandService _service;
@@ -502,21 +502,21 @@ namespace ELO_Bot.Commands.Admin
         ///     these commands have been 'blacklisted' and are not able to be used by regular users.
         /// </summary>
         /// <returns></returns>
-        [Command("Blacklist")]
-        [Remarks("List blacklisted commands")]
-        [Summary("Blacklist")]
+        [Command("AccessList")]
+        [Remarks("List Access Modified commands/Modules")]
+        [Summary("AccessList")]
         public async Task Blacklist()
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
 
             if (server.moduleConfig.DisabledTypes.Count == 0)
             {
-                await ReplyAsync("There are no blacklisted commands in this server");
+                await ReplyAsync("There are no Access Modified commands in this server");
                 return;
             }
 
             var embed = new EmbedBuilder();
-            embed.AddField("Blacklist", $"{string.Join("\n", server.moduleConfig.DisabledTypes.Select(x => $"{(x.IsCommand ? "C: " : "M: ")}{x.Name}\nAdmin: {x.Setting.AdminAllowed}\nMod: {x.Setting.ModAllowed}\nRegistered: {x.Setting.RegisteredAllowed}"))}");
+            embed.AddField("Access List", $"{string.Join("\n", server.moduleConfig.DisabledTypes.Select(x => $"{(x.IsCommand ? "C: " : "M: ")}{x.Name}\nServer Owner Only: {x.Setting.ServerOwnerOnly}\nAdmin: {x.Setting.AdminAllowed}\nMod: {x.Setting.ModAllowed}\nRegistered: {x.Setting.RegisteredAllowed}"))}");
 
             await ReplyAsync("", false, embed);
         }
@@ -527,9 +527,9 @@ namespace ELO_Bot.Commands.Admin
         /// <param name="selection">a compination of ints and commas indicating the selections</param>
         /// <param name="name">command or module name.</param>
         /// <returns></returns>
-        [Command("BlacklistAdd")]
-        [Remarks("Blacklist a command from all regular users.")]
-        [Summary("BlacklistAdd <command-name>")]
+        [Command("AccessListAdd")]
+        [Remarks("Modify command access for the specified types")]
+        [Summary("AccessListAdd <types> <command/module-name>")]
         public async Task BlacklistAdd(string selection, string name)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
@@ -541,6 +541,7 @@ namespace ELO_Bot.Commands.Admin
 
             var bsettings = new Servers.Server.ModuleConfig.SetupConf
             {
+                ServerOwnerOnly = false,
                 AdminAllowed = false,
                 ModAllowed = false,
                 RegisteredAllowed = false,
@@ -554,15 +555,18 @@ namespace ELO_Bot.Commands.Admin
                     foreach (var s in intselections)
                         if (int.TryParse(s, out var sint))
                         {
-                            if (sint < 1 || sint > 4)
+                            if (sint < 0 || sint > 4)
                             {
                                 await ReplyAsync($"Invalid Input {s}\n" +
-                                                 "only 1-4 are accepted.");
+                                                 "only 0-4 are accepted.");
                                 return;
                             }
 
                             switch (sint)
                             {
+                                case 0:
+                                    bsettings.ServerOwnerOnly = true;
+                                    break;
                                 case 1:
                                     bsettings.AdminAllowed = true;
                                     break;
@@ -586,6 +590,7 @@ namespace ELO_Bot.Commands.Admin
                     embed = new EmbedBuilder
                     {
                         Description = $"{name}\n" +
+                                      $"Server Owner ONLY: {bsettings.ServerOwnerOnly}\n" +
                                       $"Admin Allowed: {bsettings.AdminAllowed}\n" +
                                       $"Mod Allowed: {bsettings.ModAllowed}\n" +
                                       $"Registered Allowed: {bsettings.RegisteredAllowed}\n" +
@@ -605,7 +610,7 @@ namespace ELO_Bot.Commands.Admin
                 {
                     if (server.moduleConfig.DisabledTypes.Any(x => string.Equals(x.Name, modulematch.Name, StringComparison.CurrentCultureIgnoreCase)))
                     {
-                        await ReplyAsync("Command already blacklisted.");
+                        await ReplyAsync("Module Access already Modified.");
                         return;
                     }
 
@@ -621,7 +626,7 @@ namespace ELO_Bot.Commands.Admin
                 {
                     if (server.moduleConfig.DisabledTypes.Any(x => string.Equals(x.Name, cmdmatch.Name, StringComparison.CurrentCultureIgnoreCase)))
                     {
-                        await ReplyAsync("Command already blacklisted.");
+                        await ReplyAsync("Command Access already modified.");
                         return;
                     }
 
@@ -644,9 +649,9 @@ namespace ELO_Bot.Commands.Admin
         /// </summary>
         /// <param name="cmdname">command name</param>
         /// <returns></returns>
-        [Command("BlacklistDel")]
-        [Remarks("Remove a blacklisted command")]
-        [Summary("BlacklistDel <command-name>")]
+        [Command("AccessListDel")]
+        [Remarks("Remove a Access Modified command/module")]
+        [Summary("AccessList <command/module-name>")]
         public async Task BlacklistDel(string cmdname)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
@@ -663,24 +668,26 @@ namespace ELO_Bot.Commands.Admin
             }
         }
 
-        [Command("BlacklistInfo")]
-        [Remarks("Info on how to use the blacklist command")]
-        [Summary("BlacklistInfo")]
+        [Command("AccessListInfo")]
+        [Remarks("Info on how to use the AccessListAdd command")]
+        [Summary("AccessListInfo")]
         public async Task BlacklistInfo()
         {
             await ReplyAsync("", false, new EmbedBuilder
             {
                 Description =
-                    "You can select roles to bypass the blacklist\n" +
+                    "You can override command permission requirements using the AccessList Commands\n" +
                     "__Key__\n" +
+                    "`0` - Server Owner Only\n" +
                     "`1` - Allow Admin\n" +
                     "`2` - Allow Moderator\n" +
                     "`3` - Allow RegisteredUser\n" +
                     "`4` - Allow UnregisteredUser\n\n" +
                     "Usage\n" +
-                    $"`{Config.Load().Prefix}BlacklistAdd 1 Leave` - this allows the admin role to use the leave command but no others\n" +
+                    $"`{Config.Load().Prefix}AccessListAdd 1 Leave` - this allows the admin role to use the leave command but no others\n" +
                     "You can use commas to use multiple Settings on the same item.\n" +
-                    $"`{Config.Load().Prefix}BlacklistAdd 1,2,3 Join` - this allows admins, moderators and registered users to use the join command"
+                    $"`{Config.Load().Prefix}AccessListAdd 1,2,3 Join` - this allows admins, moderators and registered users to use the join command\n" +
+                    $"NOTE: Using serverowner only will only allow the server owner to use the command/module REGARDLESS of other settings"
             }.Build());
         }
 

@@ -7,12 +7,12 @@ using Discord.Commands;
 namespace ELO_Bot.Preconditions
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public sealed class CheckBlacklist : PreconditionAttribute
+    public sealed class CheckAccessList : PreconditionAttribute
     {
         private readonly bool DefaultAdminModule;
         private readonly bool DefaultModModule;
 
-        public CheckBlacklist(bool AllowAdminPermission = false, bool allowAdministratorRole = false)
+        public CheckAccessList(bool AllowAdminPermission = false, bool allowAdministratorRole = false)
         {
             DefaultAdminModule = AllowAdminPermission;
             DefaultModModule = allowAdministratorRole;
@@ -55,15 +55,26 @@ namespace ELO_Bot.Preconditions
                                 blacklisted = true;
                             }
                         }
-                        if (blacklisted)
-                        {
-                            returntype = type;
-                            break;
-                        }
+
+                        if (!blacklisted) continue;
+                        returntype = type;
+                        break;
                     }
 
                     if (returntype != null)
                     {
+                        if (returntype.Setting.ServerOwnerOnly)
+                        {
+                            if (context.Guild.OwnerId == context.User.Id)
+                            {
+                                return await Task.FromResult(PreconditionResult.FromSuccess());
+                            }
+
+                            return await Task.FromResult(
+                                PreconditionResult.FromError(
+                                    "This Command/Module is server owner only!"));
+                        }
+
                         if (returntype.Setting.AdminAllowed)
                         {
                             if (server.AdminRole != 0)
@@ -101,7 +112,7 @@ namespace ELO_Bot.Preconditions
                                       context.User.Id == context.Guild.OwnerId))
                                 return await Task.FromResult(
                                     PreconditionResult.FromError(
-                                        $"This Command requires admin permissions."));
+                                        "This Command/Module requires admin permissions."));
                                 return await Task.FromResult(PreconditionResult.FromSuccess());
                             }
                         }
@@ -122,12 +133,12 @@ namespace ELO_Bot.Preconditions
                                       context.User.Id == context.Guild.OwnerId))
                                 return await Task.FromResult(
                                     PreconditionResult.FromError(
-                                        "This Command requires Moderator OR Admin permissions."));
+                                        "This Command/Module requires Moderator OR Admin permissions."));
                                 return await Task.FromResult(PreconditionResult.FromSuccess());
                             }
                         }
 
-                        return await Task.FromResult(PreconditionResult.FromError($"This is a Blacklisted Command."));
+                        return await Task.FromResult(PreconditionResult.FromError("This is a Blacklisted Command/Module."));
                     }
                     else
                     {
@@ -143,7 +154,7 @@ namespace ELO_Bot.Preconditions
                                       context.User.Id == context.Guild.OwnerId))
                                 return await Task.FromResult(
                                     PreconditionResult.FromError(
-                                        $"This Command requires admin permissions."));
+                                        "This Command/Module requires admin permissions."));
                                 return await Task.FromResult(PreconditionResult.FromSuccess());
                             }
                         }
@@ -164,7 +175,7 @@ namespace ELO_Bot.Preconditions
                                       context.User.Id == context.Guild.OwnerId))
                                 return await Task.FromResult(
                                     PreconditionResult.FromError(
-                                        "This Command requires Moderator OR Admin permissions."));
+                                        "This Command/Module requires Moderator OR Admin permissions."));
                                 return await Task.FromResult(PreconditionResult.FromSuccess());
                             }
                         }
@@ -182,7 +193,7 @@ namespace ELO_Bot.Preconditions
                               context.User.Id == context.Guild.OwnerId))
                             return await Task.FromResult(
                                 PreconditionResult.FromError(
-                                    $"This Command requires admin permissions."));
+                                    "This Command/Module requires admin permissions."));
 
                         return await Task.FromResult(PreconditionResult.FromSuccess());
                     }
@@ -201,7 +212,7 @@ namespace ELO_Bot.Preconditions
                               context.User.Id == context.Guild.OwnerId))
                             return await Task.FromResult(
                                 PreconditionResult.FromError(
-                                    "This Command requires Moderator OR Admin permissions."));
+                                    "This Command/Module requires Moderator OR Admin permissions."));
 
                         return await Task.FromResult(PreconditionResult.FromSuccess());
                     }

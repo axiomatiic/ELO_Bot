@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace ELO_Bot.Commands
 {
-    [CheckBlacklist]
+    [CheckAccessList]
     public class StatsLookup : InteractiveBase
     {
         [Command("FortniteStats")]

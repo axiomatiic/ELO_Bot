@@ -83,6 +83,7 @@ namespace ELO_Bot
 
                 public class SetupConf
                 {
+                    public bool ServerOwnerOnly = false;
                     public bool AdminAllowed { get; set; } = true;
                     public bool ModAllowed { get; set; } = true;
                     public bool RegisteredAllowed { get; set; } = true;

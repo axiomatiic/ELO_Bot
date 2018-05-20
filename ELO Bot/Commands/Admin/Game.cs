@@ -13,7 +13,7 @@ namespace ELO_Bot.Commands.Admin
     /// <summary>
     ///     Checks the commands against the blacklist to ensure that a blacklisted command is not run
     /// </summary>
-    [CheckBlacklist(true, true)]
+    [CheckAccessList(true, true)]
     //[CheckModerator]
     public class Game : InteractiveBase
     {

@@ -11,7 +11,7 @@ namespace ELO_Bot.Commands.Admin
     /// <summary>
     ///     makes sure that only admins can run the following commands.
     /// </summary>
-    [CheckBlacklist(true)]
+    [CheckAccessList(true)]
     //[CheckAdmin]
     public class Point : ModuleBase
     {

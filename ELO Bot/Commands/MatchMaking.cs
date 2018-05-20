@@ -16,7 +16,7 @@ namespace ELO_Bot.Commands
     ///     these commands can only be run within a server.
     /// </summary>
     [CheckRegistered]
-    [CheckBlacklist]
+    [CheckAccessList]
     [RequireContext(ContextType.Guild)]
     public class MatchMaking : InteractiveBase
     {

@@ -15,7 +15,7 @@ namespace ELO_Bot.Commands.Admin
     ///     to ensure no blacklisted commands are used
     ///     make sure that only admins can use these commands
     /// </summary>
-    [CheckBlacklist(true)]
+    [CheckAccessList(true)]
     //[CheckAdmin]
     public class Management : InteractiveBase<SocketCommandContext>
     {
