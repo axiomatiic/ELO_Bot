@@ -165,6 +165,24 @@ namespace ELO_Bot.Commands.Admin
             await ReplyAsync("", false, embed.Build());
         }
 
+        [Command("SetBonusRole")]
+        [Summary("SetBonusRole <points> <@role>")]
+        [Remarks("Set a special role that gives users bonus points on win")]
+        public async Task BonusRole(int bonus, IRole role = null)
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+            server.settings.ExtraPoints.ExtraPointsRole = role?.Id ?? 0;
+            server.settings.ExtraPoints.ExtraPointsAmount = bonus;
+
+            var reply = new EmbedBuilder
+            {
+                Title = "Bonus Role",
+                Description = $"Bonus Points: {server.settings.ExtraPoints.ExtraPointsAmount}\n" +
+                              $"Role: {role?.Name ?? "N/A"}"
+            };
+            await ReplyAsync("", false, reply.Build());
+        }
+
         /// <summary>
         ///     toggle whether users are removed from queues when going idle/offline
         /// </summary>

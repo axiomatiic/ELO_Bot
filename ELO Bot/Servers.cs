@@ -35,7 +35,7 @@ namespace ELO_Bot
             public bool AllowNegativeScore { get; set; } = false;
             public int UsernameSelection { get; set; } = 1;
             public bool DeleteProfileOnLeave { get; set; } = false;
-
+            public Settings settings { get; set; } = new Settings();
             public List<Q> Queue { get; set; } = new List<Q>();
             public List<PreviouMatches> Gamelist { get; set; } = new List<PreviouMatches>();
 
@@ -88,7 +88,16 @@ namespace ELO_Bot
                     public bool RegisteredAllowed { get; set; } = true;
                     public bool UnRegisteredAllowed { get; set; } = false;
                 }
+            }
 
+            public class Settings
+            {
+                public ExtraP ExtraPoints { get; set; } = new ExtraP();
+                public class ExtraP
+                {
+                    public ulong ExtraPointsRole { get; set; }
+                    public int ExtraPointsAmount { get; set; } = 5;
+                }
             }
 
 
