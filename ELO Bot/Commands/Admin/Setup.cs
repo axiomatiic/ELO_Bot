@@ -678,9 +678,9 @@ namespace ELO_Bot.Commands.Admin
                     "`3` - Allow RegisteredUser\n" +
                     "`4` - Allow UnregisteredUser\n\n" +
                     "Usage\n" +
-                    $"`{Config.Load().Prefix} 1 Leave` - this allows the admin role to use the leave command but no others\n" +
+                    $"`{Config.Load().Prefix}BlacklistAdd 1 Leave` - this allows the admin role to use the leave command but no others\n" +
                     "You can use commas to use multiple Settings on the same item.\n" +
-                    $"`{Config.Load().Prefix} 1,2,3 Join` - this allows admins, moderators and registered users to use the join command"
+                    $"`{Config.Load().Prefix}BlacklistAdd 1,2,3 Join` - this allows admins, moderators and registered users to use the join command"
             }.Build());
         }
 
