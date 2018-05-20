@@ -647,7 +647,12 @@ namespace ELO_Bot.Commands.Admin
 
                     if (win)
                     {
-                        usr.Points = usr.Points + points;
+                        var bonus = 0;
+                        if ((user as IGuildUser).RoleIds.Contains(server.settings.ExtraPoints.ExtraPointsRole))
+                        {
+                            bonus = server.settings.ExtraPoints.ExtraPointsAmount;
+                        }
+                        usr.Points = usr.Points + points + bonus;
                         usr.Wins++;
                         embed.AddField($"{usr.Username} WON (+{points})", $"Points: **{usr.Points}**\n" +
                                                                           $"W/L: **[{usr.Wins}/{usr.Losses}]**");
