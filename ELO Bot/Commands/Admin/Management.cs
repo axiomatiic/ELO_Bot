@@ -307,6 +307,23 @@ namespace ELO_Bot.Commands.Admin
 
             await ReplyAsync($"{user.Mention} has been unbanned");
         }
+        /// <summary>
+        ///     unbans the specified user from matchmaking
+        /// </summary>
+        /// <param name="user">user to unban</param>
+        /// <returns></returns>
+        [Command("unban")]
+        [Summary("unban <ID>")]
+        [Remarks("Unban the specified user via ID")]
+        public async Task Unban(ulong user)
+        {
+            var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
+
+            if (server.Bans.Select(x => x.UserId == user).Any())
+                server.Bans.Remove(server.Bans.FirstOrDefault(x => x.UserId == user));
+
+            await ReplyAsync($"[{user}] has been unbanned");
+        }
 
         /// <summary>
         ///     lists all bans in the server
