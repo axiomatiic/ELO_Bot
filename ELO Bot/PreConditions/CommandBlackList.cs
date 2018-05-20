@@ -183,20 +183,7 @@ namespace ELO_Bot.Preconditions
                 }
                 else
                 {
-                    if (DefaultAdminModule)
-                    {
-                        if (server.AdminRole != 0)
-                            if (((IGuildUser)context.User).RoleIds.Contains(server.AdminRole))
-                                return await Task.FromResult(PreconditionResult.FromSuccess());
 
-                        if (!(((IGuildUser)context.User).GuildPermissions.Administrator ||
-                              context.User.Id == context.Guild.OwnerId))
-                            return await Task.FromResult(
-                                PreconditionResult.FromError(
-                                    "This Command/Module requires admin permissions."));
-
-                        return await Task.FromResult(PreconditionResult.FromSuccess());
-                    }
 
                     if (DefaultModModule)
                     {
@@ -213,6 +200,21 @@ namespace ELO_Bot.Preconditions
                             return await Task.FromResult(
                                 PreconditionResult.FromError(
                                     "This Command/Module requires Moderator OR Admin permissions."));
+
+                        return await Task.FromResult(PreconditionResult.FromSuccess());
+                    }
+
+                    if (DefaultAdminModule)
+                    {
+                        if (server.AdminRole != 0)
+                            if (((IGuildUser)context.User).RoleIds.Contains(server.AdminRole))
+                                return await Task.FromResult(PreconditionResult.FromSuccess());
+
+                        if (!(((IGuildUser)context.User).GuildPermissions.Administrator ||
+                              context.User.Id == context.Guild.OwnerId))
+                            return await Task.FromResult(
+                                PreconditionResult.FromError(
+                                    "This Command/Module requires admin permissions."));
 
                         return await Task.FromResult(PreconditionResult.FromSuccess());
                     }
