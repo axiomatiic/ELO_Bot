@@ -95,7 +95,7 @@ namespace ELO_Bot
                 public ExtraP ExtraPoints { get; set; } = new ExtraP();
                 public class ExtraP
                 {
-                    public ulong ExtraPointsRole { get; set; }
+                    public ulong ExtraPointsRole { get; set; } = 0;
                     public int ExtraPointsAmount { get; set; } = 5;
                 }
             }
