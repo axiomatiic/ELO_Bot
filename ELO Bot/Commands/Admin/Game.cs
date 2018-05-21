@@ -654,7 +654,7 @@ namespace ELO_Bot.Commands.Admin
                         }
                         usr.Points = usr.Points + points + bonus;
                         usr.Wins++;
-                        embed.AddField($"{usr.Username} WON (+{points})", $"Points: **{usr.Points}**\n" +
+                        embed.AddField($"{usr.Username} WON (+{points}{(bonus == 0 ? "" : $" Bonus: +{bonus}")})", $"Points: **{usr.Points}**\n" +
                                                                           $"W/L: **[{usr.Wins}/{usr.Losses}]**");
                         embed.Color = Color.Green;
                     }
