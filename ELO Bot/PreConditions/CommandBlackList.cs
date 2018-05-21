@@ -100,6 +100,27 @@ namespace ELO_Bot.Preconditions
                             return await Task.FromResult(PreconditionResult.FromSuccess());
                         }
 
+                        if (DefaultModModule)
+                        {
+                            if (!bl.Any(x => string.Equals(x.Name, command.Module.Name, StringComparison.CurrentCultureIgnoreCase)) || !bl.Any(x => string.Equals(x.Name, command.Name, StringComparison.CurrentCultureIgnoreCase)))
+                            {
+                                if (server.ModRole != 0)
+                                    if (((IGuildUser)context.User).RoleIds.Contains(server.ModRole))
+                                        return await Task.FromResult(PreconditionResult.FromSuccess());
+
+                                if (server.AdminRole != 0)
+                                    if (((IGuildUser)context.User).RoleIds.Contains(server.AdminRole))
+                                        return await Task.FromResult(PreconditionResult.FromSuccess());
+
+                                if (!(((IGuildUser)context.User).GuildPermissions.Administrator ||
+                                      context.User.Id == context.Guild.OwnerId))
+                                    return await Task.FromResult(
+                                        PreconditionResult.FromError(
+                                            "This Command/Module requires Moderator OR Admin permissions."));
+                                return await Task.FromResult(PreconditionResult.FromSuccess());
+                            }
+                        }
+
                         if (DefaultAdminModule)
                         {
                             if (!bl.Any(x => string.Equals(x.Name, command.Module.Name, StringComparison.CurrentCultureIgnoreCase)) || !bl.Any(x => string.Equals(x.Name, command.Name, StringComparison.CurrentCultureIgnoreCase)))
@@ -113,27 +134,6 @@ namespace ELO_Bot.Preconditions
                                 return await Task.FromResult(
                                     PreconditionResult.FromError(
                                         "This Command/Module requires admin permissions."));
-                                return await Task.FromResult(PreconditionResult.FromSuccess());
-                            }
-                        }
-
-                        if (DefaultModModule)
-                        {
-                            if (!bl.Any(x => string.Equals(x.Name, command.Module.Name, StringComparison.CurrentCultureIgnoreCase)) || !bl.Any(x => string.Equals(x.Name, command.Name, StringComparison.CurrentCultureIgnoreCase)))
-                            {
-                                if (server.ModRole != 0)
-                                    if (((IGuildUser)context.User).RoleIds.Contains(server.ModRole))
-                                        return await Task.FromResult(PreconditionResult.FromSuccess());
-
-                                if (server.AdminRole != 0)
-                                    if (((IGuildUser)context.User).RoleIds.Contains(server.AdminRole))
-                                        return await Task.FromResult(PreconditionResult.FromSuccess());
-
-                                if (!(((IGuildUser) context.User).GuildPermissions.Administrator ||
-                                      context.User.Id == context.Guild.OwnerId))
-                                return await Task.FromResult(
-                                    PreconditionResult.FromError(
-                                        "This Command/Module requires Moderator OR Admin permissions."));
                                 return await Task.FromResult(PreconditionResult.FromSuccess());
                             }
                         }
@@ -142,23 +142,6 @@ namespace ELO_Bot.Preconditions
                     }
                     else
                     {
-                        if (DefaultAdminModule)
-                        {
-                            if (!bl.Any(x => string.Equals(x.Name, command.Module.Name, StringComparison.CurrentCultureIgnoreCase)) || !bl.Any(x => string.Equals(x.Name, command.Name, StringComparison.CurrentCultureIgnoreCase)))
-                            {
-                                if (server.AdminRole != 0)
-                                    if (((IGuildUser)context.User).RoleIds.Contains(server.AdminRole))
-                                        return await Task.FromResult(PreconditionResult.FromSuccess());
-
-                                if (!(((IGuildUser)context.User).GuildPermissions.Administrator ||
-                                      context.User.Id == context.Guild.OwnerId))
-                                return await Task.FromResult(
-                                    PreconditionResult.FromError(
-                                        "This Command/Module requires admin permissions."));
-                                return await Task.FromResult(PreconditionResult.FromSuccess());
-                            }
-                        }
-
                         if (DefaultModModule)
                         {
                             if (!bl.Any(x => string.Equals(x.Name, command.Module.Name, StringComparison.CurrentCultureIgnoreCase)) || !bl.Any(x => string.Equals(x.Name, command.Name, StringComparison.CurrentCultureIgnoreCase)))
@@ -179,6 +162,23 @@ namespace ELO_Bot.Preconditions
                                 return await Task.FromResult(PreconditionResult.FromSuccess());
                             }
                         }
+                        if (DefaultAdminModule)
+                        {
+                            if (!bl.Any(x => string.Equals(x.Name, command.Module.Name, StringComparison.CurrentCultureIgnoreCase)) || !bl.Any(x => string.Equals(x.Name, command.Name, StringComparison.CurrentCultureIgnoreCase)))
+                            {
+                                if (server.AdminRole != 0)
+                                    if (((IGuildUser)context.User).RoleIds.Contains(server.AdminRole))
+                                        return await Task.FromResult(PreconditionResult.FromSuccess());
+
+                                if (!(((IGuildUser)context.User).GuildPermissions.Administrator ||
+                                      context.User.Id == context.Guild.OwnerId))
+                                return await Task.FromResult(
+                                    PreconditionResult.FromError(
+                                        "This Command/Module requires admin permissions."));
+                                return await Task.FromResult(PreconditionResult.FromSuccess());
+                            }
+                        }
+
                     }
                 }
                 else
