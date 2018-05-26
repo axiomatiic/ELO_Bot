@@ -651,7 +651,7 @@ namespace ELO_Bot.Commands.Admin
         /// <returns></returns>
         [Command("AccessListDel")]
         [Remarks("Remove a Access Modified command/module")]
-        [Summary("AccessList <command/module-name>")]
+        [Summary("AccessListDel <command/module-name>")]
         public async Task BlacklistDel(string cmdname)
         {
             var server = Servers.ServerList.First(x => x.ServerId == Context.Guild.Id);
