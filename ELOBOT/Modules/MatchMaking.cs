@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Preconditions;
+using Raven.Client.Documents.Linq.Indexing;
 
 namespace ELOBOT.Modules
 {
@@ -67,6 +67,72 @@ namespace ELOBOT.Modules
                                    $"Channel: {Context.Channel.Name}\n" +
                                    "Description:\n" +
                                    $"{Context.Elo.Lobby.Description}");
+        }
+
+        [Command("Pick")]
+        public async Task PickUser(IGuildUser User)
+        {
+            if (!Context.Elo.Lobby.Game.IsPickingTeams)
+            {
+                throw new Exception("Lobby is not picking teams at the moment.");
+            }
+
+            if (Context.Elo.Lobby.Game.Team1.Captain != Context.User.Id && Context.Elo.Lobby.Game.Team2.Captain != Context.User.Id)
+            {
+                throw new Exception("User is not a captain");
+            }
+
+            if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(User.Id))
+            {
+                throw new Exception("User is not pickable");
+            }
+
+            int TeamNext;
+            if (Context.Elo.Lobby.Game.Team1.TurnToPick)
+            {
+                if (Context.User.Id != Context.Elo.Lobby.Game.Team1.Captain)
+                {
+                    throw new Exception("It is not your turn to pick.");
+                }
+
+                Context.Elo.Lobby.Game.Team1.Players.Add(User.Id);
+                TeamNext = 2;
+                Context.Elo.Lobby.Game.Team2.TurnToPick = true;
+                Context.Elo.Lobby.Game.Team1.TurnToPick = false;
+            }
+            else
+            {
+                if (Context.User.Id != Context.Elo.Lobby.Game.Team2.Captain)
+                {
+                    throw new Exception("It is not your turn to pick.");
+                }
+
+                Context.Elo.Lobby.Game.Team2.Players.Add(User.Id);
+                TeamNext = 1;
+                Context.Elo.Lobby.Game.Team2.TurnToPick = false;
+                Context.Elo.Lobby.Game.Team1.TurnToPick = true;
+            }
+            Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(User.Id);
+            if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 0)
+            {
+                Context.Elo.Lobby.GamesPlayed++;
+                await ReplyAsync("**Game has Started**\n" +
+                                $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
+            }
+            else
+            {
+                await SimpleEmbedAsync($"**Team1 Captain** {Context.Socket.Guild.GetUser(Context.Elo.Lobby.Game.Team1.Captain)?.Mention}\n" +
+                                       $"**Team1:** {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                       $"**Team2 Captain** {Context.Socket.Guild.GetUser(Context.Elo.Lobby.Game.Team2.Captain)?.Mention}\n" +
+                                       $"**Team2:** {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                       $"**Select Your Teams using `{Context.Prefix}pick <@user>`**\n" +
+                                       $"**It is Captain {TeamNext}'s Turn to pick**\n" +
+                                       "**Player Pool**\n" +
+                                       $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Socket.Guild.GetUser(x)?.Mention))}");
+            }
+            Context.Server.Save();
         }
     }
 }

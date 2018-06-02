@@ -109,8 +109,7 @@ namespace ELOBOT.Modules
         [Command("ClearQueue")]
         public async Task ClearQueue()
         {
-            Context.Elo.Lobby.Game.Team1 = new GuildModel.Lobby.CurrentGame.Team();
-            Context.Elo.Lobby.Game.Team2 = new GuildModel.Lobby.CurrentGame.Team();
+            Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
             Context.Server.Save();
             await SimpleEmbedAsync("Queue has been cleared");
         }

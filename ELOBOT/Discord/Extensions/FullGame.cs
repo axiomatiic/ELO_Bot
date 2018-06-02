@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -124,13 +125,36 @@ namespace ELOBOT.Discord.Extensions
                     Context.Elo.Lobby.Game.Team2.Captain = cap2.Id;
                     Context.Elo.Lobby.Game.Team1.Players.Add(cap1.Id);
                     Context.Elo.Lobby.Game.Team2.Players.Add(cap2.Id);
+                    Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(cap1.Id);
+                    Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(cap2.Id);
                     await Context.Channel.SendMessageAsync($"**Team1 Captain** {cap1.Mention}\n" +
                                                            $"**Team2 Captain** {cap2.Mention}\n" +
-                                                           "**Select Your Teams using `=pick <@user>`**\n" +
+                                                           $"**Select Your Teams using `{Context.Prefix}pick <@user>`**\n" +
                                                            "**Captain 1 Always Picks First**\n" +
-                                                           "**Players**\n" +
+                                                           "**Player Pool**\n" +
                                                            $"{string.Join(" ", users.Select(x => x.Mention))}");
                     Context.Elo.Lobby.Game.IsPickingTeams = true;
+                    Context.Elo.Lobby.Game.Team1.TurnToPick = true;
+                    Context.Elo.Lobby.Game.Team2.TurnToPick = false;
+                }
+
+                if (!Context.Elo.Lobby.Game.IsPickingTeams)
+                {
+                    Context.Elo.Lobby.GamesPlayed++;
+                    await Context.Channel.SendMessageAsync("**Game has Started**\n" +
+                                                           $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                                           $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                                           $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
+                    Context.Server.Results.Add(new GuildModel.GameResult
+                    {
+                        Comments = new List<GuildModel.GameResult.Comment>(),
+                        Gamenumber = Context.Elo.Lobby.GamesPlayed,
+                        LobbyID = Context.Elo.Lobby.ChannelID,
+                        Result = GuildModel.GameResult._Result.Undecided,
+                        Team1 = Context.Elo.Lobby.Game.Team1.Players,
+                        Team2 = Context.Elo.Lobby.Game.Team2.Players
+                    });
+                    Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
                 }
                 Context.Server.Save();
             }

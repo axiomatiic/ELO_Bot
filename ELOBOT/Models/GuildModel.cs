@@ -74,6 +74,7 @@ namespace ELOBOT.Models
                 {
                     public List<ulong> Players { get; set; } = new List<ulong>();
                     public ulong Captain { get; set; }
+                    public bool TurnToPick { get; set; } = false;
                 }
             }
         }
