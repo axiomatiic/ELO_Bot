@@ -46,7 +46,7 @@ namespace ELOBOT.Discord.Extensions
                 User = context.Elo.User;
             }
 
-            var rename = context.Server.Settings.Registration.NameFormat.Replace("{points}", User.Stats.Points.ToString()).Replace("{username}", User.Username);
+            var rename = context.Server.Settings.Registration.NameFormat.Replace("{score}", User.Stats.Points.ToString()).Replace("{username}", User.Username);
 
             try
             {

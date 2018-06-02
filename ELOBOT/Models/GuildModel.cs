@@ -64,6 +64,9 @@ namespace ELOBOT.Models
             public CurrentGame Game { get; set; } = new CurrentGame();
             public class CurrentGame
             {
+                public bool IsPickingTeams { get; set; } = false;
+                public List<ulong> QueuedPlayerIDs { get; set; } = new List<ulong>();
+
                 public Team Team1 { get; set; } = new Team();
                 public Team Team2 { get; set; } = new Team();
 
