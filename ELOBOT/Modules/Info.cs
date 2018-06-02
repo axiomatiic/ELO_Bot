@@ -14,18 +14,11 @@ namespace ELOBOT.Modules
     [RequireContext(ContextType.Guild)]
     public class Info : Base
     {
-        /*
-        [Priority(2)]
         [Command("Register")]
-        public async Task Register(IGuildUser User)
+        public async Task Register()
         {
-            if (User.Id == Context.User.Id)
-            {
-                await Register(User.Nickname ?? User.Username);
-            }
+            await Register(Context.User.Username);
         }
-        */
-        [Priority(1)]
         [Command("Register")]
         public async Task Register([Remainder]string name)
         {

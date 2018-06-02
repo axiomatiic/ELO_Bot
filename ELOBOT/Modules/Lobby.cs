@@ -13,6 +13,7 @@ using Raven.Client.Documents.Linq.Indexing;
 
 namespace ELOBOT.Modules
 {
+    [CheckLobby]
     [CheckRegistered]
     public class Lobby : Base
     {

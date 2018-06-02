@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
+using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
 
 namespace ELOBOT.Modules
 {
+    [CheckAdmin]
     public class Setup : Base
     {
         [Command("RegisterRole")]

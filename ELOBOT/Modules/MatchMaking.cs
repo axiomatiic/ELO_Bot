@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Preconditions;
+using ELOBOT.Models;
 using Raven.Client.Documents.Linq.Indexing;
 
 namespace ELOBOT.Modules
@@ -15,6 +17,7 @@ namespace ELOBOT.Modules
     public class MatchMaking : Base
     {
         [Command("Join")]
+        [Alias("j")]
         public async Task JoinLobby()
         {
             if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
@@ -25,6 +28,11 @@ namespace ELOBOT.Modules
                     {
                         throw new Exception("MultiQueuing is disabled by the server Admins");
                     }
+                }
+
+                if (Context.Elo.Lobby.Game.IsPickingTeams)
+                {
+                    throw new Exception("Currently Picking teams. Please wait until this is completed");
                 }
 
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
@@ -38,10 +46,15 @@ namespace ELOBOT.Modules
             }
         }
         [Command("Leave")]
+        [Alias("l")]
         public async Task LeaveLobby()
         {
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
             {
+                if (Context.Elo.Lobby.Game.IsPickingTeams)
+                {
+                    throw new Exception("Currently Picking teams. Please wait until this is completed");
+                }
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(Context.User.Id);
                 await SimpleEmbedAsync($"Success, Removed from queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
                 Context.Server.Save();
@@ -49,11 +62,26 @@ namespace ELOBOT.Modules
         }
 
         [Command("Queue")]
+        [Alias("q")]
         public async Task Queue()
         {
             var QueuedPlayers = Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(p => Context.Socket.Guild.GetUser(p));
-            await SimpleEmbedAsync($"**Player List**\n" +
-                                   $"{string.Join("\n", QueuedPlayers.Select(x => x.Mention))}");
+            if (!Context.Elo.Lobby.Game.IsPickingTeams)
+            {
+                await SimpleEmbedAsync($"**Player List [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]**\n" +
+                                       $"{string.Join("\n", QueuedPlayers.Select(x => x.Mention))}");
+            }
+            else
+            {
+                await SimpleEmbedAsync($"**Team1 Captain** {Context.Socket.Guild.GetUser(Context.Elo.Lobby.Game.Team1.Captain)?.Mention}\n" +
+                                       $"**Team1:** {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                       $"**Team2 Captain** {Context.Socket.Guild.GetUser(Context.Elo.Lobby.Game.Team2.Captain)?.Mention}\n" +
+                                       $"**Team2:** {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                       $"**Select Your Teams using `{Context.Prefix}pick <@user>`**\n" +
+                                       $"**It is Captain {(Context.Elo.Lobby.Game.Team1.TurnToPick ? 1 : 2)}'s Turn to pick**\n" +
+                                       "**Player Pool**\n" +
+                                       $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Socket.Guild.GetUser(x)?.Mention))}");
+            }
         }
 
         [Command("Lobby")]
@@ -70,6 +98,7 @@ namespace ELOBOT.Modules
         }
 
         [Command("Pick")]
+        [Alias("p")]
         public async Task PickUser(IGuildUser User)
         {
             if (!Context.Elo.Lobby.Game.IsPickingTeams)
@@ -99,6 +128,8 @@ namespace ELOBOT.Modules
                 TeamNext = 2;
                 Context.Elo.Lobby.Game.Team2.TurnToPick = true;
                 Context.Elo.Lobby.Game.Team1.TurnToPick = false;
+
+                
             }
             else
             {
@@ -113,6 +144,23 @@ namespace ELOBOT.Modules
                 Context.Elo.Lobby.Game.Team1.TurnToPick = true;
             }
             Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(User.Id);
+
+            if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 1)
+            {
+                var lastplayer = Context.Elo.Lobby.Game.QueuedPlayerIDs.FirstOrDefault();
+                if (Context.Elo.Lobby.Game.Team1.TurnToPick)
+                {
+                    Context.Elo.Lobby.Game.Team1.Players.Add(lastplayer);
+                }
+                else
+                {
+                    Context.Elo.Lobby.Game.Team2.Players.Add(lastplayer);
+                }
+
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(lastplayer);
+            }
+
+
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 0)
             {
                 Context.Elo.Lobby.GamesPlayed++;
@@ -120,6 +168,16 @@ namespace ELOBOT.Modules
                                 $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
                                 $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
                                 $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
+                Context.Server.Results.Add(new GuildModel.GameResult
+                {
+                    Comments = new List<GuildModel.GameResult.Comment>(),
+                    Gamenumber = Context.Elo.Lobby.GamesPlayed,
+                    LobbyID = Context.Elo.Lobby.ChannelID,
+                    Result = GuildModel.GameResult._Result.Undecided,
+                    Team1 = Context.Elo.Lobby.Game.Team1.Players,
+                    Team2 = Context.Elo.Lobby.Game.Team2.Players
+                });
+                Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
             }
             else
             {
