@@ -163,7 +163,7 @@ namespace ELOBOT.Models
 
             public class _GameSettings
             {
-                public ulong AnnounceMentsChannel { get; set; }
+                public ulong AnnouncementsChannel { get; set; }
                 public bool DMAnnouncements { get; set; } = false;
                 public bool RemoveOnAfk { get; set; } = true;
                 public bool BlockMultiQueuing { get; set; } = true;

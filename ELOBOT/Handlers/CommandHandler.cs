@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -29,6 +30,40 @@ namespace ELOBOT.Handlers
             _client.MessageReceived += _client_MessageReceived;
             _client.Ready += Client_Ready;
             _client.JoinedGuild += _client_JoinedGuild;
+            _client.GuildMemberUpdated += _client_GuildMemberUpdated;
+        }
+
+        private async Task _client_GuildMemberUpdated(SocketGuildUser UserBefore, SocketGuildUser UserAfter)
+        {
+
+            if (UserBefore.Status != UserAfter.Status)
+            {
+                if (UserAfter.Status != UserStatus.Online)
+                {
+                    var guildobject = DatabaseHandler.GetGuild(UserBefore.Guild.Id);
+                    if (guildobject.Settings.GameSettings.RemoveOnAfk)
+                    {
+                        var lobbymatches = guildobject.Lobbies.Where(x => x.Game.QueuedPlayerIDs.Contains(UserAfter.Id) || x.Game.Team1.Players.Contains(UserAfter.Id) || x.Game.Team2.Players.Contains(UserAfter.Id)).ToList();
+                        if (lobbymatches.Any())
+                        {
+                            foreach (var lobby in lobbymatches)
+                            {
+                                var lchannel = _client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
+                                if (lobby.Game.IsPickingTeams)
+                                {
+                                    await lchannel.SendMessageAsync($"{UserAfter.Mention} has gone {UserAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue");
+                                }
+                                else
+                                {
+                                    lobby.Game.QueuedPlayerIDs.Remove(UserAfter.Id);
+                                    await lchannel.SendMessageAsync($"{UserAfter.Mention} has gone {UserAfter.Status.ToString()} and has been automatically removed from the queue");
+                                }
+                            }
+                            guildobject.Save();
+                        }
+                    }
+                }
+            }
         }
 
         private static Task _client_JoinedGuild(SocketGuild Guild)
@@ -53,6 +88,7 @@ namespace ELOBOT.Handlers
 
             var fullconfig = DatabaseHandler.GetFullConfig();
             var initialised = 0;
+
             foreach (var guild in _client.Guilds.Where(g => fullconfig.All(cfg => cfg.ID != g.Id)))
             {
                 DatabaseHandler.InsertGuildObject(new GuildModel

@@ -15,6 +15,7 @@ namespace ELOBOT.Modules
 {
     [CheckLobby]
     [CheckRegistered]
+    [CheckAdmin]
     public class Lobby : Base
     {
         [Command("CreateLobby", RunMode = RunMode.Async)]

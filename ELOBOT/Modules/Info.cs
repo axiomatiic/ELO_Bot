@@ -29,7 +29,11 @@ namespace ELOBOT.Modules
             var NewUser = new GuildModel.User
             {
                 UserID = Context.User.Id,
-                Username = name
+                Username = name,
+                Stats = new GuildModel.User.Score
+                {
+                    Points = Context.Server.Settings.Registration.RegistrationBonus
+                }
             };
 
             if (Context.Elo.User != null)

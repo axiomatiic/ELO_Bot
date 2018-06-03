@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Discord;
+using ELOBOT.Handlers;
 using ELOBOT.Models;
 
 namespace ELOBOT.Discord.Extensions
@@ -154,10 +156,67 @@ namespace ELOBOT.Discord.Extensions
                         Team1 = Context.Elo.Lobby.Game.Team1.Players,
                         Team2 = Context.Elo.Lobby.Game.Team2.Players
                     });
+                    await AnnounceGame(Context);
                     Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
                 }
                 Context.Server.Save();
             }
         }
+
+        public static async Task AnnounceGame(Context.Context Context)
+        {
+            if (Context.Socket.Guild.GetChannel(Context.Server.Settings.GameSettings.AnnouncementsChannel) is IMessageChannel AnnouncementsChannel)
+            {
+                try
+                {
+                    var T1Mentions = string.Join(" ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList());
+                    var T2Mentions = string.Join(" ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList());
+                    var mentions = $"{T1Mentions} {T2Mentions}";
+                    var embed = new EmbedBuilder
+                        {
+                            Title = "Game has Started"
+                        }.AddField("Game Info", $"Lobby: {(Context.Channel as ITextChannel).Mention}\n" +
+                                                $"Game: {Context.Elo.Lobby.GamesPlayed}\n")
+                        .AddField("Team 1", T1Mentions)
+                        .AddField("Team 2", T2Mentions);
+                    await AnnouncementsChannel.SendMessageAsync(mentions, false, embed.Build());
+                }
+                catch (Exception e)
+                {
+                    LogHandler.LogMessage(Context, e.ToString(), LogSeverity.Error);
+                }
+            }
+
+            if (Context.Server.Settings.GameSettings.DMAnnouncements)
+            {
+                var DMEmbed = new EmbedBuilder
+                    {
+                        Title = "Game has Started"
+                    }.AddField("Game Info", $"Lobby: {Context.Channel.Name}\n" +
+                                            $"Game: {Context.Elo.Lobby.GamesPlayed}\n")
+                    .AddField("Team 1", $"{string.Join(" ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}")
+                    .AddField("Team 2", $"{string.Join(" ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}")
+                    .Build();
+                var AllPlayers = new List<ulong>();
+                AllPlayers.AddRange(Context.Elo.Lobby.Game.Team1.Players);
+                AllPlayers.AddRange(Context.Elo.Lobby.Game.Team2.Players);
+                foreach (var user in AllPlayers)
+                {
+                    try
+                    {
+                        var u = Context.Socket.Client.GetUser(user);
+                        if (u != null)
+                        {
+                            await u.SendMessageAsync("", false, DMEmbed);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        LogHandler.LogMessage(Context, e.ToString(), LogSeverity.Error);
+                    }
+                }
+            }
+        }
+
     }
 }

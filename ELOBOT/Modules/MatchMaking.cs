@@ -24,7 +24,7 @@ namespace ELOBOT.Modules
             {
                 if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
                 {
-                    if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)))
+                    if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team1.Players.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team2.Players.Contains(Context.User.Id)))
                     {
                         throw new Exception("MultiQueuing is disabled by the server Admins");
                     }
@@ -177,6 +177,7 @@ namespace ELOBOT.Modules
                     Team1 = Context.Elo.Lobby.Game.Team1.Players,
                     Team2 = Context.Elo.Lobby.Game.Team2.Players
                 });
+                await Discord.Extensions.FullGame.AnnounceGame(Context);
                 Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
             }
             else
