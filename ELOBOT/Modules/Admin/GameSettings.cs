@@ -8,7 +8,7 @@ using ELOBOT.Discord.Preconditions;
 
 namespace ELOBOT.Modules
 {
-    [CheckAdmin]
+    [CustomPermissions(true, false)]
     public class GameSettings : Base
     {
         [Command("AllowNegativeScore")]

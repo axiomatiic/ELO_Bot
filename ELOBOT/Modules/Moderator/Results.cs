@@ -12,7 +12,7 @@ using ELOBOT.Models;
 
 namespace ELOBOT.Modules
 {
-    [CheckAdmin]
+    [CustomPermissions(true, true)]
     public class Results : Base
     {
         [Command("Game", RunMode = RunMode.Async)]

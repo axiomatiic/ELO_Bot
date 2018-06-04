@@ -11,7 +11,7 @@ using ELOBOT.Models;
 
 namespace ELOBOT.Modules
 {
-    [CheckAdmin]
+    [CustomPermissions(true, false)]
     public class Setup : Base
     {
         [Command("RegisterRole")]
@@ -73,6 +73,27 @@ namespace ELOBOT.Modules
         {
             await SimpleEmbedAsync("Set the server's nickname format. You can represent points using {score} and represent Name using {username}\n" +
                                    "ie. `NickNameFormat [{score}] - {username}`");
+        }
+
+        [Command("DefaultWinModifier")]
+        public async Task WinModifier(int input = 10)
+        {
+            if (input <= 0)
+            {
+                throw new Exception("Win Modifier must be a positive integer");
+            }
+            Context.Server.Settings.Registration.DefaultWinModifier = input;
+            Context.Server.Save();
+
+            await SimpleEmbedAsync($"Succes Default Win Modifier is now: +{input}");
+        }
+        [Command("DefaultLossModifier")]
+        public async Task LossModifier(int input = 5)
+        {
+            Context.Server.Settings.Registration.DefaultLossModifier = Math.Abs(input);
+            Context.Server.Save();
+
+            await SimpleEmbedAsync($"Succes Default Loss Modifier is now: -{input}");
         }
     }
 }

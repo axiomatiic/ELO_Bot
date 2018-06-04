@@ -154,6 +154,7 @@ namespace ELOBOT.Models
 
             public _Registration Registration { get; set; } = new _Registration();
             public _GameSettings GameSettings { get; set; } = new _GameSettings();
+            public _CommandAccess CustomPermissions { get; set; } = new _CommandAccess();
 
             public class _Moderation
             {
@@ -169,6 +170,27 @@ namespace ELOBOT.Models
                 public bool BlockMultiQueuing { get; set; } = true;
                 public bool AllowNegativeScore { get; set; } = false;
             }
+
+            public class _CommandAccess
+            {
+                public List<CustomPermission> CustomisedPermission { get; set; } = new List<CustomPermission>();
+
+                public class CustomPermission
+                {
+                    public bool IsCommand { get; set; } = true;
+                    public string Name { get; set; }
+                    public accesstype Setting { get; set; } = accesstype.Admin;
+
+                    public enum accesstype
+                    {
+                        ServerOwner,
+                        Admin,
+                        Moderator,
+                        Registered
+                    }
+                }
+            }
+
 
             public class _Registration
             {

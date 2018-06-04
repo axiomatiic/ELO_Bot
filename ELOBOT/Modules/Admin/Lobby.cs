@@ -13,9 +13,7 @@ using Raven.Client.Documents.Linq.Indexing;
 
 namespace ELOBOT.Modules
 {
-    [CheckLobby]
-    [CheckRegistered]
-    [CheckAdmin]
+    [CustomPermissions(true, false)]
     public class Lobby : Base
     {
         [Command("CreateLobby", RunMode = RunMode.Async)]

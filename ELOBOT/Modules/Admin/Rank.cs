@@ -11,7 +11,7 @@ using ELOBOT.Models;
 
 namespace ELOBOT.Modules
 {
-    [CheckAdmin]
+    [CustomPermissions(true, false)]
     public class Rank : Base
     {
         [Command("AddRank")]

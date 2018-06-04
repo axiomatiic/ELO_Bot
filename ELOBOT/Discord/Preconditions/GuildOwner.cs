@@ -18,6 +18,10 @@ namespace ELOBOT.Discord.Preconditions
         /// <returns></returns>
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
+            if (context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id)
+            {
+                return Task.FromResult(PreconditionResult.FromSuccess());
+            }
             return context.Channel is IDMChannel ?
                 Task.FromResult(PreconditionResult.FromSuccess()) :
                 Task.FromResult(context.Guild.OwnerId == context.User.Id ?

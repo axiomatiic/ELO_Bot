@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
+using ELOBOT.Discord.Preconditions;
 using ELOBOT.Handlers;
 using ELOBOT.Models;
 

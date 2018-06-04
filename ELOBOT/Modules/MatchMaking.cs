@@ -11,7 +11,7 @@ using Raven.Client.Documents.Linq.Indexing;
 
 namespace ELOBOT.Modules
 {
-
+    [CustomPermissions(false, false)]
     [CheckLobby]
     [CheckRegistered]
     public class MatchMaking : Base
@@ -28,6 +28,11 @@ namespace ELOBOT.Modules
                     {
                         throw new Exception("MultiQueuing is disabled by the server Admins");
                     }
+                }
+
+                if (Context.Elo.User.Banned.Banned)
+                {
+                    throw new Exception($"You are banned from matchmaking for another {(Context.Elo.User.Banned.ExpiryTime - DateTime.UtcNow).TotalMinutes}");
                 }
 
                 if (Context.Elo.Lobby.Game.IsPickingTeams)

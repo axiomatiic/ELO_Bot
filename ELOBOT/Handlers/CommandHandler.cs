@@ -123,6 +123,21 @@ namespace ELOBOT.Handlers
                 }
             }
 
+            if (context.Elo.User != null && context.Elo.User.Banned.Banned)
+            {
+                if (context.Elo.User.Banned.ExpiryTime < DateTime.UtcNow)
+                {
+                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Description = $"{context.User.Mention} Your ban has expired.\n" +
+                                      $"Reason: {context.Elo.User.Banned.Reason}\n" +
+                                      $"Moderator: {context.Socket.Guild.GetUser(context.Elo.User.Banned.Moderator)?.Mention ?? $"[{context.Elo.User.Banned.Moderator}]"}",
+                        Color = Color.DarkOrange
+                    }.Build());
+                    context.Elo.User.Banned = new GuildModel.User.Ban();
+                    context.Server.Save();
+                }
+            }
 
             var result = await _commands.ExecuteAsync(context, argPos, Provider);
             if (result.IsSuccess)
