@@ -89,6 +89,7 @@ namespace ELOBOT.Models
                 Cancelled
             }
 
+            public DateTime Time { get; set; } = DateTime.UtcNow;
 
             public _Result Result = _Result.Undecided;
             public ulong LobbyID { get; set; }
@@ -169,6 +170,8 @@ namespace ELOBOT.Models
                 public bool RemoveOnAfk { get; set; } = true;
                 public bool BlockMultiQueuing { get; set; } = true;
                 public bool AllowNegativeScore { get; set; } = false;
+                public TimeSpan ReQueueDelay { get; set; } = TimeSpan.Zero;
+                public bool useKD { get; set; } = false;
             }
 
             public class _CommandAccess

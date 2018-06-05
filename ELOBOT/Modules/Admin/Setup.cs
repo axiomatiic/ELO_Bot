@@ -95,5 +95,27 @@ namespace ELOBOT.Modules
 
             await SimpleEmbedAsync($"Succes Default Loss Modifier is now: -{input}");
         }
+
+        [Command("ReQueueDelay")]
+        public async Task RequeueDelay(int input = 0)
+        {
+            if (input < 0)
+            {
+                throw new Exception("Delay must be greater than or equal to zero");
+            }
+            Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(input);
+            Context.Server.Save();
+
+            await SimpleEmbedAsync($"Success, users must wait {input} minutes before re-queuing");
+        }
+
+        [Command("ShowKD")]
+        public async Task ShowKD()
+        {
+            Context.Server.Settings.GameSettings.useKD = !Context.Server.Settings.GameSettings.useKD;
+            Context.Server.Save();
+
+            await SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.useKD}");
+        }
     }
 }

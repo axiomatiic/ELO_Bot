@@ -69,6 +69,8 @@ namespace ELOBOT.Discord.Extensions
                                                           $"Losses: {user.Stats.Losses}");
 
                     }
+
+                    user.Stats.GamesPlayed++;
                 }
 
                 sgame.Result = Result;

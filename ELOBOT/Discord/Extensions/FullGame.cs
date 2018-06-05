@@ -154,7 +154,8 @@ namespace ELOBOT.Discord.Extensions
                         LobbyID = Context.Elo.Lobby.ChannelID,
                         Result = GuildModel.GameResult._Result.Undecided,
                         Team1 = Context.Elo.Lobby.Game.Team1.Players,
-                        Team2 = Context.Elo.Lobby.Game.Team2.Players
+                        Team2 = Context.Elo.Lobby.Game.Team2.Players,
+                        Time = DateTime.UtcNow
                     });
                     await AnnounceGame(Context);
                     Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();

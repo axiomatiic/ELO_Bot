@@ -40,6 +40,15 @@ namespace ELOBOT.Modules
                     throw new Exception("Currently Picking teams. Please wait until this is completed");
                 }
 
+                var previousgame = Context.Server.Results.Where(x => x.LobbyID == Context.Elo.Lobby.ChannelID && x.Team1.Contains(Context.User.Id) || x.Team2.Contains(Context.User.Id)).OrderByDescending(x => x.Time).FirstOrDefault();
+                if (previousgame != null && previousgame.Time + Context.Server.Settings.GameSettings.ReQueueDelay > DateTime.UtcNow)
+                {
+                    if (previousgame.Result == GuildModel.GameResult._Result.Undecided)
+                    {
+                        throw new Exception($"You must wait another {((previousgame.Time + Context.Server.Settings.GameSettings.ReQueueDelay) - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
+                    }
+                }
+
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
                 Context.Server.Save();
                 await SimpleEmbedAsync($"Success, Added to queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
@@ -180,7 +189,8 @@ namespace ELOBOT.Modules
                     LobbyID = Context.Elo.Lobby.ChannelID,
                     Result = GuildModel.GameResult._Result.Undecided,
                     Team1 = Context.Elo.Lobby.Game.Team1.Players,
-                    Team2 = Context.Elo.Lobby.Game.Team2.Players
+                    Team2 = Context.Elo.Lobby.Game.Team2.Players,
+                    Time = DateTime.UtcNow
                 });
                 await Discord.Extensions.FullGame.AnnounceGame(Context);
                 Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
