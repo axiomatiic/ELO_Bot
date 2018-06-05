@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -21,16 +19,16 @@ namespace ELOBOT.Discord.Preconditions
             DefaultAdminModule = DefaultAdmin;
             DefaultModModule = DefaultModerator;
         }
-        
+
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (context.Channel is IDMChannel) return Task.FromResult(PreconditionResult.FromError("This is a guild command"));
-            
+
             if (context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id || context.Guild.OwnerId == context.User.Id)
             {
                 return Task.FromResult(PreconditionResult.FromSuccess());
             }
-            
+
             var server = DatabaseHandler.GetGuild(context.Guild.Id);
             if (server.Users.All(u => u.UserID != context.User.Id))
             {
@@ -77,7 +75,6 @@ namespace ELOBOT.Discord.Preconditions
                     }
 
                     return Task.FromResult(PreconditionResult.FromError($"This command is {(DefaultModModule ? "Moderator+" : "")}{(DefaultAdminModule ? "Admin+" : "")} Only"));
-
                 }
             }
             else
@@ -94,8 +91,8 @@ namespace ELOBOT.Discord.Preconditions
                 }
 
                 return Task.FromResult(PreconditionResult.FromError($"This command is {(DefaultModModule ? "Moderator+ " : "")}{(DefaultAdminModule ? "Admin+" : "")} Only"));
-
             }
+
             return Task.FromResult(PreconditionResult.FromSuccess());
         }
     }

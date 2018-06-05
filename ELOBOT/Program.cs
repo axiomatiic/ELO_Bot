@@ -29,7 +29,7 @@ namespace ELOBOT
                 Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "setup/"));
 
             ConfigModel.CheckExistence();
-            
+
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Info
@@ -47,7 +47,7 @@ namespace ELOBOT
                 Log.Information("Discord Token Rejected\n" +
                                 $"{e}", LogSeverity.Critical);
             }
-            
+
             var serviceProvider = new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton(new DocumentStore
@@ -67,10 +67,9 @@ namespace ELOBOT
                 }.Initialize()))
                 .AddSingleton(new InteractiveService(Client))
                 .AddSingleton(new CommandService(
-                    new CommandServiceConfig { CaseSensitiveCommands = false, ThrowOnError = false })).BuildServiceProvider();
+                    new CommandServiceConfig {CaseSensitiveCommands = false, ThrowOnError = false})).BuildServiceProvider();
 
 
-            
             _handler = new CommandHandler(serviceProvider);
             await _handler.ConfigureAsync();
 

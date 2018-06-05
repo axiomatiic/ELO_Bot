@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
+using ELOBOT.Discord.Extensions;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
-using Raven.Client.Documents.Linq.Indexing;
 
 namespace ELOBOT.Modules
 {
-    [CustomPermissions(false, false)]
+    [CustomPermissions]
     [CheckLobby]
     [CheckRegistered]
     public class MatchMaking : Base
@@ -45,7 +45,7 @@ namespace ELOBOT.Modules
                 {
                     if (previousgame.Result == GuildModel.GameResult._Result.Undecided)
                     {
-                        throw new Exception($"You must wait another {((previousgame.Time + Context.Server.Settings.GameSettings.ReQueueDelay) - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
+                        throw new Exception($"You must wait another {(previousgame.Time + Context.Server.Settings.GameSettings.ReQueueDelay - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
                     }
                 }
 
@@ -55,10 +55,11 @@ namespace ELOBOT.Modules
                 if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
                 {
                     //Game is ready to be played
-                    await Discord.Extensions.FullGame.FullQueue(Context);
+                    await FullGame.FullQueue(Context);
                 }
             }
         }
+
         [Command("Leave")]
         [Alias("l")]
         public async Task LeaveLobby()
@@ -69,6 +70,7 @@ namespace ELOBOT.Modules
                 {
                     throw new Exception("Currently Picking teams. Please wait until this is completed");
                 }
+
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(Context.User.Id);
                 await SimpleEmbedAsync($"Success, Removed from queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
                 Context.Server.Save();
@@ -142,8 +144,6 @@ namespace ELOBOT.Modules
                 TeamNext = 2;
                 Context.Elo.Lobby.Game.Team2.TurnToPick = true;
                 Context.Elo.Lobby.Game.Team1.TurnToPick = false;
-
-                
             }
             else
             {
@@ -157,6 +157,7 @@ namespace ELOBOT.Modules
                 Context.Elo.Lobby.Game.Team2.TurnToPick = false;
                 Context.Elo.Lobby.Game.Team1.TurnToPick = true;
             }
+
             Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(User.Id);
 
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 1)
@@ -179,9 +180,9 @@ namespace ELOBOT.Modules
             {
                 Context.Elo.Lobby.GamesPlayed++;
                 await ReplyAsync("**Game has Started**\n" +
-                                $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
-                                $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
-                                $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
+                                 $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                 $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Socket.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                 $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
                 Context.Server.Results.Add(new GuildModel.GameResult
                 {
                     Comments = new List<GuildModel.GameResult.Comment>(),
@@ -192,7 +193,7 @@ namespace ELOBOT.Modules
                     Team2 = Context.Elo.Lobby.Game.Team2.Players,
                     Time = DateTime.UtcNow
                 });
-                await Discord.Extensions.FullGame.AnnounceGame(Context);
+                await FullGame.AnnounceGame(Context);
                 Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
             }
             else
@@ -206,6 +207,7 @@ namespace ELOBOT.Modules
                                        "**Player Pool**\n" +
                                        $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Socket.Guild.GetUser(x)?.Mention))}");
             }
+
             Context.Server.Save();
         }
     }

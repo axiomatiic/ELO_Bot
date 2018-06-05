@@ -8,6 +8,7 @@ namespace ELOBOT.Handlers
     public static class LogHandler
     {
         private static readonly Logger log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+
         public static string Left(this string s, int len)
         {
             return s.Length == len ? s : (s.Length < len ? s.PadRight(len) : s.Substring(0, len));

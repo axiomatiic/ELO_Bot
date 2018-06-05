@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Discord;
 using ELOBOT.Handlers;
@@ -160,6 +159,7 @@ namespace ELOBOT.Discord.Extensions
                     await AnnounceGame(Context);
                     Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
                 }
+
                 Context.Server.Save();
             }
         }
@@ -218,6 +218,5 @@ namespace ELOBOT.Discord.Extensions
                 }
             }
         }
-
     }
 }

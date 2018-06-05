@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -10,7 +8,7 @@ using ELOBOT.Discord.Extensions;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
 
-namespace ELOBOT.Modules
+namespace ELOBOT.Modules.Moderator
 {
     [CustomPermissions(true, true)]
     public class Results : Base
@@ -45,7 +43,6 @@ namespace ELOBOT.Modules
             {
                 await GameManagement.GameResult(Context, game, Result);
             }
-            
         }
     }
 }

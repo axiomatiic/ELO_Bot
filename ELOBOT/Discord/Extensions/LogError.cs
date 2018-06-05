@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using ELOBOT.Handlers;
@@ -31,10 +29,9 @@ namespace ELOBOT.Discord.Extensions
             }
             catch (Exception e)
             {
-                LogHandler.LogMessage($"Fatal Error Logging Issue:\n" +
+                LogHandler.LogMessage("Fatal Error Logging Issue:\n" +
                                       $"{e}", LogSeverity.Error);
             }
-
         }
     }
 }

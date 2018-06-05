@@ -62,6 +62,7 @@ namespace ELOBOT.Models
             public CaptainSort CaptainSortMode { get; set; } = CaptainSort.MostPoints;
 
             public CurrentGame Game { get; set; } = new CurrentGame();
+
             public class CurrentGame
             {
                 public bool IsPickingTeams { get; set; } = false;
@@ -89,9 +90,9 @@ namespace ELOBOT.Models
                 Cancelled
             }
 
-            public DateTime Time { get; set; } = DateTime.UtcNow;
-
             public _Result Result = _Result.Undecided;
+
+            public DateTime Time { get; set; } = DateTime.UtcNow;
             public ulong LobbyID { get; set; }
             public int Gamenumber { get; set; }
             public List<ulong> Team1 { get; set; } = new List<ulong>();
@@ -180,10 +181,6 @@ namespace ELOBOT.Models
 
                 public class CustomPermission
                 {
-                    public bool IsCommand { get; set; } = true;
-                    public string Name { get; set; }
-                    public accesstype Setting { get; set; } = accesstype.Admin;
-
                     public enum accesstype
                     {
                         ServerOwner,
@@ -191,6 +188,10 @@ namespace ELOBOT.Models
                         Moderator,
                         Registered
                     }
+
+                    public bool IsCommand { get; set; } = true;
+                    public string Name { get; set; }
+                    public accesstype Setting { get; set; } = accesstype.Admin;
                 }
             }
 

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using ELOBOT.Handlers;
 using ELOBOT.Models;
 
 namespace ELOBOT.Discord.Extensions
@@ -15,7 +11,7 @@ namespace ELOBOT.Discord.Extensions
         {
             try
             {
-                var maxrankpoints = Context.Server.Ranks.Where(x => x.Threshhold <= (User?.Stats.Points ?? Context.Elo.User.Stats.Points))?.Max(x => x.Threshhold);
+                var maxrankpoints = Context.Server.Ranks.Where(x => x.Threshhold <= (User?.Stats.Points ?? Context.Elo.User.Stats.Points)).Max(x => x.Threshhold);
                 var maxrank = Context.Server.Ranks.FirstOrDefault(x => x.Threshhold == maxrankpoints);
                 return maxrank;
             }

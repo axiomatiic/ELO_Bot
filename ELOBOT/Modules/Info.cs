@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
@@ -10,7 +9,6 @@ using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Context.Interactive.Paginator;
 using ELOBOT.Discord.Extensions;
 using ELOBOT.Discord.Preconditions;
-using ELOBOT.Handlers;
 using ELOBOT.Models;
 
 namespace ELOBOT.Modules
@@ -18,18 +16,31 @@ namespace ELOBOT.Modules
     [RequireContext(ContextType.Guild)]
     public class Info : Base
     {
+        public enum LeaderboardSortMode
+        {
+            Win,
+            Loss,
+            Points,
+            GamesPlayed,
+            Kills,
+            Deaths,
+            Draws
+        }
+
         [Command("Register")]
         public async Task Register()
         {
             await Register(Context.User.Username);
         }
+
         [Command("Register")]
-        public async Task Register([Remainder]string name)
+        public async Task Register([Remainder] string name)
         {
             if (name.Length > 20)
             {
                 throw new Exception("Name nust be equal to or less than 20 characters long");
             }
+
             var NewUser = new GuildModel.User
             {
                 UserID = Context.User.Id,
@@ -46,6 +57,7 @@ namespace ELOBOT.Modules
                 NewUser.Banned = Context.Elo.User.Banned;
                 Context.Server.Users.Remove(Context.Elo.User);
             }
+
             Context.Server.Users.Add(NewUser);
 
             if (NewUser.Stats.Points == Context.Server.Settings.Registration.RegistrationBonus && Context.Server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID != null)
@@ -90,17 +102,6 @@ namespace ELOBOT.Modules
             }
         }
 
-        public enum LeaderboardSortMode
-        {
-            Win,
-            Loss,
-            Points,
-            GamesPlayed,
-            Kills,
-            Deaths,
-            Draws
-        }
-
         [Command("Invite")]
         public async Task Invite()
         {
@@ -123,20 +124,20 @@ namespace ELOBOT.Modules
             }
 
             var embed = new EmbedBuilder
-            {
-                Color = Color.Blue,
-                Title = $"{ELOUser.Username} Profile"
-            }
+                {
+                    Color = Color.Blue,
+                    Title = $"{ELOUser.Username} Profile"
+                }
                 .AddField("Points", ELOUser.Stats.Points.ToString())
                 .AddField("Rank", Context.Socket.Guild.GetRole(UserManagement.MaxRole(Context, ELOUser).RoleID)?.Mention ?? "N/A")
                 .AddField("Games", "**Games Played**\n" +
-                                    $"{ELOUser.Stats.GamesPlayed}\n" +
-                                    "**Wins**\n" +
-                                    $"{ELOUser.Stats.Wins}\n" +
-                                    "**Losses**\n" +
-                                    $"{ELOUser.Stats.Losses}\n" +
-                                    "**WLR**\n" +
-                                    $"{(double)ELOUser.Stats.Wins / ELOUser.Stats.Losses}");
+                                   $"{ELOUser.Stats.GamesPlayed}\n" +
+                                   "**Wins**\n" +
+                                   $"{ELOUser.Stats.Wins}\n" +
+                                   "**Losses**\n" +
+                                   $"{ELOUser.Stats.Losses}\n" +
+                                   "**WLR**\n" +
+                                   $"{(double) ELOUser.Stats.Wins / ELOUser.Stats.Losses}");
 
             if (Context.Server.Settings.GameSettings.useKD)
             {
@@ -144,7 +145,7 @@ namespace ELOBOT.Modules
                                       $"{ELOUser.Stats.Kills}\n" +
                                       "**Deaths**\n" +
                                       $"{ELOUser.Stats.Deaths}\n" +
-                                      $"**KDR**\n" +
+                                      "**KDR**\n" +
                                       $"{(double) ELOUser.Stats.Kills / ELOUser.Stats.Deaths}");
             }
 
@@ -169,59 +170,58 @@ namespace ELOBOT.Modules
         [Command("Leaderboard")]
         public async Task Leaderboard(LeaderboardSortMode Mode = LeaderboardSortMode.Points)
         {
-
             var rgx = new Regex("[^a-zA-Z0-9 -#]");
             List<string> userstrings;
             switch (Mode)
             {
                 case LeaderboardSortMode.Points:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Points).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Points: {x.Stats.Points}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Points).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Points: {x.Stats.Points}`").ToList();
+                    break;
+                }
                 case LeaderboardSortMode.Win:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Wins).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Wins: {x.Stats.Wins}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Wins).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Wins: {x.Stats.Wins}`").ToList();
+                    break;
+                }
                 case LeaderboardSortMode.Loss:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Losses).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Losses: {x.Stats.Losses}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Losses).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Losses: {x.Stats.Losses}`").ToList();
+                    break;
+                }
                 case LeaderboardSortMode.Kills:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Kills).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Kills: {x.Stats.Kills}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Kills).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Kills: {x.Stats.Kills}`").ToList();
+                    break;
+                }
                 case LeaderboardSortMode.Deaths:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Deaths).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Deaths: {x.Stats.Deaths}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Deaths).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Deaths: {x.Stats.Deaths}`").ToList();
+                    break;
+                }
                 case LeaderboardSortMode.Draws:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Draws).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Draws: {x.Stats.Draws}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Draws).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Draws: {x.Stats.Draws}`").ToList();
+                    break;
+                }
                 case LeaderboardSortMode.GamesPlayed:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.GamesPlayed).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Games: {x.Stats.GamesPlayed}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.GamesPlayed).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Games: {x.Stats.GamesPlayed}`").ToList();
+                    break;
+                }
                 default:
-                    {
-                        var users = Context.Server.Users.OrderByDescending(x => x.Stats.Points).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
-                        userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Points: {x.Stats.Points}`").ToList();
-                        break;
-                    }
+                {
+                    var users = Context.Server.Users.OrderByDescending(x => x.Stats.Points).Where(x => Context.Socket.Guild.GetUser(x.UserID) != null).ToList();
+                    userstrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Points: {x.Stats.Points}`").ToList();
+                    break;
+                }
             }
 
             var pages = ListManagement.splitList(userstrings, 20).Select(x => new PaginatedMessage.Page

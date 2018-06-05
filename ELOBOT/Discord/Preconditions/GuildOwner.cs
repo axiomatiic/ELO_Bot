@@ -22,11 +22,8 @@ namespace ELOBOT.Discord.Preconditions
             {
                 return Task.FromResult(PreconditionResult.FromSuccess());
             }
-            return context.Channel is IDMChannel ?
-                Task.FromResult(PreconditionResult.FromSuccess()) :
-                Task.FromResult(context.Guild.OwnerId == context.User.Id ?
-                    PreconditionResult.FromSuccess() :
-                    PreconditionResult.FromError("User is not the Guild Owner!"));
+
+            return context.Channel is IDMChannel ? Task.FromResult(PreconditionResult.FromSuccess()) : Task.FromResult(context.Guild.OwnerId == context.User.Id ? PreconditionResult.FromSuccess() : PreconditionResult.FromError("User is not the Guild Owner!"));
         }
     }
 }

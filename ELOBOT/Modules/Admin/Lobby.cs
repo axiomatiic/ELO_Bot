@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Preconditions;
-using ELOBOT.Handlers;
 using ELOBOT.Models;
-using Raven.Client.Documents.Linq.Indexing;
 
-namespace ELOBOT.Modules
+namespace ELOBOT.Modules.Admin
 {
-    [CustomPermissions(true, false)]
+    [CustomPermissions(true)]
     public class Lobby : Base
     {
         [Command("CreateLobby", RunMode = RunMode.Async)]
@@ -41,6 +38,7 @@ namespace ELOBOT.Modules
                 {
                     throw new Exception("Playercount must be a whole integer greater than 0, aborting the Lobby Setup.");
                 }
+
                 lobby.UserLimit = PlayerCount * 2;
                 await next.DeleteAsync();
             }
@@ -49,15 +47,17 @@ namespace ELOBOT.Modules
                 throw new Exception("Please reply with only a number, aborting the Lobby Setup.");
             }
 
-           await  embed.ModifyAsync(x => x.Embed = new EmbedBuilder{Description = "Please reply with the team sorting mode you would like for this lobby:\n" +
-                                                               "`CompleteRandom` __**Completely Random Team sorting**__\n" +
-                                                               "All teams are chosen completely randomly\n\n" +
-                                                               "`Captains` __**Captains Mode**__\n" +
-                                                               "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
-                                                               "`SortByScore` __**Score Balance Mode**__\n" +
-                                                               "Players will be automatically selected and teams will be balanced based on player scores",
-               Color = Color.Blue
-           }.Build());
+            await embed.ModifyAsync(x => x.Embed = new EmbedBuilder
+            {
+                Description = "Please reply with the team sorting mode you would like for this lobby:\n" +
+                              "`CompleteRandom` __**Completely Random Team sorting**__\n" +
+                              "All teams are chosen completely randomly\n\n" +
+                              "`Captains` __**Captains Mode**__\n" +
+                              "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
+                              "`SortByScore` __**Score Balance Mode**__\n" +
+                              "Players will be automatically selected and teams will be balanced based on player scores",
+                Color = Color.Blue
+            }.Build());
 
 
             next = await NextMessageAsync(true, true, TimeSpan.FromMinutes(1));
@@ -86,7 +86,7 @@ namespace ELOBOT.Modules
             {
                 Title = "Success!",
                 Description = "Lobby Created.\n" +
-                              $"Players Per team: {lobby.UserLimit/2}\n" +
+                              $"Players Per team: {lobby.UserLimit / 2}\n" +
                               $"Total Players: {lobby.UserLimit}\n" +
                               $"Sort Mode: {lobby.PickMode.ToString()}\n" +
                               $"Channel: {Context.Channel.Name}\n" +
@@ -130,12 +130,12 @@ namespace ELOBOT.Modules
         public async Task LobbySortMode()
         {
             await SimpleEmbedAsync($"Please use command `{Context.Prefix}LobbySortMode <mode>` with the selection mode you would like for this lobby:\n" +
-                              "`CompleteRandom` __**Completely Random Team sorting**__\n" +
-                              "All teams are chosen completely randomly\n\n" +
-                              "`Captains` __**Captains Mode**__\n" +
-                              "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
-                              "`SortByScore` __**Score Balance Mode**__\n" +
-                              "Players will be automatically selected and teams will be balanced based on player scores");
+                                   "`CompleteRandom` __**Completely Random Team sorting**__\n" +
+                                   "All teams are chosen completely randomly\n\n" +
+                                   "`Captains` __**Captains Mode**__\n" +
+                                   "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
+                                   "`SortByScore` __**Score Balance Mode**__\n" +
+                                   "Players will be automatically selected and teams will be balanced based on player scores");
         }
 
         [CheckLobby]
@@ -186,6 +186,7 @@ namespace ELOBOT.Modules
                 throw new Exception("Map has already been added to the lobby");
             }
         }
+
         [CheckLobby]
         [Command("DelMap")]
         public async Task DelMap([Remainder] string mapname)
@@ -202,6 +203,7 @@ namespace ELOBOT.Modules
                 throw new Exception("Map is not in lobby");
             }
         }
+
         [CheckLobby]
         [Command("AddMaps")]
         public async Task AddMaps([Remainder] string maplist)
@@ -219,6 +221,7 @@ namespace ELOBOT.Modules
                 throw new Exception("One of the provided maps is already in the lobby");
             }
         }
+
         [CheckLobby]
         [Command("ClearMaps")]
         public async Task ClearMaps()

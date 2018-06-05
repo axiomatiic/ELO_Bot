@@ -12,7 +12,7 @@ using ELOBOT.Models;
 
 namespace ELOBOT.Modules
 {
-    [CustomPermissions(false, false)]
+    [CustomPermissions]
     public class GameInfo : Base
     {
         [CheckLobby]
@@ -29,6 +29,7 @@ namespace ELOBOT.Modules
             {
                 throw new Exception("Comment cannot be empty");
             }
+
             game.Comments.Add(new GuildModel.GameResult.Comment
             {
                 ID = game.Comments.Count,
@@ -67,6 +68,7 @@ namespace ELOBOT.Modules
                     description = string.Join("\n", section)
                 });
             }
+
             var pager = new PaginatedMessage
             {
                 Pages = pages,
@@ -83,6 +85,7 @@ namespace ELOBOT.Modules
         {
             await ShowGame(Context.Channel as ITextChannel, GameNumber);
         }
+
         [Command("ShowGame")]
         public async Task ShowGame(ITextChannel Channel, int GameNumber)
         {
@@ -136,9 +139,10 @@ namespace ELOBOT.Modules
                     pages.Add(new PaginatedMessage.Page
                     {
                         dynamictitle = $"{Channel.Name} Game #{GameNumber} Comments",
-                        Fields = fields,
+                        Fields = fields
                     });
                 }
+
                 var pager = new PaginatedMessage
                 {
                     Pages = pages,
@@ -147,7 +151,6 @@ namespace ELOBOT.Modules
                 };
 
                 await PagedReplyAsync(pager);
-
             }
             else
             {
@@ -161,8 +164,6 @@ namespace ELOBOT.Modules
                 embed.AddField("Team 2", string.Join(", ", game.Team2.Select(x => Context.Socket.Guild.GetUser(x)?.Mention ?? $"{Context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username ?? $"[{x}]"}")));
                 await ReplyAsync(embed);
             }
-
-
         }
     }
 }

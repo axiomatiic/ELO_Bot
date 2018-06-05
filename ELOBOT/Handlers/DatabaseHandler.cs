@@ -8,7 +8,6 @@ using Discord;
 using Discord.WebSocket;
 using ELOBOT.Models;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Linq.Indexing;
 using Raven.Client.Documents.Operations.Backups;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
@@ -61,7 +60,7 @@ namespace ELOBOT.Handlers
                 //Backup every 6 hours
                 FullBackupFrequency = "0 */6 * * *",
                 IncrementalBackupFrequency = "0 2 * * *",
-                LocalSettings = new LocalSettings { FolderPath = Path.Combine(AppContext.BaseDirectory, "setup/backups/") }
+                LocalSettings = new LocalSettings {FolderPath = Path.Combine(AppContext.BaseDirectory, "setup/backups/")}
             };
             var Record = Store.Maintenance.ForDatabase(CommandHandler.Config.DBName).Server.Send(new GetDatabaseRecordOperation(CommandHandler.Config.DBName));
             var backupop = Record.PeriodicBackups.FirstOrDefault(x => x.Name == "Backup");
@@ -72,9 +71,10 @@ namespace ELOBOT.Handlers
             else
             {
                 //In the case that we already have a backup operation setup, ensure that we update the backup location accordingly
-                backupop.LocalSettings = new LocalSettings { FolderPath = Path.Combine(AppContext.BaseDirectory, "setup/backups/") };
+                backupop.LocalSettings = new LocalSettings {FolderPath = Path.Combine(AppContext.BaseDirectory, "setup/backups/")};
                 await Store.Maintenance.ForDatabase(CommandHandler.Config.DBName).SendAsync(new UpdatePeriodicBackupOperation(backupop));
             }
+
             LogHandler.LogMessage("Backup Operation Set.");
             if (!dbcreated)
             {

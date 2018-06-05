@@ -18,6 +18,7 @@ namespace ELOBOT.Modules.Admin
         {
             _service = service;
         }
+
         [Command("AddPermissionOverride")]
         public async Task AddoverRide(string commandname, GuildModel.GuildSettings._CommandAccess.CustomPermission.accesstype Type)
         {
@@ -40,12 +41,13 @@ namespace ELOBOT.Modules.Admin
                 {
                     Name = matched.Name,
                     Setting = Type
-                });              
+                });
             }
 
             await SimpleEmbedAsync($"Custom Permission override {(modified ? "Modfied" : "Added")}, users with {Type.ToString()} and above permissions, will be able to access it");
             Context.Server.Save();
         }
+
         [Command("RemovePermissionOverride")]
         public async Task RemoveOverrride(string commandname)
         {
@@ -54,10 +56,12 @@ namespace ELOBOT.Modules.Admin
             {
                 throw new Exception("Unknown override name");
             }
+
             Context.Server.Settings.CustomPermissions.CustomisedPermission.Remove(matched);
             await SimpleEmbedAsync("Custom Permission override removed.");
             Context.Server.Save();
         }
+
         [Command("OverrideList")]
         public async Task List()
         {
@@ -72,10 +76,12 @@ namespace ELOBOT.Modules.Admin
             {
                 throw new Exception("Role is already a mod role");
             }
+
             Context.Server.Settings.Moderation.ModRoles.Add(ModRole.Id);
             Context.Server.Save();
             await SimpleEmbedAsync("Mod Role Added.");
         }
+
         [Command("AddAdmin")]
         public async Task AdminAdd(IRole AdminRole)
         {
@@ -83,10 +89,12 @@ namespace ELOBOT.Modules.Admin
             {
                 throw new Exception("Role is already a Admin role");
             }
+
             Context.Server.Settings.Moderation.AdminRoles.Add(AdminRole.Id);
             Context.Server.Save();
             await SimpleEmbedAsync("Admin Role Added.");
         }
+
         [Command("ModeratorList")]
         public async Task ModeratorList()
         {
@@ -94,6 +102,7 @@ namespace ELOBOT.Modules.Admin
             await SimpleEmbedAsync("Moderator Roles\n" +
                                    $"{string.Join("\n", role)}");
         }
+
         [Command("AdminList")]
         public async Task AdminList()
         {
@@ -101,6 +110,7 @@ namespace ELOBOT.Modules.Admin
             await SimpleEmbedAsync("Admin Roles\n" +
                                    $"{string.Join("\n", role)}");
         }
+
         [Command("DelMod")]
         public async Task ModDel(IRole ModRole)
         {
@@ -109,13 +119,13 @@ namespace ELOBOT.Modules.Admin
                 Context.Server.Settings.Moderation.ModRoles.Remove(ModRole.Id);
                 Context.Server.Save();
                 await SimpleEmbedAsync("Moderator Role Removed.");
-                
             }
             else
             {
                 throw new Exception("Role is not a Moderator role");
             }
         }
+
         [Command("Deladmin")]
         public async Task AdminDel(IRole AdminRole)
         {
@@ -124,7 +134,6 @@ namespace ELOBOT.Modules.Admin
                 Context.Server.Settings.Moderation.AdminRoles.Remove(AdminRole.Id);
                 Context.Server.Save();
                 await SimpleEmbedAsync("Admin Role Added.");
-
             }
             else
             {

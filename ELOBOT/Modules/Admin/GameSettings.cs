@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Preconditions;
 
-namespace ELOBOT.Modules
+namespace ELOBOT.Modules.Admin
 {
-    [CustomPermissions(true, false)]
+    [CustomPermissions(true)]
     public class GameSettings : Base
     {
         [Command("AllowNegativeScore")]
@@ -18,6 +15,7 @@ namespace ELOBOT.Modules
             Context.Server.Save();
             await SimpleEmbedAsync($"Negative Scores Allowed: {Context.Server.Settings.GameSettings.AllowNegativeScore}");
         }
+
         [Command("BlockMultiQueuing")]
         public async Task BlockMultiQueuing()
         {
@@ -25,6 +23,7 @@ namespace ELOBOT.Modules
             Context.Server.Save();
             await SimpleEmbedAsync($"Multi Queuing Disabled: {Context.Server.Settings.GameSettings.BlockMultiQueuing}");
         }
+
         [Command("RemoveOnAFK")]
         public async Task RemoveOnAfk()
         {
@@ -40,6 +39,7 @@ namespace ELOBOT.Modules
             Context.Server.Save();
             await SimpleEmbedAsync($"Game announcements will now be posted to {Context.Channel.Name}");
         }
+
         [Command("DMAnnouncements")]
         public async Task DMAnnouncements()
         {

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using ELOBOT.Handlers;
 using ELOBOT.Models;
 
 namespace ELOBOT.Discord.Extensions
@@ -29,6 +26,7 @@ namespace ELOBOT.Discord.Extensions
 
                     return;
                 }
+
                 var UserList = new List<ulong>();
                 UserList.AddRange(Game.Team1);
                 UserList.AddRange(Game.Team2);
@@ -47,11 +45,10 @@ namespace ELOBOT.Discord.Extensions
                     var MaxRank = UserManagement.MaxRole(Context, user);
                     if (Result == GuildModel.GameResult._Result.Team1 && Game.Team1.Contains(user.UserID) || Result == GuildModel.GameResult._Result.Team2 && Game.Team2.Contains(user.UserID))
                     {
-
                         user.Stats.Points += MaxRank.WinModifier;
                         user.Stats.Wins++;
                         WinEmbed.AddField($"{user.Username} (+{MaxRank.WinModifier})", $"Points: {user.Stats.Points}\n" +
-                                                          $"Wins: {user.Stats.Wins}");
+                                                                                       $"Wins: {user.Stats.Wins}");
                     }
                     else
                     {
@@ -63,11 +60,11 @@ namespace ELOBOT.Discord.Extensions
                                 user.Stats.Points = 0;
                             }
                         }
+
                         user.Stats.Losses++;
 
                         LoseEmbed.AddField($"{user.Username} (-{MaxRank.LossModifier})", $"Points: {user.Stats.Points}\n" +
-                                                          $"Losses: {user.Stats.Losses}");
-
+                                                                                         $"Losses: {user.Stats.Losses}");
                     }
 
                     user.Stats.GamesPlayed++;

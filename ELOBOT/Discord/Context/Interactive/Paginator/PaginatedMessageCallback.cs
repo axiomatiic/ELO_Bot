@@ -181,7 +181,7 @@ namespace ELOBOT.Discord.Context.Interactive.Paginator
                     if (options.DisplayInformationIcon) await message.AddReactionAsync(options.Info);
                 }
             });
-            
+
             if (Timeout.HasValue)
             {
                 displaytimeout(message, Message);

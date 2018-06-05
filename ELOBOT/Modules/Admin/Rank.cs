@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -9,9 +7,9 @@ using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
 
-namespace ELOBOT.Modules
+namespace ELOBOT.Modules.Admin
 {
-    [CustomPermissions(true, false)]
+    [CustomPermissions(true)]
     public class Rank : Base
     {
         [Command("AddRank")]
@@ -19,6 +17,7 @@ namespace ELOBOT.Modules
         {
             await AddRank(Role, Points);
         }
+
         [Command("AddRank")]
         public async Task AddRank(IRole Role, int Points)
         {
@@ -45,6 +44,7 @@ namespace ELOBOT.Modules
         {
             await DelRank(Role.Id);
         }
+
         [Command("DelRank")]
         public async Task DelRank(ulong RoleID)
         {
@@ -74,7 +74,7 @@ namespace ELOBOT.Modules
 
             if (Points <= 0)
             {
-                throw  new Exception("Point modifier must be a positive integer");
+                throw new Exception("Point modifier must be a positive integer");
             }
 
             var Rank = Context.Server.Ranks.FirstOrDefault(x => x.RoleID == Role.Id);
@@ -82,6 +82,7 @@ namespace ELOBOT.Modules
             Context.Server.Save();
             await SimpleEmbedAsync("Rank Win Modifier Updated.");
         }
+
         [Command("LossModifier")]
         public async Task LossModifier(IRole Role, int Points)
         {

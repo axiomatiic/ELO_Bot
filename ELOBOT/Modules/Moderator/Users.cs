@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -18,7 +17,7 @@ namespace ELOBOT.Modules.Moderator
     public class Users : Base
     {
         [Command("Ban")]
-        public async Task Ban(IUser user, int hours,[Remainder]string reason = null)
+        public async Task Ban(IUser user, int hours, [Remainder] string reason = null)
         {
             var userprofile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (userprofile == null)
@@ -30,13 +29,14 @@ namespace ELOBOT.Modules.Moderator
             {
                 throw new Exception("Reason cannot be empty or greater than 200 characters long");
             }
+
             userprofile.Banned.Banned = true;
             userprofile.Banned.Moderator = Context.User.Id;
             userprofile.Banned.Reason = reason;
             userprofile.Banned.ExpiryTime = DateTime.UtcNow + TimeSpan.FromHours(hours);
             Context.Server.Save();
             await SimpleEmbedAsync($"{user.Mention} has been banned for {hours} hours by {Context.User.Mention}\n" +
-                                   $"**Reason**\n" +
+                                   "**Reason**\n" +
                                    $"{reason}");
         }
 
@@ -55,7 +55,7 @@ namespace ELOBOT.Modules.Moderator
             }
 
             await SimpleEmbedAsync($"{user.Mention} has been unbanned manually.\n" +
-                                   $"**Ban Info**\n" +
+                                   "**Ban Info**\n" +
                                    $"Reason: {userprofile.Banned.Reason}\n" +
                                    $"Moderator: {Context.Socket.Guild.GetUser(userprofile.Banned.Moderator)?.Mention ?? $"[{userprofile.Banned.Moderator}]"}\n" +
                                    $"Expiry: {userprofile.Banned.ExpiryTime.ToString(CultureInfo.InvariantCulture)}");
@@ -71,6 +71,7 @@ namespace ELOBOT.Modules.Moderator
             {
                 user.Banned = new GuildModel.User.Ban();
             }
+
             Context.Server.Save();
             await SimpleEmbedAsync($"Success, {modified} users have been unbanned.");
         }
@@ -97,14 +98,15 @@ namespace ELOBOT.Modules.Moderator
                     Fields = fields
                 });
             }
+
             foreach (var users in ListManagement.splitList(Context.Server.Users.Where(x => x.Banned.ExpiryTime < DateTime.UtcNow && x.Banned.Banned).ToList(), 5))
             {
                 var userstrings = users.Select(b => new EmbedFieldBuilder
                 {
                     Name = "Expired Bans",
                     Value = $"User: {b.Username} [{b.UserID}]\n" +
-                           $"Mod: {Context.Socket.Guild.GetUser(b.Banned.Moderator)?.Mention ?? $"{b.Banned.Moderator}"}\n" +
-                           $"Reason: {b.Banned.Reason}"
+                            $"Mod: {Context.Socket.Guild.GetUser(b.Banned.Moderator)?.Mention ?? $"{b.Banned.Moderator}"}\n" +
+                            $"Reason: {b.Banned.Reason}"
                 }).ToList();
 
                 pages.Add(new PaginatedMessage.Page
@@ -117,6 +119,7 @@ namespace ELOBOT.Modules.Moderator
                     Context.Server.Users.FirstOrDefault(x => x.UserID == user.UserID).Banned = new GuildModel.User.Ban();
                 }
             }
+
             Context.Server.Save();
             var pager = new PaginatedMessage
             {

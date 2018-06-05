@@ -2,7 +2,6 @@
 using System.IO;
 using ELOBOT.Handlers;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace ELOBOT.Models
 {

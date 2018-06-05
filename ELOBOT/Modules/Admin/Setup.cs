@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -9,9 +7,9 @@ using ELOBOT.Discord.Context;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
 
-namespace ELOBOT.Modules
+namespace ELOBOT.Modules.Admin
 {
-    [CustomPermissions(true, false)]
+    [CustomPermissions(true)]
     public class Setup : Base
     {
         [Command("RegisterRole")]
@@ -21,6 +19,7 @@ namespace ELOBOT.Modules
             {
                 Context.Server.Ranks = Context.Server.Ranks.Where(x => !x.IsDefault).ToList();
             }
+
             Context.Server.Ranks.Add(new GuildModel.Rank
             {
                 IsDefault = true,
@@ -34,7 +33,7 @@ namespace ELOBOT.Modules
         }
 
         [Command("RegisterMessage")]
-        public async Task RegisterMessage([Remainder]string Message)
+        public async Task RegisterMessage([Remainder] string Message)
         {
             Context.Server.Settings.Registration.Message = Message;
             await SimpleEmbedAsync("Success Registration message has been set.");
@@ -48,26 +47,30 @@ namespace ELOBOT.Modules
             {
                 throw new Exception("Register Points must be a positive integer");
             }
+
             Context.Server.Settings.Registration.RegistrationBonus = Points;
             await SimpleEmbedAsync($"Success, users who register for a first time will be given {Points}");
             Context.Server.Save();
         }
 
         [Command("NickNameFormat")]
-        public async Task NickFormat([Remainder]string Message)
+        public async Task NickFormat([Remainder] string Message)
         {
             if (Message.Length > 32)
             {
                 throw new Exception("Format must be shorter than 32 characters");
             }
-            else if (Message.Length - "{username}".Length > 12)
+
+            if (Message.Length - "{username}".Length > 12)
             {
                 throw new Exception("Format Length too long, please shorten it.");
             }
+
             Context.Server.Settings.Registration.NameFormat = Message.ToLower();
             await SimpleEmbedAsync("Success Nickname Format has been set.");
             Context.Server.Save();
         }
+
         [Command("NickNameFormat")]
         public async Task NickFormat()
         {
@@ -82,11 +85,13 @@ namespace ELOBOT.Modules
             {
                 throw new Exception("Win Modifier must be a positive integer");
             }
+
             Context.Server.Settings.Registration.DefaultWinModifier = input;
             Context.Server.Save();
 
             await SimpleEmbedAsync($"Succes Default Win Modifier is now: +{input}");
         }
+
         [Command("DefaultLossModifier")]
         public async Task LossModifier(int input = 5)
         {
@@ -103,6 +108,7 @@ namespace ELOBOT.Modules
             {
                 throw new Exception("Delay must be greater than or equal to zero");
             }
+
             Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(input);
             Context.Server.Save();
 

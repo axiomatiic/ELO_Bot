@@ -178,12 +178,12 @@ namespace ELOBOT.Discord.Context
         public IDocumentSession Session { get; }
         public SocketContext Socket { get; }
         public string Prefix { get; }
+        public ServerContext Elo { get; set; }
         public IUser User { get; }
         public IGuild Guild { get; }
         public IDiscordClient Client { get; }
         public IUserMessage Message { get; }
         public IMessageChannel Channel { get; }
-        public ServerContext Elo { get; set; }
 
         public class ServerContext
         {

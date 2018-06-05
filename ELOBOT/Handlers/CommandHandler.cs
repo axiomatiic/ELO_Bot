@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -15,7 +14,6 @@ namespace ELOBOT.Handlers
     public class CommandHandler
     {
         public static int Commands;
-        public static ConfigModel Config { get; set; } = ConfigModel.Load();
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         public IServiceProvider Provider;
@@ -33,9 +31,10 @@ namespace ELOBOT.Handlers
             _client.GuildMemberUpdated += _client_GuildMemberUpdated;
         }
 
+        public static ConfigModel Config { get; set; } = ConfigModel.Load();
+
         private async Task _client_GuildMemberUpdated(SocketGuildUser UserBefore, SocketGuildUser UserAfter)
         {
-
             if (UserBefore.Status != UserAfter.Status)
             {
                 if (UserAfter.Status != UserStatus.Online)
@@ -59,6 +58,7 @@ namespace ELOBOT.Handlers
                                     await lchannel.SendMessageAsync($"{UserAfter.Mention} has gone {UserAfter.Status.ToString()} and has been automatically removed from the queue");
                                 }
                             }
+
                             guildobject.Save();
                         }
                     }
@@ -68,7 +68,6 @@ namespace ELOBOT.Handlers
 
         private static Task _client_JoinedGuild(SocketGuild Guild)
         {
-
             if (DatabaseHandler.GetGuild(Guild.Id) == null)
             {
                 DatabaseHandler.InsertGuildObject(new GuildModel
@@ -76,6 +75,7 @@ namespace ELOBOT.Handlers
                     ID = Guild.Id
                 });
             }
+
             return Task.CompletedTask;
         }
 
@@ -157,12 +157,12 @@ namespace ELOBOT.Handlers
                     var cmd = srch.Commands.FirstOrDefault();
 
                     ErrorMessage = $"**Command Name:** `{cmd.Command.Name}`\n" +
-                           $"**Summary:** `{cmd.Command?.Summary ?? "N/A"}`\n" +
-                           $"**Remarks:** `{cmd.Command?.Remarks ?? "N/A"}`\n" +
-                           $"**Aliases:** {(cmd.Command.Aliases.Any() ? string.Join(" ", cmd.Command.Aliases.Select(x => $"`{x}`")) : "N/A")}\n" +
-                           $"**Parameters:** {(cmd.Command.Parameters.Any() ? string.Join(" ", cmd.Command.Parameters.Select(x => x.IsOptional ? $" `<(Optional){x.Name}>` " : $" `<{x.Name}>` ")) : "N/A")}\n" +
-                           "**Error Reason**\n" +
-                           $"{result.ErrorReason}";
+                                   $"**Summary:** `{cmd.Command?.Summary ?? "N/A"}`\n" +
+                                   $"**Remarks:** `{cmd.Command?.Remarks ?? "N/A"}`\n" +
+                                   $"**Aliases:** {(cmd.Command.Aliases.Any() ? string.Join(" ", cmd.Command.Aliases.Select(x => $"`{x}`")) : "N/A")}\n" +
+                                   $"**Parameters:** {(cmd.Command.Parameters.Any() ? string.Join(" ", cmd.Command.Parameters.Select(x => x.IsOptional ? $" `<(Optional){x.Name}>` " : $" `<{x.Name}>` ")) : "N/A")}\n" +
+                                   "**Error Reason**\n" +
+                                   $"{result.ErrorReason}";
                 }
 
                 try
