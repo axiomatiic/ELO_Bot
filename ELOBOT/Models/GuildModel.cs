@@ -51,11 +51,23 @@ namespace ELOBOT.Models
                 RandomTop4HighestWinLoss
             }
 
+            public enum HostSelector
+            {
+                MostWins,
+                MostPoints,
+                HighestWinLoss,
+                Random,
+                None
+            }
+
             public ulong ChannelID { get; set; }
             public int UserLimit { get; set; } = 10;
             public string Description { get; set; } = null;
             public int GamesPlayed { get; set; } = 0;
 
+            public HostSelector HostSelectionMode { get; set; } = HostSelector.MostPoints;
+
+            public bool RandomMapAnnounce { get; set; } = true;
             public List<string> Maps { get; set; } = new List<string>();
 
             public _PickMode PickMode { get; set; } = _PickMode.CompleteRandom;
@@ -97,6 +109,15 @@ namespace ELOBOT.Models
             public int Gamenumber { get; set; }
             public List<ulong> Team1 { get; set; } = new List<ulong>();
             public List<ulong> Team2 { get; set; } = new List<ulong>();
+
+            public ResultProposal Proposal { get; set; } = new ResultProposal();
+            public class ResultProposal
+            {
+                public ulong P1 { get; set; } = 0;
+                public _Result R1 { get; set; } = _Result.Undecided;
+                public ulong P2 { get; set; } = 0;
+                public _Result R2 { get; set; } = _Result.Undecided;
+            }
 
             public List<Comment> Comments { get; set; } = new List<Comment>();
 

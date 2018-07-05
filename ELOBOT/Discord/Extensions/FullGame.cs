@@ -180,6 +180,25 @@ namespace ELOBOT.Discord.Extensions
                                                 $"Game: {Context.Elo.Lobby.GamesPlayed}\n")
                         .AddField("Team 1", T1Mentions)
                         .AddField("Team 2", T2Mentions);
+
+                    if (Context.Elo.Lobby.RandomMapAnnounce)
+                    {
+                        var field = AnnouncementManager.MapField(Context.Elo.Lobby);
+                        if (field != null)
+                        {
+                            embed.AddField(field);
+                        }
+                    }
+
+                    if (Context.Elo.Lobby.HostSelectionMode != GuildModel.Lobby.HostSelector.None)
+                    {
+                        var field = AnnouncementManager.HostField(Context, Context.Elo.Lobby);
+                        if (field != null)
+                        {
+                            embed.AddField(field);
+                        }
+                    }
+
                     await AnnouncementsChannel.SendMessageAsync(mentions, false, embed.Build());
                 }
                 catch (Exception e)
@@ -196,8 +215,25 @@ namespace ELOBOT.Discord.Extensions
                     }.AddField("Game Info", $"Lobby: {Context.Channel.Name}\n" +
                                             $"Game: {Context.Elo.Lobby.GamesPlayed}\n")
                     .AddField("Team 1", $"{string.Join(" ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}")
-                    .AddField("Team 2", $"{string.Join(" ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}")
-                    .Build();
+                    .AddField("Team 2", $"{string.Join(" ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}");
+                if (Context.Elo.Lobby.RandomMapAnnounce)
+                {
+                    var field = AnnouncementManager.MapField(Context.Elo.Lobby);
+                    if (field != null)
+                    {
+                        DMEmbed.AddField(field);
+                    }
+                }
+
+                if (Context.Elo.Lobby.HostSelectionMode != GuildModel.Lobby.HostSelector.None)
+                {
+                    var field = AnnouncementManager.HostField(Context, Context.Elo.Lobby);
+                    if (field != null)
+                    {
+                        DMEmbed.AddField(field);
+                    }
+                }
+
                 var AllPlayers = new List<ulong>();
                 AllPlayers.AddRange(Context.Elo.Lobby.Game.Team1.Players);
                 AllPlayers.AddRange(Context.Elo.Lobby.Game.Team2.Players);
@@ -208,7 +244,7 @@ namespace ELOBOT.Discord.Extensions
                         var u = Context.Socket.Client.GetUser(user);
                         if (u != null)
                         {
-                            await u.SendMessageAsync("", false, DMEmbed);
+                            await u.SendMessageAsync("", false, DMEmbed.Build());
                         }
                     }
                     catch (Exception e)

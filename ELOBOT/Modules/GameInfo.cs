@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
-using ELOBOT.Discord.Context.Interactive.Paginator;
 using ELOBOT.Discord.Extensions;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
@@ -65,7 +65,7 @@ namespace ELOBOT.Modules
             {
                 pages.Add(new PaginatedMessage.Page
                 {
-                    description = string.Join("\n", section)
+                    Description = string.Join("\n", section)
                 });
             }
 
@@ -76,7 +76,12 @@ namespace ELOBOT.Modules
                 Color = Color.Blue
             };
 
-            await PagedReplyAsync(pager);
+            await PagedReplyAsync(pager, new ReactionList
+            {
+                Forward = true,
+                Backward = true,
+                Trash = true
+            });
         }
 
         [CheckLobby]
@@ -138,7 +143,7 @@ namespace ELOBOT.Modules
 
                     pages.Add(new PaginatedMessage.Page
                     {
-                        dynamictitle = $"{Channel.Name} Game #{GameNumber} Comments",
+                        Title = $"{Channel.Name} Game #{GameNumber} Comments",
                         Fields = fields
                     });
                 }
@@ -150,7 +155,12 @@ namespace ELOBOT.Modules
                     Color = Color.Blue
                 };
 
-                await PagedReplyAsync(pager);
+                await PagedReplyAsync(pager, new ReactionList
+                {
+                    Forward = true,
+                    Backward = true,
+                    Trash = true
+                });
             }
             else
             {

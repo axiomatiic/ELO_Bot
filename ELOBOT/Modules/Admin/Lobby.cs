@@ -171,6 +171,37 @@ namespace ELOBOT.Modules.Admin
         }
 
         [CheckLobby]
+        [Command("RandomMap")]
+        public async Task RandomMap()
+        {
+            Context.Elo.Lobby.RandomMapAnnounce = !Context.Elo.Lobby.RandomMapAnnounce;
+            Context.Server.Save();
+
+            await SimpleEmbedAsync($"Random Map on game announcements: {Context.Elo.Lobby.RandomMapAnnounce}");
+        }
+
+        [CheckLobby]
+        [Command("HostSelectionMode")]
+        public async Task HostMode(GuildModel.Lobby.HostSelector Mode)
+        {
+            Context.Elo.Lobby.HostSelectionMode = Mode;
+            Context.Server.Save();
+
+            await SimpleEmbedAsync($"Host selection mode = {Mode.ToString()}");
+        }
+
+        [CheckLobby]
+        [Command("HostSelectionMode")]
+        public async Task HostMode()
+        { 
+            await SimpleEmbedAsync($"Please use command `{Context.Prefix}HostSelectionMode <mode>` with the host selection mode you would like for this lobby:\n" +
+                                   "`MostWins` __**Selects Player with Most Wins**__\n" +
+                                   "`MostPoints` __**Selects Player with Most Points**__\n" +
+                                   "`HighestWinLoss` __**Selects the Player with the highest Win/Loss Ratio**__\n" +
+                                   "`Random` __**Random**__\n");
+        }
+
+        [CheckLobby]
         [Command("AddMap")]
         public async Task AddMap([Remainder] string mapname)
         {

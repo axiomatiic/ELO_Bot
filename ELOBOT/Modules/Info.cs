@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
-using ELOBOT.Discord.Context.Interactive.Paginator;
 using ELOBOT.Discord.Extensions;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
@@ -226,7 +226,7 @@ namespace ELOBOT.Modules
 
             var pages = ListManagement.splitList(userstrings, 20).Select(x => new PaginatedMessage.Page
             {
-                description = string.Join("\n", x)
+                Description = string.Join("\n", x)
             });
             var Pager = new PaginatedMessage
             {
@@ -234,7 +234,12 @@ namespace ELOBOT.Modules
                 Pages = pages,
                 Color = Color.Blue
             };
-            await PagedReplyAsync(Pager);
+            await PagedReplyAsync(Pager, new ReactionList
+            {
+                Forward = true,
+                Backward = true,
+                Trash = true
+            });
         }
     }
 }

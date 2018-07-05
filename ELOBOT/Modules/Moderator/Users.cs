@@ -4,9 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using ELOBOT.Discord.Context;
-using ELOBOT.Discord.Context.Interactive.Paginator;
 using ELOBOT.Discord.Extensions;
 using ELOBOT.Discord.Preconditions;
 using ELOBOT.Models;
@@ -126,7 +126,11 @@ namespace ELOBOT.Modules.Moderator
                 Pages = pages,
                 Title = "Bans"
             };
-            await PagedReplyAsync(pager);
+            await PagedReplyAsync(pager, new ReactionList
+            {
+                Forward = true,
+                Backward = true, Trash = true
+            });
         }
     }
 }

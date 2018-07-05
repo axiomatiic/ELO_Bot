@@ -81,7 +81,12 @@ namespace ELOBOT.Modules
         [Alias("q")]
         public async Task Queue()
         {
-            var QueuedPlayers = Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(p => Context.Socket.Guild.GetUser(p));
+            var QueuedPlayers = Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(p => Context.Socket.Guild.GetUser(p)).Where(x => x != null).ToList();
+            if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count() != QueuedPlayers.Count())
+            {
+                Context.Elo.Lobby.Game.QueuedPlayerIDs = QueuedPlayers.Select(x => x.Id).ToList();
+                Context.Server.Save();
+            }
             if (!Context.Elo.Lobby.Game.IsPickingTeams)
             {
                 await SimpleEmbedAsync($"**Player List [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]**\n" +
@@ -209,6 +214,89 @@ namespace ELOBOT.Modules
             }
 
             Context.Server.Save();
+        }
+
+        [Command("GameResult")]
+        public async Task GameResult(ITextChannel Channel, int GameNumber, GuildModel.GameResult._Result Result)
+        {
+            var selectedgame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == Channel.Id && x.Gamenumber == GameNumber);
+            if (selectedgame == null)
+            {
+                throw new Exception("Game Unavailable. Incorrect Data.");
+            }
+
+            if (selectedgame.Result != GuildModel.GameResult._Result.Undecided)
+            {
+                throw new Exception("Game must be undecided to submut player chosen result.");
+            }
+
+            if (Result == GuildModel.GameResult._Result.Undecided)
+            {
+                throw new Exception("You cannot set the result to undecided");
+            }
+
+            if (selectedgame.Team1.Contains(Context.User.Id))
+            {
+                if (selectedgame.Proposal.P1 == 0)
+                {
+                    selectedgame.Proposal.P1 = Context.User.Id;
+                    selectedgame.Proposal.R1 = Result;
+                }
+                else
+                {
+                    throw new Exception("A player has already submitted a result from this team.");
+                }
+            }
+            else if (selectedgame.Team2.Contains(Context.User.Id))
+            {
+                if (selectedgame.Proposal.P2 == 0)
+                {
+                    selectedgame.Proposal.P2 = Context.User.Id;
+                    selectedgame.Proposal.R2 = Result;
+                }
+                else
+                {
+                    throw new Exception("A player has already submitted a result from this team.");
+                }
+            }
+            else
+            {
+                throw new Exception("You must be on either team to submit the game result.");
+            }
+
+            Context.Server.Save();
+            await SimpleEmbedAsync("Result Proposal\n" +
+                                   $"Team1 Sumbmission: {selectedgame.Proposal.R1.ToString()} Player: {Context.Socket.Guild.GetUser(selectedgame.Proposal.P1)?.Mention ?? "N/A"}\n" +
+                                   $"Team2 Sumbmission: {selectedgame.Proposal.R2.ToString()} Player: {Context.Socket.Guild.GetUser(selectedgame.Proposal.P2)?.Mention ?? "N/A"}");
+
+            if (selectedgame.Proposal.R1 == GuildModel.GameResult._Result.Undecided || selectedgame.Proposal.R2 == GuildModel.GameResult._Result.Undecided)
+            {
+                return;
+            }
+
+            if (selectedgame.Proposal.R1 == selectedgame.Proposal.R2)
+            {
+                await GameManagement.GameResult(Context, selectedgame, Result);
+            }
+            else
+            {
+                throw new Exception("Mismatched Game Result Proposals. Please allow an admin to manually submit a result");
+            }
+        }
+
+        [CheckLobby]
+        [Command("ClearGResult")]
+        public async Task ClearGRes(ITextChannel Channel, int GameNumber, GuildModel.GameResult._Result Result)
+        {
+            var selectedgame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == Channel.Id && x.Gamenumber == GameNumber);
+            if (selectedgame == null)
+            {
+                throw new Exception("Game Unavailable. Incorrect Data.");
+            }
+
+            selectedgame.Proposal = new GuildModel.GameResult.ResultProposal();
+            Context.Server.Save();
+            await ReplyAsync("Reset.");
         }
     }
 }
