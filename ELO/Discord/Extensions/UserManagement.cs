@@ -15,6 +15,8 @@
             {
                 var maxRankPoints = context.Server.Ranks.Where(x => x.Threshold <= (user?.Stats.Points ?? context.Elo.User.Stats.Points)).Max(x => x.Threshold);
                 var maxRank = context.Server.Ranks.FirstOrDefault(x => x.Threshold == maxRankPoints);
+                maxRank.LossModifier = maxRank.LossModifier == 0 ? context.Server.Settings.Registration.DefaultLossModifier : maxRank.LossModifier;
+                maxRank.WinModifier = maxRank.WinModifier == 0 ? context.Server.Settings.Registration.DefaultWinModifier : maxRank.WinModifier;
                 return maxRank;
             }
             catch

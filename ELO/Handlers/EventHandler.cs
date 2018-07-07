@@ -52,7 +52,10 @@
             Provider = service;
             CommandService = commandService;
             CancellationToken = new CancellationTokenSource();
+            PrefixOverride = Provider.GetRequiredService<DatabaseHandler>().Settings.PrefixOverride;
         }
+
+        public string PrefixOverride { get; set; }
 
         /// <summary>
         /// Gets the config.
@@ -257,11 +260,22 @@
 
             var argPos = 0;
 
-            // Filter out all messages that don't start with our Bot Prefix, bot mention or server specific prefix.
-            if (!(Message.HasStringPrefix(Config.Prefix, ref argPos) || Message.HasMentionPrefix(context.Client.CurrentUser, ref argPos) || Message.HasStringPrefix(context.Server.Settings.CustomPrefix, ref argPos)))
+            if (PrefixOverride != null)
             {
-                return;
+                if (!Message.HasStringPrefix(PrefixOverride, ref argPos))
+                {
+                    return;
+                }
             }
+            else
+            {
+                // Filter out all messages that don't start with our Bot Prefix, bot mention or server specific prefix.
+                if (!(Message.HasStringPrefix(Config.Prefix, ref argPos) || Message.HasMentionPrefix(context.Client.CurrentUser, ref argPos) || Message.HasStringPrefix(context.Server.Settings.CustomPrefix, ref argPos)))
+                {
+                    return;
+                }                
+            }
+
 
             if (context.Elo.User != null)
             {

@@ -129,7 +129,7 @@
                     throw new Exception("No Commands available with your current permission level.");
                 }
 
-                var info = passingCommands.Select(x => $"{Context.Prefix}{x.Aliases.FirstOrDefault()} {string.Join(" ", x.Parameters.Select(ParameterInformation))}").ToList();
+                var info = passingCommands.Select(x => $"`{Context.Prefix}{x.Aliases.FirstOrDefault()} {string.Join(" ", x.Parameters.Select(ParameterInformation))}` {(x.Summary != null ? $"S: {x.Summary}" : "")} {(x.Remarks != null ? $"R: {x.Remarks}" : "")}").ToList();
                 var splitFields = SplitList(info, 10)
                     .Select(x => new EmbedFieldBuilder
                     {

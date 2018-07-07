@@ -57,7 +57,7 @@
         /// <summary>
         /// Gets or sets the settings.
         /// </summary>
-        public DatabaseObject Settings { get; set; }
+        public DatabaseObject Settings { get; set; } = JsonConvert.DeserializeObject<DatabaseObject>(File.ReadAllText("setup/DBConfig.json"));
 
         /// <summary>
         /// Pings a web url

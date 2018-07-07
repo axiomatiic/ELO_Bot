@@ -99,12 +99,14 @@
             foreach (var socketGuildUser in userList)
             {
                 var eloUser = context.Server.Users.FirstOrDefault(x => x.UserID == socketGuildUser.Id);
-                var maxRank = UserManagement.MaxRole(context, eloUser);
-                eloUser.Stats.Wins++;
-                eloUser.Stats.GamesPlayed++;
-                eloUser.Stats.Points += maxRank.WinModifier;
-                winEmbed.AddField($"{eloUser.Username} (+{maxRank.WinModifier})", $"Points: {eloUser.Stats.Points}\n" +
-                                                                               $"Wins: {eloUser.Stats.Wins}");
+                if (eloUser != null)
+                {
+                    var maxRank = UserManagement.MaxRole(context, eloUser);
+                    eloUser.Stats.Wins++;
+                    eloUser.Stats.GamesPlayed++;
+                    eloUser.Stats.Points += maxRank.WinModifier;
+                    winEmbed.AddField($"{eloUser.Username} (+{maxRank.WinModifier})", $"Points: {eloUser.Stats.Points}\n" + $"Wins: {eloUser.Stats.Wins}");
+                }
             }
             context.Server.Save();
             return context.Channel.SendMessageAsync("", false, winEmbed.Build());
@@ -122,7 +124,7 @@
                 if (eloUser != null)
                 {
                     var maxRank = UserManagement.MaxRole(context, eloUser);
-                    eloUser.Stats.Wins++;
+                    eloUser.Stats.Losses++;
                     eloUser.Stats.GamesPlayed++;
                     eloUser.Stats.Points -= maxRank.LossModifier;
                     if (eloUser.Stats.Points < 0)
