@@ -135,6 +135,7 @@
 
         [CustomPermissions]
         [Command("GetUser")]
+        [Alias("userstats", "statsuser", "stats")]
         [Summary("Get information about the specified user profile")]
         public Task GetUserAsync(IUser user = null)
         {
@@ -180,6 +181,7 @@
 
         [CustomPermissions]
         [Command("LeaderBoardSort")]
+        [Alias("sortleaderboard", "sortlb")]
         [Summary("Displays leaderboard sort modes")]
         public Task LSortAsync()
         {
