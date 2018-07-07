@@ -131,7 +131,7 @@
                               $"**Host Pick mode**: {Context.Elo.Lobby.HostSelectionMode}\n" +
                               "Description:\n" +
                               $"{Context.Elo.Lobby.Description}",
-            Color = Color.Blue
+                Color = Color.Blue
             }.Build());
         }
 
@@ -139,49 +139,72 @@
         [Summary("Replace a user in the current queue")]
         public async Task ReplaceAsync(SocketGuildUser user)
         {
-            if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
+            var g = Context.Elo.Lobby.Game;
+            if (g.QueuedPlayerIDs.Contains(Context.User.Id) || g.Team1.Players.Contains(Context.User.Id) || g.Team2.Players.Contains(Context.User.Id) || g.Team2.Captain == Context.User.Id || g.Team1.Captain == Context.User.Id)
             {
                 throw new Exception("You cannot replace a user if you are in the queue yourself");
             }
 
-            if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(user.Id))
+            if (!g.QueuedPlayerIDs.Contains(user.Id) && !g.Team1.Players.Contains(user.Id) && !g.Team2.Players.Contains(user.Id))
             {
                 throw new Exception("User is not queued.");
             }
 
+            if (g.Team1.Captain == user.Id || g.Team2.Captain == user.Id)
+            {
+                throw new Exception("You cannot replace a team captain");
+            }
 
-                if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
-                {
-                    if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team1.Players.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team2.Players.Contains(Context.User.Id)))
-                    {
-                        throw new Exception("MultiQueuing is disabled by the server Admins");
-                    }
-                }
 
-                if (Context.Elo.User.Banned.Banned)
+            if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
+            {
+                if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team1.Players.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team2.Players.Contains(Context.User.Id)))
                 {
-                    throw new Exception($"You are banned from matchmaking for another {(Context.Elo.User.Banned.ExpiryTime - DateTime.UtcNow).TotalMinutes}");
+                    throw new Exception("MultiQueuing is disabled by the server Admins");
                 }
+            }
 
-                var previous = Context.Server.Results.Where(x => x.LobbyID == Context.Elo.Lobby.ChannelID && (x.Team1.Contains(Context.User.Id) || x.Team2.Contains(Context.User.Id))).OrderByDescending(x => x.Time).FirstOrDefault();
-                if (previous != null && previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay > DateTime.UtcNow)
+            if (Context.Elo.User.Banned.Banned)
+            {
+                throw new Exception($"You are banned from matchmaking for another {(Context.Elo.User.Banned.ExpiryTime - DateTime.UtcNow).TotalMinutes}");
+            }
+
+            var previous = Context.Server.Results.Where(x => x.LobbyID == Context.Elo.Lobby.ChannelID && (x.Team1.Contains(Context.User.Id) || x.Team2.Contains(Context.User.Id))).OrderByDescending(x => x.Time).FirstOrDefault();
+            if (previous != null && previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay > DateTime.UtcNow)
+            {
+                if (previous.Result == GuildModel.GameResult._Result.Undecided)
                 {
-                    if (previous.Result == GuildModel.GameResult._Result.Undecided)
-                    {
-                        throw new Exception($"You must wait another {(previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
-                    }
+                    throw new Exception($"You must wait another {(previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
                 }
-            
+            }
+
+            if (g.QueuedPlayerIDs.Contains(user.Id))
+            {
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
-                Context.Server.Save();
-                await SimpleEmbedAsync($"Success, Added {Context.User.Mention} to queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
-                if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
-                {
-                    //Game is ready to be played
-                    await FullGame.FullQueueAsync(Context);
-                }
-            
+            }
+            else if (g.Team1.Players.Contains(user.Id))
+            {
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+            }
+            else if (g.Team2.Players.Contains(user.Id))
+            {
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+            }
+            else
+            {
+                throw new Exception("Unknown Player Exception!");
+            }
+
+            Context.Server.Save();
+            await SimpleEmbedAsync($"Success, {Context.User.Mention} replaced {user.Mention}");
+            if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
+            {
+                // Game is ready to be played
+                await FullGame.FullQueueAsync(Context);
+            }
         }
 
         [Command("Pick")]
