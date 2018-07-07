@@ -13,6 +13,8 @@
     using ELO.Discord.Preconditions;
     using ELO.Models;
 
+    using Raven.Client.Documents.Linq.Indexing;
+
     [CustomPermissions]
     [CheckLobby]
     [CheckRegistered]
@@ -309,6 +311,28 @@
             selectedGame.Proposal = new GuildModel.GameResult.ResultProposal();
             Context.Server.Save();
             return ReplyAsync("Reset.");
+        }
+
+        [CheckLobby]
+        [Command("Maps")]
+        [Summary("Show a list of all maps for the current lobby")]
+        public Task MapsAsync()
+        {
+            return SimpleEmbedAsync($"{string.Join("\n", Context.Elo.Lobby.Maps)}");
+        }
+
+        [CheckLobby]
+        [Command("Map")]
+        [Summary("select a random map for the lobby")]
+        public Task MapAsync()
+        {
+            if (Context.Elo.Lobby.Maps.Any())
+            {
+                var r = new Random();
+                return SimpleEmbedAsync($"{Context.Elo.Lobby.Maps.OrderByDescending(m => r.Next()).FirstOrDefault()}");
+            }
+
+            return SimpleEmbedAsync("There are no maps set in this lobby");
         }
     }
 }

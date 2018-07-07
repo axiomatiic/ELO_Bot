@@ -10,6 +10,7 @@
     using ELO.Models;
 
     using global::Discord;
+    using global::Discord.WebSocket;
 
     public class GameManagement
     {
@@ -87,6 +88,56 @@
             {
                 LogHandler.LogMessage(context, e.ToString(), LogSeverity.Error);
             }
+        }
+
+        public static Task WinAsync(List<SocketGuildUser> userList, Context context)
+        {
+            var winEmbed = new EmbedBuilder
+                               {
+                                   Color = Color.Green
+                               };
+            foreach (var socketGuildUser in userList)
+            {
+                var eloUser = context.Server.Users.FirstOrDefault(x => x.UserID == socketGuildUser.Id);
+                var maxRank = UserManagement.MaxRole(context, eloUser);
+                eloUser.Stats.Wins++;
+                eloUser.Stats.GamesPlayed++;
+                eloUser.Stats.Points += maxRank.WinModifier;
+                winEmbed.AddField($"{eloUser.Username} (+{maxRank.WinModifier})", $"Points: {eloUser.Stats.Points}\n" +
+                                                                               $"Wins: {eloUser.Stats.Wins}");
+            }
+            context.Server.Save();
+            return context.Channel.SendMessageAsync("", false, winEmbed.Build());
+        }
+
+        public static Task LoseAsync(List<SocketGuildUser> userList, Context context)
+        {
+            var loseEmbed = new EmbedBuilder
+                                {
+                                    Color = Color.Red
+                                };
+            foreach (var socketGuildUser in userList)
+            {
+                var eloUser = context.Server.Users.FirstOrDefault(x => x.UserID == socketGuildUser.Id);
+                if (eloUser != null)
+                {
+                    var maxRank = UserManagement.MaxRole(context, eloUser);
+                    eloUser.Stats.Wins++;
+                    eloUser.Stats.GamesPlayed++;
+                    eloUser.Stats.Points -= maxRank.LossModifier;
+                    if (eloUser.Stats.Points < 0)
+                    {
+                        if (!context.Server.Settings.GameSettings.AllowNegativeScore)
+                        {
+                            eloUser.Stats.Points = 0;
+                        }
+                    }
+
+                    loseEmbed.AddField($"{eloUser.Username} (-{maxRank.LossModifier})", $"Points: {eloUser.Stats.Points}\n" + $"Losses: {eloUser.Stats.Losses}");
+                }
+            }
+            context.Server.Save();
+            return context.Channel.SendMessageAsync("", false, loseEmbed.Build());
         }
     }
 }

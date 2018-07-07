@@ -12,6 +12,7 @@
     using global::Discord;
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
+    using global::Discord.WebSocket;
 
     [CustomPermissions(true, true)]
     public class Results : Base
@@ -46,6 +47,20 @@
             {
                 await GameManagement.GameResultAsync(Context, game, result);
             }
+        }
+
+        [Command("Win")]
+        [Summary("Run a win event for the specified users")]
+        public Task WinGameAsync(params SocketGuildUser[] users)
+        {
+            return GameManagement.WinAsync(users.ToList(), Context);
+        }
+        
+        [Command("Lose")]
+        [Summary("Run a Lose event for the specified users")]
+        public Task LoseGameAsync(params SocketGuildUser[] users)
+        {
+            return GameManagement.LoseAsync(users.ToList(), Context);
         }
     }
 }
