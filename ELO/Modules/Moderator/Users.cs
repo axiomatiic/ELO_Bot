@@ -19,6 +19,7 @@
     public class Users : Base
     {
         [Command("DelUser")]
+        [Summary("Deletes the specified user's profile")]
         public Task DeleteUserAsync(IUser user)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -34,6 +35,7 @@
         }
 
         [Command("Rename")]
+        [Summary("Rename the specified user")]
         public Task RenameAsync(IUser user, string nickname)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -53,6 +55,7 @@
         }
 
         [Command("Ban")]
+        [Summary("Ban the specified user for the given amount of hours")]
         public Task BanAsync(IUser user, int hours, [Remainder] string reason = null)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -77,6 +80,7 @@
         }
 
         [Command("Unban")]
+        [Summary("Unban the specified user")]
         public async Task UnBanAsync(IUser user)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -100,6 +104,7 @@
         }
 
         [Command("Unban")]
+        [Summary("Unban a user via ID")]
         public async Task UnBanAsync(ulong user)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user);
@@ -123,6 +128,7 @@
         }
 
         [Command("UnbanAll")]
+        [Summary("Unban a user via User ID")]
         public Task UnbanAllAsync()
         {
             var modified = Context.Server.Users.Count(x => x.Banned.Banned);
@@ -136,6 +142,7 @@
         }
 
         [Command("Bans")]
+        [Summary("Shows all bans")]
         public Task BansAsync()
         {
             var pages = new List<PaginatedMessage.Page>();

@@ -7,6 +7,7 @@
 
     using ELO.Discord.Context;
     using ELO.Models;
+    using ELO.Models.Parser;
 
     using global::Discord;
     using global::Discord.Addons.Interactive;
@@ -15,7 +16,16 @@
     [RequireOwner]
     public class BotOwner : Base
     {
+        [Command("Migrate", RunMode = RunMode.Async)]
+        [Summary("Migrates from the last file based config system (350) to RavenDB")]
+        public Task Migrate()
+        {
+            ConfigParser.Parse();
+            return Task.CompletedTask;
+        }
+
         [Command("CreateKeys")]
+        [Summary("Creates premium keys")]
         public Task CreateKeysAsync(int keyCount, int days)
         {
                 if (keyCount > 100)

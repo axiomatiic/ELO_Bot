@@ -15,6 +15,7 @@
     public class Setup : Base
     {
         [Command("RegisterRole")]
+        [Summary("Set the default role user's are given when registering")]
         public Task RegisterRoleAsync(IRole role)
         {
             if (Context.Server.Ranks.Any(x => x.IsDefault))
@@ -36,6 +37,7 @@
         }
 
         [Command("RegisterMessage")]
+        [Summary("Set the message that is displayed to users when registering")]
         public Task RegisterMessageAsync([Remainder] string message)
         {
             Context.Server.Settings.Registration.Message = message;
@@ -45,6 +47,7 @@
         }
 
         [Command("RegisterPoints")]
+        [Summary("Set the default points users are given when registering")]
         public Task RegisterPointsAsync(int points = 0)
         {
             if (points < 0)
@@ -59,6 +62,7 @@
         }
 
         [Command("NickNameFormat")]
+        [Summary("Set a custom user nickname format")]
         public async Task NickFormatAsync([Remainder] string message)
         {
             if (message.Length > 32)
@@ -78,6 +82,7 @@
         }
 
         [Command("NickNameFormat")]
+        [Summary("Info about setting a user's nickname format")]
         public Task NickFormatAsync()
         {
             return SimpleEmbedAsync("Set the server's nickname format. You can represent points using {score} and represent Name using {username}\n" +
@@ -85,6 +90,7 @@
         }
 
         [Command("DefaultWinModifier")]
+        [Summary("Set the default amount of points users are given when winning a match")]
         public Task WinModifierAsync(int input = 10)
         {
             if (input <= 0)
@@ -99,6 +105,7 @@
         }
 
         [Command("DefaultLossModifier")]
+        [Summary("Set the default amount of points users lose wh")]
         public Task LossModifierAsync(int input = 5)
         {
             Context.Server.Settings.Registration.DefaultLossModifier = Math.Abs(input);
@@ -108,6 +115,7 @@
         }
 
         [Command("ReQueueDelay")]
+        [Summary("Set the amount of time users must wait between games")]
         public Task ReQueueDelayAsync(int input = 0)
         {
             if (input < 0)
@@ -122,6 +130,7 @@
         }
 
         [Command("ShowKD")]
+        [Summary("Toggle the use of K/D ratio in the server")]
         public Task ShowKDAsync()
         {
             Context.Server.Settings.GameSettings.UseKd = !Context.Server.Settings.GameSettings.UseKd;

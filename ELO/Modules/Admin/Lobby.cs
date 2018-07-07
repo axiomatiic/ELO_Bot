@@ -17,6 +17,7 @@
     public class Lobby : Base
     {
         [Command("CreateLobby")]
+        [Summary("Interactive lobby creation command")]
         public Task CreateLobbyAsync()
         {
             if (Context.Elo.Lobby != null)
@@ -88,6 +89,7 @@
 
         [CheckLobby]
         [Command("RemoveLobby")]
+        [Summary("Deletes the current lobby")]
         public Task RemoveLobbyAsync()
         {
             Context.Server.Lobbies.Remove(Context.Elo.Lobby);
@@ -97,6 +99,7 @@
 
         [CheckLobby]
         [Command("ClearQueue")]
+        [Summary("Kick all users out of the current queue")]
         public Task ClearQueueAsync()
         {
             Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
@@ -106,6 +109,7 @@
 
         [CheckLobby]
         [Command("LobbyDescription")]
+        [Summary("Set the description of the current lobby")]
         public Task SetDescriptionAsync([Remainder] string description)
         {
             if (description.Length > 200)
@@ -120,6 +124,7 @@
 
         [CheckLobby]
         [Command("LobbySortMode")]
+        [Summary("Select hor players are sorted into teams")]
         public Task LobbySortModeAsync(GuildModel.Lobby._PickMode sortMode)
         {
             Context.Elo.Lobby.PickMode = sortMode;
@@ -131,6 +136,7 @@
 
         [CheckLobby]
         [Command("LobbySortMode")]
+        [Summary("Show sort modes for teams")]
         public Task LobbySortModeAsync()
         {
             return SimpleEmbedAsync($"Please use command `{Context.Prefix}LobbySortMode <mode>` with the selection mode you would like for this lobby:\n" +
@@ -144,6 +150,7 @@
 
         [CheckLobby]
         [Command("CaptainSortMode")]
+        [Summary("Select how captains are picked")]
         public Task CapSortModeAsync(GuildModel.Lobby.CaptainSort sortMode)
         {
             Context.Elo.Lobby.CaptainSortMode = sortMode;
@@ -155,6 +162,7 @@
 
         [CheckLobby]
         [Command("CaptainSortMode")]
+        [Summary("Show captain sort modes")]
         public Task CapSortModeAsync()
         {
             return SimpleEmbedAsync($"Please use command `{Context.Prefix}CapSortMode <mode>` with the captain selection mode you would like for this lobby:\n" +
@@ -176,6 +184,7 @@
 
         [CheckLobby]
         [Command("RandomMap")]
+        [Summary("toggle whether to select a random map on game announcements")]
         public Task RandomMapAsync()
         {
             Context.Elo.Lobby.RandomMapAnnounce = !Context.Elo.Lobby.RandomMapAnnounce;
@@ -186,6 +195,7 @@
 
         [CheckLobby]
         [Command("HostSelectionMode")]
+        [Summary("Select how game hosts are chosen")]
         public Task HostModeAsync(GuildModel.Lobby.HostSelector mode)
         {
             Context.Elo.Lobby.HostSelectionMode = mode;
@@ -196,6 +206,7 @@
 
         [CheckLobby]
         [Command("HostSelectionMode")]
+        [Summary("Display host selection modes")]
         public Task HostModeAsync()
         {
             return SimpleEmbedAsync($"Please use command `{Context.Prefix}HostSelectionMode <mode>` with the host selection mode you would like for this lobby:\n" +
@@ -207,6 +218,7 @@
 
         [CheckLobby]
         [Command("AddMap")]
+        [Summary("Add a map to the current lobby")]
         public async Task AddMapAsync([Remainder] string mapName)
         {
             if (!Context.Elo.Lobby.Maps.Contains(mapName))
@@ -224,6 +236,7 @@
 
         [CheckLobby]
         [Command("DelMap")]
+        [Summary("Remove a map from the current lobby")]
         public async Task DelMapAsync([Remainder] string mapName)
         {
             if (Context.Elo.Lobby.Maps.Contains(mapName))
@@ -241,6 +254,8 @@
 
         [CheckLobby]
         [Command("AddMaps")]
+        [Summary("Add multiple maps to the current lobby")]
+        [Remarks("Separate using commas")]
         public async Task AddMapsAsync([Remainder] string mapList)
         {
             var maps = mapList.Split(",");
@@ -259,6 +274,7 @@
 
         [CheckLobby]
         [Command("ClearMaps")]
+        [Summary("Remove all maps from the current lobby")]
         public Task ClearMapsAsync()
         {
             Context.Elo.Lobby.Maps = new List<string>();

@@ -17,6 +17,7 @@
     public class Results : Base
     {
         [Command("Game")]
+        [Summary("Submit a game result")]
         public async Task GameAsync(IMessageChannel lobby, int gameNumber, GuildModel.GameResult._Result result)
         {
             if (Context.Server.Lobbies.All(x => x.ChannelID != lobby.Id))

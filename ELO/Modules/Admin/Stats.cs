@@ -14,6 +14,7 @@
     public class Stats : Base
     {
         [Command("ModifyPoints")]
+        [Summary("Add or subtract points from a user")]
         public async Task ModifyPointsAsync(IUser user, int points)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -28,12 +29,14 @@
         }
 
         [Command("ModifyPoints")]
+        [Summary("Add or subtract points from a user")]
         public Task ModifyPointsAsync(int points, IUser user)
         {
             return ModifyPointsAsync(user, points);
         }
 
         [Command("SetPoints")]
+        [Summary("Set the points of a user")]
         public async Task SetPointsAsync(IUser user, int points)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -48,12 +51,14 @@
         }
 
         [Command("SetPoints")]
+        [Summary("Set the points of a user")]
         public Task SetPointsAsync(int points, IUser user)
         {
             return SetPointsAsync(user, points);
         }
 
         [Command("ModifyKills")]
+        [Summary("Add or subtract kills from a user")]
         public async Task ModifyKillsAsync(IUser user, int kills)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -68,12 +73,14 @@
         }
 
         [Command("ModifyKills")]
+        [Summary("Add or subtract kills from a user")]
         public Task ModifyKillsAsync(int kills, IUser user)
         {
             return ModifyKillsAsync(user, kills);
         }
 
         [Command("SetKills")]
+        [Summary("Set the kills of a user")]
         public async Task SetKillsAsync(IUser user, int kills)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -88,12 +95,14 @@
         }
 
         [Command("SetKills")]
+        [Summary("Set the kills of a user")]
         public Task SetKillsAsync(int kills, IUser user)
         {
             return SetKillsAsync(user, kills);
         }
 
         [Command("ModifyDeaths")]
+        [Summary("Add or subtract Deaths from a user")]
         public async Task ModifyDeathsAsync(IUser user, int deaths)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -108,12 +117,14 @@
         }
 
         [Command("ModifyDeaths")]
+        [Summary("Add or subtract Deaths from a user")]
         public Task ModifyDeathsAsync(int deaths, IUser user)
         {
             return ModifyDeathsAsync(user, deaths);
         }
 
         [Command("SetDeaths")]
+        [Summary("Set the Deaths of a user")]
         public async Task SetDeathsAsync(IUser user, int deaths)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -128,12 +139,14 @@
         }
 
         [Command("SetDeaths")]
+        [Summary("Set the Deaths of a user")]
         public Task SetDeathsAsync(int deaths, IUser user)
         {
             return SetDeathsAsync(user, deaths);
         }
 
         [Command("ModifyWins")]
+        [Summary("Add or subtract Wins from a user")]
         public async Task ModifyWinsAsync(IUser user, int wins)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -148,12 +161,14 @@
         }
 
         [Command("ModifyWins")]
+        [Summary("Add or subtract Wins from a user")]
         public Task ModifyWinsAsync(int wins, IUser user)
         {
             return ModifyWinsAsync(user, wins);
         }
 
         [Command("SetWins")]
+        [Summary("Set the Wins of a user")]
         public Task SetWinsAsync(IUser user, int wins)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -169,12 +184,14 @@
         }
 
         [Command("SetWins")]
+        [Summary("Set the Wins of a user")]
         public Task SetWinsAsync(int wins, IUser user)
         {
             return SetWinsAsync(user, wins);
         }
 
         [Command("ModifyLosses")]
+        [Summary("Add or subtract Losses from a user")]
         public Task ModifyLossesAsync(IUser user, int losses)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -190,12 +207,14 @@
         }
 
         [Command("ModifyLosses")]
+        [Summary("Add or subtract Losses from a user")]
         public Task ModifyLossesAsync(int losses, IUser user)
         {
             return ModifyLossesAsync(user, losses);
         }
 
         [Command("SetLosses")]
+        [Summary("Set the Losses of a user")]
         public Task SetLossesAsync(IUser user, int losses)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -211,6 +230,7 @@
         }
 
         [Command("SetLosses")]
+        [Summary("Set the Losses of a user")]
         public Task SetLossesAsync(int losses, IUser user)
         {
             return ModifyLossesAsync(user, losses);

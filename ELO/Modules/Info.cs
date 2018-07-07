@@ -30,6 +30,7 @@
         }
 
         [Command("Register")]
+        [Summary("Register by tagging yourself")]
         public Task RegisterAsync(IUser user)
         {
             if (user.Id == Context.User.Id)
@@ -41,12 +42,14 @@
         }
 
         [Command("Register")]
+        [Summary("Register using your username")]
         public Task RegisterAsync()
         {
             return RegisterAsync(Context.User.Username);
         }
 
         [Command("Register")]
+        [Summary("Register using a specified nickname")]
         public async Task RegisterAsync([Remainder] string name)
         {
             if (name.Length > 20)
@@ -124,6 +127,7 @@
         }
 
         [Command("Invite")]
+        [Summary("Invite the bot")]
         public Task InviteAsync()
         {
             return SimpleEmbedAsync($"You may invite the bot to your own server using the following URL: {BotInfo.GetInvite(Context)}");
@@ -131,6 +135,7 @@
 
         [CustomPermissions]
         [Command("GetUser")]
+        [Summary("Get information about the specified user profile")]
         public Task GetUserAsync(IUser user = null)
         {
             if (user == null)
@@ -175,6 +180,7 @@
 
         [CustomPermissions]
         [Command("LeaderBoardSort")]
+        [Summary("Displays leaderboard sort modes")]
         public Task LSortAsync()
         {
             return SimpleEmbedAsync("Leader board Sort Options:\n" +
@@ -189,6 +195,7 @@
 
         [CustomPermissions]
         [Command("Leaderboard")]
+        [Summary("Displays the leaderboard")]
         public Task LeaderboardAsync(LeaderboardSortMode mode = LeaderboardSortMode.Points)
         {
             var rgx = new Regex("[^a-zA-Z0-9 -#]");

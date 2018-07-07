@@ -20,6 +20,7 @@
     {
         [Command("Join")]
         [Alias("j")]
+        [Summary("Join the current lobby's queue")]
         public async Task JoinLobbyAsync()
         {
             if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
@@ -64,6 +65,7 @@
 
         [Command("Leave")]
         [Alias("l")]
+        [Summary("Leave the current lobby's queue")]
         public async Task LeaveLobbyAsync()
         {
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
@@ -81,6 +83,7 @@
 
         [Command("Queue")]
         [Alias("q")]
+        [Summary("View the current lobby's queue")]
         public async Task QueueAsync()
         {
             var queuedPlayers = Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(p => Context.Guild.GetUser(p)).Where(x => x != null).ToList();
@@ -110,6 +113,7 @@
         }
 
         [Command("Lobby")]
+        [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
             return SimpleEmbedAsync($"**{Context.Channel.Name}**\n" +
@@ -125,6 +129,8 @@
 
         [Command("Pick")]
         [Alias("p")]
+        [Summary("Pick a player for your team")]
+        [Remarks("Must pick a player that is in the queue and isn't already on a team\nYou must be the captain of a team to run this command")]
         public async Task PickUserAsync(IGuildUser pickedUser)
         {
             if (!Context.Elo.Lobby.Game.IsPickingTeams)
@@ -221,6 +227,7 @@
         }
 
         [Command("GameResult")]
+        [Summary("Vote for the result of a game")]
         public async Task GameResultAsync(ITextChannel channel, int gameNumber, GuildModel.GameResult._Result result)
         {
             var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == channel.Id && x.GameNumber == gameNumber);
@@ -290,6 +297,7 @@
 
         [CheckLobby]
         [Command("ClearProposedResult")]
+        [Summary("Clear the result of a proposal")]
         public Task ClearGResAsync(ITextChannel channel, int gameNumber)
         {
             var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == channel.Id && x.GameNumber == gameNumber);
