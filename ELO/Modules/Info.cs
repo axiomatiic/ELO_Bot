@@ -72,7 +72,7 @@
             }
             else
             {
-                if (Context.Server.Users.Count > -1 && (Context.Server.Settings.Premium.Expiry < DateTime.UtcNow || !Context.Server.Settings.Premium.IsPremium))
+                if (Context.Server.Users.Count > 20 && (Context.Server.Settings.Premium.Expiry < DateTime.UtcNow || !Context.Server.Settings.Premium.IsPremium))
                 {
                     throw new Exception($"Premium is required to register more than 20 users. {ConfigModel.Load().PurchaseLink}\n"
                                         + $"Get the server owner to purchase a key and use the command `{Context.Prefix}Premium <key>`");
