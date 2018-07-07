@@ -18,7 +18,7 @@
         /// <summary>
         /// The Log.
         /// </summary>
-        private static readonly Logger Log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+        public static Logger Log { get; set;  }= new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
         /// <summary>
         /// Ensures a string is aligned and kept to the specified length

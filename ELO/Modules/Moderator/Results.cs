@@ -37,8 +37,8 @@
                                 Description =
                                     "This game's Result has already been set to:\n"
                                     + $"{game.Result.ToString()}\n"
-                                    + "Please reply with `Continue` To Still modify the result and update scores\n"
-                                    + "Or Reply with `Cancel` to cancel this command"
+                                    + "Please react with ☑ To Still modify the result and update scores\n"
+                                    + "Or react with 🇽 to cancel this command"
                             }.Build()).WithCallback(new Emoji("☑"),
                         (c, r) => GameManagement.GameResultAsync(Context, game, result))
                         .WithCallback(new Emoji("🇽"), (c,r) => SimpleEmbedAsync("Canceled Game Result")));
