@@ -331,36 +331,29 @@
         /// </returns>
         internal async Task CmdErrorAsync(Context context, IResult result, int argPos)
         {
-            string errorMessage;
-            if (result.Error == CommandError.UnknownCommand)
+            if (context.Server.Settings.Readability.ReplyErrors)
             {
-                errorMessage = "**Command:** N/A";
-            }
-            else
-            {
-                // Search the commandservice based on the message, then respond accordingly with information about the command.
-                var search = CommandService.Search(context, argPos);
-                var cmd = search.Commands.FirstOrDefault();
-                errorMessage = $"**Command Name:** `{cmd.Command.Name}`\n" +
-                               $"**Summary:** `{cmd.Command?.Summary ?? "N/A"}`\n" +
-                               $"**Remarks:** `{cmd.Command?.Remarks ?? "N/A"}`\n" +
-                               $"**Aliases:** {(cmd.Command.Aliases.Any() ? string.Join(" ", cmd.Command.Aliases.Select(x => $"`{x}`")) : "N/A")}\n" +
-                               $"**Parameters:** {(cmd.Command.Parameters.Any() ? string.Join(" ", cmd.Command.Parameters.Select(x => x.IsOptional ? $" `<(Optional){x.Name}>` " : $" `<{x.Name}>` ")) : "N/A")}\n" +
-                               "**Error Reason**\n" +
-                               $"{result.ErrorReason}";
-            }
-
-            try
-            {
-                await context.Channel.SendMessageAsync(string.Empty, false, new EmbedBuilder
+                string errorMessage;
+                if (result.Error == CommandError.UnknownCommand)
                 {
-                    Title = "ERROR",
-                    Description = errorMessage
-                }.Build());
-            }
-            catch
-            {
-                // ignored
+                    errorMessage = "**Command:** N/A";
+                }
+                else
+                {
+                    // Search the commandservice based on the message, then respond accordingly with information about the command.
+                    var search = CommandService.Search(context, argPos);
+                    var cmd = search.Commands.FirstOrDefault();
+                    errorMessage = $"**Command Name:** `{cmd.Command.Name}`\n" + $"**Summary:** `{cmd.Command?.Summary ?? "N/A"}`\n" + $"**Remarks:** `{cmd.Command?.Remarks ?? "N/A"}`\n" + $"**Aliases:** {(cmd.Command.Aliases.Any() ? string.Join(" ", cmd.Command.Aliases.Select(x => $"`{x}`")) : "N/A")}\n" + $"**Parameters:** {(cmd.Command.Parameters.Any() ? string.Join(" ", cmd.Command.Parameters.Select(x => x.IsOptional ? $" `<(Optional){x.Name}>` " : $" `<{x.Name}>` ")) : "N/A")}\n" + "**Error Reason**\n" + $"{result.ErrorReason}";
+                }
+
+                try
+                {
+                    await context.Channel.SendMessageAsync(string.Empty, false, new EmbedBuilder { Title = "ERROR", Description = errorMessage }.Build());
+                }
+                catch
+                {
+                    // ignored
+                }
             }
 
             await LogErrorAsync(result, context);

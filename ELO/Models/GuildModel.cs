@@ -216,6 +216,13 @@
 
             public _CommandAccess CustomPermissions { get; set; } = new _CommandAccess();
 
+            public _Readability Readability { get; set; } = new _Readability();
+
+            public class _Readability
+            {
+                public bool ReplyErrors { get; set; } = true;
+            }
+
             public class _Moderation
             {
                 public List<ulong> ModRoles { get; set; } = new List<ulong>();

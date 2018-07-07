@@ -138,5 +138,15 @@
 
             return SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.UseKd}");
         }
+
+        [Command("ShowErrors")]
+        [Summary("Toggle the response of error messages in chat")]
+        public Task ToggleErrorsAsync()
+        {
+            Context.Server.Settings.Readability.ReplyErrors = !Context.Server.Settings.Readability.ReplyErrors;
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Reply with errors: {Context.Server.Settings.Readability.ReplyErrors}");
+        }
     }
 }
