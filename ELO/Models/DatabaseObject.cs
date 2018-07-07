@@ -27,6 +27,8 @@
         /// </summary>
         public string Name { get; set; } = "RavenBOT";
 
+        public string PrefixOverride { get; set; } = null;
+
         /// <summary>
         /// Gets or sets The url.
         /// </summary>

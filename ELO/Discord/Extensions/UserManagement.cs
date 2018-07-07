@@ -1,10 +1,12 @@
 ﻿namespace ELO.Discord.Extensions
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using global::Discord;
 
     using ELO.Discord.Context;
+    using ELO.Handlers;
     using ELO.Models;
 
     public class UserManagement
@@ -15,6 +17,8 @@
             {
                 var maxRankPoints = context.Server.Ranks.Where(x => x.Threshold <= (user?.Stats.Points ?? context.Elo.User.Stats.Points)).Max(x => x.Threshold);
                 var maxRank = context.Server.Ranks.FirstOrDefault(x => x.Threshold == maxRankPoints);
+                maxRank.LossModifier = maxRank.LossModifier == 0 ? context.Server.Settings.Registration.DefaultLossModifier : maxRank.LossModifier;
+                maxRank.WinModifier = maxRank.WinModifier == 0 ? context.Server.Settings.Registration.DefaultWinModifier : maxRank.WinModifier;
                 return maxRank;
             }
             catch
@@ -34,6 +38,11 @@
         {
             try
             {
+                if (user == null)
+                {
+                    user = context.Elo.User;
+                }
+
                 var maxRank = MaxRole(context, user);
 
                 var serverRole = context.Guild.GetRole(maxRank.RoleID);
@@ -41,17 +50,31 @@
                 {
                     try
                     {
-                        await (context.User as IGuildUser).AddRoleAsync(serverRole);
+                        var gUser = context.Guild.GetUser(user.UserID);
+                        if (gUser == null)
+                        {
+                            return;
+                        }
+
+                        if (gUser.Roles.Any(x => x.Id == serverRole.Id))
+                        {
+                            // Return if the user already has the role
+                            return;
+                        }
+
+                        await gUser.AddRoleAsync(serverRole);
                     }
-                    catch
+                    catch (Exception e)
                     {
                         // Role Unavailable OR user unable to receive role due to permissions
+                        LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
                 // No applicable roles
+                LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
             }
         }
 
@@ -66,11 +89,23 @@
 
             try
             {
-                await (context.User as IGuildUser).ModifyAsync(x => x.Nickname = rename);
+                var gUser = context.Guild.GetUser(user.UserID);
+                if (gUser == null)
+                {
+                    return;
+                }
+
+                if (gUser.Nickname == rename)
+                {
+                    return;
+                }
+
+                await gUser.ModifyAsync(x => x.Nickname = rename);
             }
-            catch
+            catch (Exception e)
             {
                 // Error renaming user (permissions above bot.)
+                LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
             }
         }
     }

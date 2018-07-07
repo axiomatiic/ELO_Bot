@@ -12,11 +12,13 @@
     using global::Discord;
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
+    using global::Discord.WebSocket;
 
     [CustomPermissions(true, true)]
     public class Results : Base
     {
         [Command("Game")]
+        [Summary("Submit a game result")]
         public async Task GameAsync(IMessageChannel lobby, int gameNumber, GuildModel.GameResult._Result result)
         {
             if (Context.Server.Lobbies.All(x => x.ChannelID != lobby.Id))
@@ -35,8 +37,8 @@
                                 Description =
                                     "This game's Result has already been set to:\n"
                                     + $"{game.Result.ToString()}\n"
-                                    + "Please reply with `Continue` To Still modify the result and update scores\n"
-                                    + "Or Reply with `Cancel` to cancel this command"
+                                    + "Please react with ☑ To Still modify the result and update scores\n"
+                                    + "Or react with 🇽 to cancel this command"
                             }.Build()).WithCallback(new Emoji("☑"),
                         (c, r) => GameManagement.GameResultAsync(Context, game, result))
                         .WithCallback(new Emoji("🇽"), (c,r) => SimpleEmbedAsync("Canceled Game Result")));
@@ -45,6 +47,20 @@
             {
                 await GameManagement.GameResultAsync(Context, game, result);
             }
+        }
+
+        [Command("Win")]
+        [Summary("Run a win event for the specified users")]
+        public Task WinGameAsync(params SocketGuildUser[] users)
+        {
+            return GameManagement.WinAsync(users.ToList(), Context);
+        }
+        
+        [Command("Lose")]
+        [Summary("Run a Lose event for the specified users")]
+        public Task LoseGameAsync(params SocketGuildUser[] users)
+        {
+            return GameManagement.LoseAsync(users.ToList(), Context);
         }
     }
 }

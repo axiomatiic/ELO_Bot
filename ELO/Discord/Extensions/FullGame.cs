@@ -173,53 +173,51 @@
 
         public static async Task AnnounceGameAsync(Context context)
         {
-            if (context.Guild.GetChannel(context.Server.Settings.GameSettings.AnnouncementsChannel) is IMessageChannel AnnouncementsChannel)
+            var embed = new EmbedBuilder { Title = "Game has Started", Color = Color.Blue }.AddField("Game Info", $"Lobby: {(context.Channel as ITextChannel).Mention}\n" + $"Game: {context.Elo.Lobby.GamesPlayed}\n");
+            try
             {
-                try
+                var team1Mentions = string.Join(" ", context.Elo.Lobby.Game.Team1.Players.Select(x => context.Guild.GetUser(x)?.Mention).ToList());
+                var team2Mentions = string.Join(" ", context.Elo.Lobby.Game.Team2.Players.Select(x => context.Guild.GetUser(x)?.Mention).ToList());
+                var mentions = $"{team1Mentions} {team2Mentions}";
+                embed.AddField("Team 1", team1Mentions)
+                    .AddField("Team 2", team2Mentions);
+                if (context.Elo.Lobby.RandomMapAnnounce)
                 {
-                    var team1Mentions = string.Join(" ", context.Elo.Lobby.Game.Team1.Players.Select(x => context.Guild.GetUser(x)?.Mention).ToList());
-                    var team2Mentions = string.Join(" ", context.Elo.Lobby.Game.Team2.Players.Select(x => context.Guild.GetUser(x)?.Mention).ToList());
-                    var mentions = $"{team1Mentions} {team2Mentions}";
-                    var embed = new EmbedBuilder
-                        {
-                            Title = "Game has Started"
-                        }.AddField("Game Info", $"Lobby: {(context.Channel as ITextChannel).Mention}\n" +
-                                                $"Game: {context.Elo.Lobby.GamesPlayed}\n")
-                        .AddField("Team 1", team1Mentions)
-                        .AddField("Team 2", team2Mentions);
-
-                    if (context.Elo.Lobby.RandomMapAnnounce)
+                    var field = AnnouncementManager.MapField(context.Elo.Lobby);
+                    if (field != null)
                     {
-                        var field = AnnouncementManager.MapField(context.Elo.Lobby);
-                        if (field != null)
-                        {
-                            embed.AddField(field);
-                        }
+                        embed.AddField(field);
                     }
+                }
 
-                    if (context.Elo.Lobby.HostSelectionMode != GuildModel.Lobby.HostSelector.None)
+                if (context.Elo.Lobby.HostSelectionMode != GuildModel.Lobby.HostSelector.None)
+                {
+                    var field = AnnouncementManager.HostField(context, context.Elo.Lobby);
+                    if (field != null)
                     {
-                        var field = AnnouncementManager.HostField(context, context.Elo.Lobby);
-                        if (field != null)
-                        {
-                            embed.AddField(field);
-                        }
+                        embed.AddField(field);
                     }
-
+                }
+                
+                if (context.Guild.GetChannel(context.Server.Settings.GameSettings.AnnouncementsChannel) is IMessageChannel AnnouncementsChannel)
+                {
                     await AnnouncementsChannel.SendMessageAsync(mentions, false, embed.Build());
                 }
-                catch (Exception e)
-                {
-                    LogHandler.LogMessage(context, e.ToString(), LogSeverity.Error);
-                }
+
+                await context.Channel.SendMessageAsync(mentions, false, embed.Build());
             }
+            catch (Exception e)
+            {
+                LogHandler.LogMessage(context, e.ToString(), LogSeverity.Error);
+            }
+
 
             if (context.Server.Settings.GameSettings.DMAnnouncements)
             {
                 var dmEmbed = new EmbedBuilder
-                    {
-                        Title = "Game has Started"
-                    }.AddField("Game Info", $"Lobby: {context.Channel.Name}\n" +
+                {
+                    Title = "Game has Started"
+                }.AddField("Game Info", $"Lobby: {context.Channel.Name}\n" +
                                             $"Game: {context.Elo.Lobby.GamesPlayed}\n")
                     .AddField("Team 1", $"{string.Join(" ", context.Elo.Lobby.Game.Team1.Players.Select(x => context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}")
                     .AddField("Team 2", $"{string.Join(" ", context.Elo.Lobby.Game.Team2.Players.Select(x => context.Server.Users.FirstOrDefault(u => u.UserID == x)?.Username).Where(x => x != null))}");

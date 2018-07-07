@@ -13,6 +13,10 @@
     using ELO.Discord.Preconditions;
     using ELO.Models;
 
+    using global::Discord.WebSocket;
+
+    using Raven.Client.Documents.Linq.Indexing;
+
     [CustomPermissions]
     [CheckLobby]
     [CheckRegistered]
@@ -20,6 +24,7 @@
     {
         [Command("Join")]
         [Alias("j")]
+        [Summary("Join the current lobby's queue")]
         public async Task JoinLobbyAsync()
         {
             if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
@@ -64,6 +69,7 @@
 
         [Command("Leave")]
         [Alias("l")]
+        [Summary("Leave the current lobby's queue")]
         public async Task LeaveLobbyAsync()
         {
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
@@ -80,7 +86,8 @@
         }
 
         [Command("Queue")]
-        [Alias("q")]
+        [Alias("q", "listplayers", "playerlist", "lps")]
+        [Summary("View the current lobby's queue")]
         public async Task QueueAsync()
         {
             var queuedPlayers = Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(p => Context.Guild.GetUser(p)).Where(x => x != null).ToList();
@@ -110,21 +117,100 @@
         }
 
         [Command("Lobby")]
+        [Alias("lobbyinfo", "about", "info")]
+        [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
-            return SimpleEmbedAsync($"**{Context.Channel.Name}**\n" +
-                                    $"`Players Per team:` {Context.Elo.Lobby.UserLimit / 2}\n" +
-                                    $"`Total Players:` {Context.Elo.Lobby.UserLimit}\n" +
-                                    $"`Sort Mode:` {(Context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Captains ? $"Captains => {Context.Elo.Lobby.CaptainSortMode}" : $"{Context.Elo.Lobby.PickMode}")}\n" +
-                                    $"`Game Number:` {Context.Elo.Lobby.GamesPlayed + 1}\n" +
-                                    $"`Host Pick mode:` {Context.Elo.Lobby.HostSelectionMode}\n" +
-                                    $"`Channel:` {Context.Channel.Name}\n" +
-                                    "Description:\n" +
-                                    $"{Context.Elo.Lobby.Description}");
+            return ReplyAsync(new EmbedBuilder
+            {
+                Title = $"{Context.Channel.Name} ",
+                Description = $"**Players Per team**: {Context.Elo.Lobby.UserLimit / 2}\n" +
+                              $"**Total Players**: {Context.Elo.Lobby.UserLimit}\n" +
+                              $"**Sort Mode**: {Context.Elo.Lobby.PickMode.ToString()}\n" +
+                              $"**Game Number**: {Context.Elo.Lobby.GamesPlayed + 1}\n" +
+                              $"**Host Pick mode**: {Context.Elo.Lobby.HostSelectionMode}\n" +
+                              "Description:\n" +
+                              $"{Context.Elo.Lobby.Description}",
+                Color = Color.Blue
+            }.Build());
+        }
+
+        [Command("Replace")]
+        [Summary("Replace a user in the current queue")]
+        public async Task ReplaceAsync(SocketGuildUser user)
+        {
+            var g = Context.Elo.Lobby.Game;
+            if (g.QueuedPlayerIDs.Contains(Context.User.Id) || g.Team1.Players.Contains(Context.User.Id) || g.Team2.Players.Contains(Context.User.Id) || g.Team2.Captain == Context.User.Id || g.Team1.Captain == Context.User.Id)
+            {
+                throw new Exception("You cannot replace a user if you are in the queue yourself");
+            }
+
+            if (!g.QueuedPlayerIDs.Contains(user.Id) && !g.Team1.Players.Contains(user.Id) && !g.Team2.Players.Contains(user.Id))
+            {
+                throw new Exception("User is not queued.");
+            }
+
+            if (g.Team1.Captain == user.Id || g.Team2.Captain == user.Id)
+            {
+                throw new Exception("You cannot replace a team captain");
+            }
+
+
+            if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
+            {
+                if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team1.Players.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team2.Players.Contains(Context.User.Id)))
+                {
+                    throw new Exception("MultiQueuing is disabled by the server Admins");
+                }
+            }
+
+            if (Context.Elo.User.Banned.Banned)
+            {
+                throw new Exception($"You are banned from matchmaking for another {(Context.Elo.User.Banned.ExpiryTime - DateTime.UtcNow).TotalMinutes}");
+            }
+
+            var previous = Context.Server.Results.Where(x => x.LobbyID == Context.Elo.Lobby.ChannelID && (x.Team1.Contains(Context.User.Id) || x.Team2.Contains(Context.User.Id))).OrderByDescending(x => x.Time).FirstOrDefault();
+            if (previous != null && previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay > DateTime.UtcNow)
+            {
+                if (previous.Result == GuildModel.GameResult._Result.Undecided)
+                {
+                    throw new Exception($"You must wait another {(previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
+                }
+            }
+
+            if (g.QueuedPlayerIDs.Contains(user.Id))
+            {
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+            }
+            else if (g.Team1.Players.Contains(user.Id))
+            {
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+            }
+            else if (g.Team2.Players.Contains(user.Id))
+            {
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+            }
+            else
+            {
+                throw new Exception("Unknown Player Exception!");
+            }
+
+            Context.Server.Save();
+            await SimpleEmbedAsync($"Success, {Context.User.Mention} replaced {user.Mention}");
+            if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
+            {
+                // Game is ready to be played
+                await FullGame.FullQueueAsync(Context);
+            }
         }
 
         [Command("Pick")]
         [Alias("p")]
+        [Summary("Pick a player for your team")]
+        [Remarks("Must pick a player that is in the queue and isn't already on a team\nYou must be the captain of a team to run this command")]
         public async Task PickUserAsync(IGuildUser pickedUser)
         {
             if (!Context.Elo.Lobby.Game.IsPickingTeams)
@@ -188,10 +274,13 @@
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 0)
             {
                 Context.Elo.Lobby.GamesPlayed++;
+
+                /*
                 await ReplyAsync("**Game has Started**\n" +
                                  $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n" +
                                  $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n" +
                                  $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
+                                 */
                 Context.Server.Results.Add(new GuildModel.GameResult
                 {
                     Comments = new List<GuildModel.GameResult.Comment>(),
@@ -208,11 +297,11 @@
             else
             {
                 await SimpleEmbedAsync($"**Team1 Captain** {Context.Guild.GetUser(Context.Elo.Lobby.Game.Team1.Captain)?.Mention}\n" +
-                                       $"**Team1:** {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                       $"**Team1:** {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n\n" +
                                        $"**Team2 Captain** {Context.Guild.GetUser(Context.Elo.Lobby.Game.Team2.Captain)?.Mention}\n" +
-                                       $"**Team2:** {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n" +
+                                       $"**Team2:** {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n\n" +
                                        $"**Select Your Teams using `{Context.Prefix}pick <@user>`**\n" +
-                                       $"**It is Captain {nextTeam}'s Turn to pick**\n" +
+                                       $"**It is Captain {nextTeam}'s Turn to pick**\n\n" +
                                        "**Player Pool**\n" +
                                        $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Guild.GetUser(x)?.Mention))}");
             }
@@ -221,6 +310,7 @@
         }
 
         [Command("GameResult")]
+        [Summary("Vote for the result of a game")]
         public async Task GameResultAsync(ITextChannel channel, int gameNumber, GuildModel.GameResult._Result result)
         {
             var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == channel.Id && x.GameNumber == gameNumber);
@@ -290,6 +380,7 @@
 
         [CheckLobby]
         [Command("ClearProposedResult")]
+        [Summary("Clear the result of a proposal")]
         public Task ClearGResAsync(ITextChannel channel, int gameNumber)
         {
             var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == channel.Id && x.GameNumber == gameNumber);
@@ -301,6 +392,28 @@
             selectedGame.Proposal = new GuildModel.GameResult.ResultProposal();
             Context.Server.Save();
             return ReplyAsync("Reset.");
+        }
+
+        [CheckLobby]
+        [Command("Maps")]
+        [Summary("Show a list of all maps for the current lobby")]
+        public Task MapsAsync()
+        {
+            return SimpleEmbedAsync($"{string.Join("\n", Context.Elo.Lobby.Maps)}");
+        }
+
+        [CheckLobby]
+        [Command("Map")]
+        [Summary("select a random map for the lobby")]
+        public Task MapAsync()
+        {
+            if (Context.Elo.Lobby.Maps.Any())
+            {
+                var r = new Random();
+                return SimpleEmbedAsync($"{Context.Elo.Lobby.Maps.OrderByDescending(m => r.Next()).FirstOrDefault()}");
+            }
+
+            return SimpleEmbedAsync("There are no maps set in this lobby");
         }
     }
 }

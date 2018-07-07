@@ -19,6 +19,7 @@
     public class Users : Base
     {
         [Command("DelUser")]
+        [Summary("Deletes the specified user's profile")]
         public Task DeleteUserAsync(IUser user)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -33,7 +34,24 @@
             return SimpleEmbedAsync($"Success {user.Mention}'s profile has been deleted.");
         }
 
+        [Command("DelUser")]
+        [Summary("Deletes the specified user's profile via user ID")]
+        public Task DeleteUserAsync(ulong userID)
+        {
+            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == userID);
+            if (profile == null)
+            {
+                throw new Exception("User is not registered");
+            }
+
+            Context.Server.Users.Remove(profile);
+
+            Context.Server.Save();
+            return SimpleEmbedAsync($"Success {profile.Username} [{userID}]'s profile has been deleted.");
+        }
+
         [Command("Rename")]
+        [Summary("Rename the specified user")]
         public Task RenameAsync(IUser user, string nickname)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -49,10 +67,12 @@
 
             profile.Username = nickname;
             Context.Server.Save();
+            var rename = Task.Run(() => UserManagement.UserRenameAsync(Context, profile));
             return SimpleEmbedAsync($"Success {user.Mention} renamed to {nickname}");
         }
 
         [Command("Ban")]
+        [Summary("Ban the specified user for the given amount of hours")]
         public Task BanAsync(IUser user, int hours, [Remainder] string reason = null)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -77,6 +97,7 @@
         }
 
         [Command("Unban")]
+        [Summary("Unban the specified user")]
         public async Task UnBanAsync(IUser user)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
@@ -100,9 +121,10 @@
         }
 
         [Command("Unban")]
-        public async Task UnBanAsync(ulong user)
+        [Summary("Unban a user via ID")]
+        public async Task UnBanAsync(ulong userID)
         {
-            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user);
+            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == userID);
             if (profile == null)
             {
                 throw new Exception("User is not registered");
@@ -113,7 +135,7 @@
                 throw new Exception("User is not banned");
             }
 
-            await SimpleEmbedAsync($"{profile.Username} [{user}] has been unbanned manually.\n" +
+            await SimpleEmbedAsync($"{profile.Username} [{userID}] has been unbanned manually.\n" +
                                    "**Ban Info**\n" +
                                    $"Reason: {profile.Banned.Reason}\n" +
                                    $"Moderator: {Context.Guild.GetUser(profile.Banned.Moderator)?.Mention ?? $"[{profile.Banned.Moderator}]"}\n" +
@@ -123,6 +145,7 @@
         }
 
         [Command("UnbanAll")]
+        [Summary("Unban a user via User ID")]
         public Task UnbanAllAsync()
         {
             var modified = Context.Server.Users.Count(x => x.Banned.Banned);
@@ -136,6 +159,7 @@
         }
 
         [Command("Bans")]
+        [Summary("Shows all bans")]
         public Task BansAsync()
         {
             var pages = new List<PaginatedMessage.Page>();

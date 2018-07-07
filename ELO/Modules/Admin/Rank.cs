@@ -15,12 +15,14 @@
     public class Rank : Base
     {
         [Command("AddRank")]
+        [Summary("Add a rank users can achieve by getting a certain amount of points")]
         public Task AddRankAsync(int points, IRole role)
         {
             return AddRankAsync(role, points);
         }
 
         [Command("AddRank")]
+        [Summary("Add a rank users can achieve by getting a certain amount of points")]
         public Task AddRankAsync(IRole role, int points)
         {
             if (Context.Server.Ranks.Any(x => x.RoleID == role.Id))
@@ -42,12 +44,14 @@
         }
 
         [Command("DelRank")]
+        [Summary("Delete a server rank")]
         public Task DelRankAsync(IRole role)
         {
             return DelRankAsync(role.Id);
         }
 
         [Command("DelRank")]
+        [Summary("Delete a rank via role ID")]
         public Task DelRankAsync(ulong roleId)
         {
             if (Context.Server.Ranks.All(x => x.RoleID != roleId))
@@ -67,6 +71,7 @@
         }
 
         [Command("WinModifier")]
+        [Summary("Set the amount of points a role receives upon winning with a specific rank")]
         public Task WinModifierAsync(IRole role, int points)
         {
             if (Context.Server.Ranks.All(x => x.RoleID != role.Id))
@@ -86,6 +91,7 @@
         }
 
         [Command("LossModifier")]
+        [Summary("Set the amount of points a role loses upon losing with a specific rank")]
         public Task LossModifierAsync(IRole role, int points)
         {
             if (Context.Server.Ranks.All(x => x.RoleID != role.Id))
@@ -107,6 +113,7 @@
         }
 
         [Command("Ranks")]
+        [Summary("Display all ranks")]
         public Task ViewRanksAsync()
         {
             var list = Context.Server.Ranks

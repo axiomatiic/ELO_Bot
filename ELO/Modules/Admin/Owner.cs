@@ -22,6 +22,7 @@
         }
 
         [Command("Premium")]
+        [Summary("Upgrade the current server to premium or extend the current premium period")]
         public Task DoPremiumAsync([Remainder]string code = null)
         {
             var tokenModel = TokenModel.Load();
@@ -49,6 +50,7 @@
         }
 
         [Command("AddPermissionOverride")]
+        [Summary("Set custom access permissions for a specific command")]
         public async Task AddOverrideAsync(string commandName, GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType type)
         {
             var matched = _service.Commands.FirstOrDefault(x => x.Aliases.Any(a => string.Equals(a, commandName, StringComparison.CurrentCultureIgnoreCase)));
@@ -78,6 +80,7 @@
         }
 
         [Command("RemovePermissionOverride")]
+        [Summary("Remove/Reset custom access for a command")]
         public async Task RemoveOverrideAsync(string commandName)
         {
             var matched = Context.Server.Settings.CustomPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(x.Name, commandName, StringComparison.CurrentCultureIgnoreCase));
@@ -92,6 +95,7 @@
         }
 
         [Command("OverrideList")]
+        [Summary("Display custom permissions for commands")]
         public Task ListAsync()
         {
             var list = Context.Server.Settings.CustomPermissions.CustomizedPermission.Select(x => $"Name: {x.Name} Accessibility: {x.Setting.ToString()}");
@@ -99,6 +103,7 @@
         }
 
         [Command("AddMod")]
+        [Summary("Add a moderator role for the bot")]
         public Task ModAddAsync(IRole modRole)
         {
             if (Context.Server.Settings.Moderation.ModRoles.Contains(modRole.Id))
@@ -112,6 +117,7 @@
         }
 
         [Command("AddAdmin")]
+        [Summary("Add an administrator role for the bot")]
         public Task AdminAddAsync(IRole adminRole)
         {
             if (Context.Server.Settings.Moderation.AdminRoles.Contains(adminRole.Id))
@@ -125,6 +131,7 @@
         }
 
         [Command("ModeratorList")]
+        [Summary("View all moderator roles in the server")]
         public Task ModeratorListAsync()
         {
             var role = Context.Server.Settings.Moderation.ModRoles.Select(x => Context.Guild.GetRole(x)?.Mention).Where(x => x != null);
@@ -133,6 +140,7 @@
         }
 
         [Command("AdminList")]
+        [Summary("View all admin roles in the server")]
         public Task AdminListAsync()
         {
             var role = Context.Server.Settings.Moderation.AdminRoles.Select(x => Context.Guild.GetRole(x)?.Mention).Where(x => x != null);
@@ -141,6 +149,7 @@
         }
 
         [Command("DelMod")]
+        [Summary("Remove a moderator role")]
         public Task ModDelAsync(IRole modRole)
         {
             if (!Context.Server.Settings.Moderation.ModRoles.Contains(modRole.Id))
@@ -154,6 +163,7 @@
         }
 
         [Command("DelAdmin")]
+        [Summary("Delete an administrator role")]
         public Task AdminDelAsync(IRole adminRole)
         {
             if (!Context.Server.Settings.Moderation.AdminRoles.Contains(adminRole.Id))
