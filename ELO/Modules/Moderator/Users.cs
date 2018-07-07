@@ -67,6 +67,7 @@
 
             profile.Username = nickname;
             Context.Server.Save();
+            var rename = Task.Run(() => UserManagement.UserRenameAsync(Context, profile));
             return SimpleEmbedAsync($"Success {user.Mention} renamed to {nickname}");
         }
 
