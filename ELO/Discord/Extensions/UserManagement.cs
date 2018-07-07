@@ -52,6 +52,16 @@
                     try
                     {
                         var gUser = context.Guild.GetUser(user.UserID);
+                        if (gUser == null)
+                        {
+                            return;
+                        }
+
+                        if (gUser.Roles.Any(x => x.Id == serverRole.Id))
+                        {
+                            // Return if the user already has the role
+                            return;
+                        }
                         await gUser.AddRoleAsync(serverRole);
                     }
                     catch (Exception e)
@@ -80,6 +90,16 @@
             try
             {
                 var gUser = context.Guild.GetUser(user.UserID);
+                if (gUser == null)
+                {
+                    return;
+                }
+
+                if (gUser.Nickname == rename)
+                {
+                    return;
+                }
+
                 await gUser.ModifyAsync(x => x.Nickname = rename);
             }
             catch (Exception e)

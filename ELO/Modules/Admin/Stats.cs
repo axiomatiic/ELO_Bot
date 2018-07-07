@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
+    using ELO.Discord.Extensions;
     using ELO.Discord.Preconditions;
 
     using global::Discord;
@@ -25,6 +26,8 @@
 
             eUser.Stats.Points += points;
             await SimpleEmbedAsync($"{user.Mention} Points Modified: {eUser.Stats.Points}");
+            var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
+            var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
             Context.Server.Save();
         }
 
@@ -47,6 +50,8 @@
 
             eUser.Stats.Points = points;
             await SimpleEmbedAsync($"{user.Mention} Points Set: {eUser.Stats.Points}");
+            var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
+            var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
             Context.Server.Save();
         }
 
