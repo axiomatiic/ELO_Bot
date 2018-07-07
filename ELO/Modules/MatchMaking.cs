@@ -86,7 +86,7 @@
         }
 
         [Command("Queue")]
-        [Alias("q")]
+        [Alias("q", "listplayers", "playerlist", "lps")]
         [Summary("View the current lobby's queue")]
         public async Task QueueAsync()
         {
@@ -117,18 +117,22 @@
         }
 
         [Command("Lobby")]
+        [Alias("lobbyinfo", "about", "info")]
         [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
-            return SimpleEmbedAsync($"**{Context.Channel.Name}**\n" +
-                                    $"`Players Per team:` {Context.Elo.Lobby.UserLimit / 2}\n" +
-                                    $"`Total Players:` {Context.Elo.Lobby.UserLimit}\n" +
-                                    $"`Sort Mode:` {(Context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Captains ? $"Captains => {Context.Elo.Lobby.CaptainSortMode}" : $"{Context.Elo.Lobby.PickMode}")}\n" +
-                                    $"`Game Number:` {Context.Elo.Lobby.GamesPlayed + 1}\n" +
-                                    $"`Host Pick mode:` {Context.Elo.Lobby.HostSelectionMode}\n" +
-                                    $"`Channel:` {Context.Channel.Name}\n" +
-                                    "Description:\n" +
-                                    $"{Context.Elo.Lobby.Description}");
+            return ReplyAsync(new EmbedBuilder
+            {
+                Title = $"{Context.Channel.Name} ",
+                Description = $"**Players Per team**: {Context.Elo.Lobby.UserLimit / 2}\n" +
+                              $"**Total Players**: {Context.Elo.Lobby.UserLimit}\n" +
+                              $"**Sort Mode**: {Context.Elo.Lobby.PickMode.ToString()}\n" +
+                              $"**Game Number**: {Context.Elo.Lobby.GamesPlayed + 1}\n" +
+                              $"**Host Pick mode**: {Context.Elo.Lobby.HostSelectionMode}\n" +
+                              "Description:\n" +
+                              $"{Context.Elo.Lobby.Description}",
+            Color = Color.Blue
+            }.Build());
         }
 
         [Command("Replace")]
