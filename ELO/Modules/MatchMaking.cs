@@ -13,6 +13,8 @@
     using ELO.Discord.Preconditions;
     using ELO.Models;
 
+    using global::Discord.WebSocket;
+
     using Raven.Client.Documents.Linq.Indexing;
 
     [CustomPermissions]
@@ -129,6 +131,24 @@
                                     $"{Context.Elo.Lobby.Description}");
         }
 
+        [Command("Replace")]
+        [Summary("Replace a user in the current queue")]
+        public Task ReplaceAsync(SocketGuildUser user)
+        {
+            if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(Context.User.Id))
+            {
+                throw new Exception("You cannot replace a user if you are in the queue yourself");
+            }
+
+            if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(user.Id))
+            {
+                throw new Exception("User is not queued.");
+            }
+
+            Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+            return JoinLobbyAsync();
+        }
+
         [Command("Pick")]
         [Alias("p")]
         [Summary("Pick a player for your team")]
@@ -196,10 +216,13 @@
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 0)
             {
                 Context.Elo.Lobby.GamesPlayed++;
+
+                /*
                 await ReplyAsync("**Game has Started**\n" +
                                  $"Team1: {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n" +
                                  $"Team2: {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n" +
                                  $"**Game #{Context.Elo.Lobby.GamesPlayed}**");
+                                 */
                 Context.Server.Results.Add(new GuildModel.GameResult
                 {
                     Comments = new List<GuildModel.GameResult.Comment>(),
