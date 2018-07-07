@@ -36,9 +36,9 @@
 
         [Command("DelUser")]
         [Summary("Deletes the specified user's profile via user ID")]
-        public Task DeleteUserAsync(ulong user)
+        public Task DeleteUserAsync(ulong userID)
         {
-            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user);
+            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == userID);
             if (profile == null)
             {
                 throw new Exception("User is not registered");
@@ -47,7 +47,7 @@
             Context.Server.Users.Remove(profile);
 
             Context.Server.Save();
-            return SimpleEmbedAsync($"Success {profile.Username} [{user}]'s profile has been deleted.");
+            return SimpleEmbedAsync($"Success {profile.Username} [{userID}]'s profile has been deleted.");
         }
 
         [Command("Rename")]
@@ -121,9 +121,9 @@
 
         [Command("Unban")]
         [Summary("Unban a user via ID")]
-        public async Task UnBanAsync(ulong user)
+        public async Task UnBanAsync(ulong userID)
         {
-            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user);
+            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == userID);
             if (profile == null)
             {
                 throw new Exception("User is not registered");
@@ -134,7 +134,7 @@
                 throw new Exception("User is not banned");
             }
 
-            await SimpleEmbedAsync($"{profile.Username} [{user}] has been unbanned manually.\n" +
+            await SimpleEmbedAsync($"{profile.Username} [{userID}] has been unbanned manually.\n" +
                                    "**Ban Info**\n" +
                                    $"Reason: {profile.Banned.Reason}\n" +
                                    $"Moderator: {Context.Guild.GetUser(profile.Banned.Moderator)?.Mention ?? $"[{profile.Banned.Moderator}]"}\n" +

@@ -76,6 +76,8 @@
                                                                                          $"Losses: {user.Stats.Losses}");
                     }
 
+                    var rename = Task.Run(() => UserManagement.UserRenameAsync(context, user));
+                    var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(context, user));
                     user.Stats.GamesPlayed++;
                 }
 
@@ -106,6 +108,8 @@
                     eloUser.Stats.GamesPlayed++;
                     eloUser.Stats.Points += maxRank.WinModifier;
                     winEmbed.AddField($"{eloUser.Username} (+{maxRank.WinModifier})", $"Points: {eloUser.Stats.Points}\n" + $"Wins: {eloUser.Stats.Wins}");
+                    var rename = Task.Run(() => UserManagement.UserRenameAsync(context, eloUser));
+                    var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(context, eloUser));
                 }
             }
             context.Server.Save();
@@ -136,6 +140,8 @@
                     }
 
                     loseEmbed.AddField($"{eloUser.Username} (-{maxRank.LossModifier})", $"Points: {eloUser.Stats.Points}\n" + $"Losses: {eloUser.Stats.Losses}");
+                    var rename = Task.Run(() => UserManagement.UserRenameAsync(context, eloUser));
+                    var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(context, eloUser));
                 }
             }
             context.Server.Save();

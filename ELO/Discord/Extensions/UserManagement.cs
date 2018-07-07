@@ -1,10 +1,12 @@
 ﻿namespace ELO.Discord.Extensions
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using global::Discord;
 
     using ELO.Discord.Context;
+    using ELO.Handlers;
     using ELO.Models;
 
     public class UserManagement
@@ -36,24 +38,33 @@
         {
             try
             {
+                if (user == null)
+                {
+                    user = context.Elo.User;
+                }
+
                 var maxRank = MaxRole(context, user);
+
 
                 var serverRole = context.Guild.GetRole(maxRank.RoleID);
                 if (serverRole != null)
                 {
                     try
                     {
-                        await (context.User as IGuildUser).AddRoleAsync(serverRole);
+                        var gUser = context.Guild.GetUser(user.UserID);
+                        await gUser.AddRoleAsync(serverRole);
                     }
-                    catch
+                    catch (Exception e)
                     {
                         // Role Unavailable OR user unable to receive role due to permissions
+                        LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
                 // No applicable roles
+                LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
             }
         }
 
@@ -68,11 +79,13 @@
 
             try
             {
-                await (context.User as IGuildUser).ModifyAsync(x => x.Nickname = rename);
+                var gUser = context.Guild.GetUser(user.UserID);
+                await gUser.ModifyAsync(x => x.Nickname = rename);
             }
-            catch
+            catch (Exception e)
             {
                 // Error renaming user (permissions above bot.)
+                LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
             }
         }
     }
