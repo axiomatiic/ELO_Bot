@@ -34,6 +34,22 @@
             return SimpleEmbedAsync($"Success {user.Mention}'s profile has been deleted.");
         }
 
+        [Command("DelUser")]
+        [Summary("Deletes the specified user's profile via user ID")]
+        public Task DeleteUserAsync(ulong user)
+        {
+            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user);
+            if (profile == null)
+            {
+                throw new Exception("User is not registered");
+            }
+
+            Context.Server.Users.Remove(profile);
+
+            Context.Server.Save();
+            return SimpleEmbedAsync($"Success {profile.Username} [{user}]'s profile has been deleted.");
+        }
+
         [Command("Rename")]
         [Summary("Rename the specified user")]
         public Task RenameAsync(IUser user, string nickname)
