@@ -45,7 +45,6 @@
 
                 var maxRank = MaxRole(context, user);
 
-
                 var serverRole = context.Guild.GetRole(maxRank.RoleID);
                 if (serverRole != null)
                 {
@@ -62,6 +61,7 @@
                             // Return if the user already has the role
                             return;
                         }
+
                         await gUser.AddRoleAsync(serverRole);
                     }
                     catch (Exception e)
