@@ -148,5 +148,15 @@
 
             return SimpleEmbedAsync($"Reply with errors: {Context.Server.Settings.Readability.ReplyErrors}");
         }
+
+        [Command("JoinLeaveErrors")]
+        [Summary("Toggle the response of error messages in chat when users try to join a queue they are already in and leave a queue they aren't in")]
+        public Task ToggleJLErrorsAsync()
+        {
+            Context.Server.Settings.Readability.JoinLeaveErrors = !Context.Server.Settings.Readability.JoinLeaveErrors;
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Reply with Join Leave: {Context.Server.Settings.Readability.JoinLeaveErrors}");
+        }
     }
 }
