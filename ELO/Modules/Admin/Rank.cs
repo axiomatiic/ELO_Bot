@@ -12,6 +12,7 @@
     using global::Discord.Commands;
 
     [CustomPermissions(true)]
+    [Summary("Rank info and management")]
     public class Rank : Base
     {
         [Command("AddRank")]
@@ -110,30 +111,6 @@
             rank.LossModifier = points;
             Context.Server.Save();
             return SimpleEmbedAsync("Rank Loss Modifier Updated.");
-        }
-
-        [Command("Ranks")]
-        [Summary("Display all ranks")]
-        public Task ViewRanksAsync()
-        {
-            /*
-            var list = Context.Server.Ranks
-                .Select(x => new Tuple<GuildModel.Rank, IRole>(x, Context.Guild.GetRole(x.RoleID)))
-                .Where(x => x.Item2 != null).OrderByDescending(x => x.Item1.Threshold).Select(
-                    x =>
-                        $"{x.Item1.Threshold} - {x.Item2.Mention} - W: {x.Item1.WinModifier} L: {x.Item1.LossModifier}").ToList();
-            return SimpleEmbedAsync($"Ranks\n\n{string.Join("\n", list)}");
-            */
-
-            var rankList = Context.Server.Ranks.OrderByDescending(r => r.Threshold).Select(
-                r =>
-                    {
-                        var name = Context.Guild.GetRole(r.RoleID)?.Mention ?? $"[{r.RoleID}]";
-                        var scoreInfo = $"{r.Threshold.ToString().PadRight(10)} +{(r.WinModifier == 0 ? Context.Server.Settings.Registration.DefaultWinModifier : r.WinModifier).ToString().PadRight(10)} -{(r.LossModifier == 0 ? Context.Server.Settings.Registration.DefaultLossModifier : r.LossModifier).ToString().PadRight(10)}\u200B";
-                        return $"`{scoreInfo}` - {name}";
-                    }).ToList();
-
-            return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", rankList)}");
         }
     }
 }

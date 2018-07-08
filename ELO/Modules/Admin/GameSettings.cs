@@ -1,5 +1,6 @@
 ﻿namespace ELO.Modules.Admin
 {
+    using System;
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
@@ -8,6 +9,7 @@
     using global::Discord.Commands;
 
     [CustomPermissions(true)]
+    [Summary("Game setup settings")]
     public class GameSettings : Base
     {
         [Command("AllowNegativeScore")]
@@ -54,5 +56,31 @@
             Context.Server.Save();
             return SimpleEmbedAsync($"Users will be DM'ed Announcements: {Context.Server.Settings.GameSettings.DMAnnouncements}");
         }
+
+        [Command("ReQueueDelay")]
+        [Summary("Set the amount of time users must wait between games")]
+        public Task ReQueueDelayAsync(int minutes = 0)
+        {
+            if (minutes < 0)
+            {
+                throw new Exception("Delay must be greater than or equal to zero");
+            }
+
+            Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(minutes);
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Success, users must wait {minutes} minutes before re-queuing");
+        }
+
+        [Command("ShowKD")]
+        [Summary("Toggle the use of K/D ratio in the server")]
+        public Task ShowKDAsync()
+        {
+            Context.Server.Settings.GameSettings.UseKd = !Context.Server.Settings.GameSettings.UseKd;
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.UseKd}");
+        }
+
     }
 }

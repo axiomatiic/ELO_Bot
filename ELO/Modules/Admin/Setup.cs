@@ -12,6 +12,7 @@
     using global::Discord.Commands;
 
     [CustomPermissions(true)]
+    [Summary("Main server setup commands")]
     public class Setup : Base
     {
         [Command("RegisterRole")]
@@ -112,31 +113,6 @@
             Context.Server.Save();
 
             return SimpleEmbedAsync($"Success, Default Loss Modifier is now: -{pointsToRemove}");
-        }
-
-        [Command("ReQueueDelay")]
-        [Summary("Set the amount of time users must wait between games")]
-        public Task ReQueueDelayAsync(int minutes = 0)
-        {
-            if (minutes < 0)
-            {
-                throw new Exception("Delay must be greater than or equal to zero");
-            }
-
-            Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(minutes);
-            Context.Server.Save();
-
-            return SimpleEmbedAsync($"Success, users must wait {minutes} minutes before re-queuing");
-        }
-
-        [Command("ShowKD")]
-        [Summary("Toggle the use of K/D ratio in the server")]
-        public Task ShowKDAsync()
-        {
-            Context.Server.Settings.GameSettings.UseKd = !Context.Server.Settings.GameSettings.UseKd;
-            Context.Server.Save();
-
-            return SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.UseKd}");
         }
 
         [Command("ShowErrors")]

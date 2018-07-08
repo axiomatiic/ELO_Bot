@@ -16,6 +16,7 @@
     using global::Discord.Commands;
 
     [CustomPermissions(true, true)]
+    [Summary("User management commands")]
     public class Users : Base
     {
         [Command("DelUser")]

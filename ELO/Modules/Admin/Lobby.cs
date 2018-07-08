@@ -14,6 +14,7 @@
     using global::Discord.Commands;
 
     [CustomPermissions(true)]
+    [Summary("Lobby creation and setup commands")]
     public class Lobby : Base
     {
         [Command("CreateLobby")]

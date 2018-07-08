@@ -15,6 +15,7 @@
     using global::Discord.WebSocket;
 
     [CustomPermissions(true, true)]
+    [Summary("Game results submissions")]
     public class Results : Base
     {
         [Command("Game")]

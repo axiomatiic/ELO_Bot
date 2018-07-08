@@ -7,11 +7,13 @@
     using ELO.Discord.Context;
     using ELO.Discord.Preconditions;
     using ELO.Models;
+    using ELO.Models.Parser;
 
     using global::Discord;
     using global::Discord.Commands;
 
     [GuildOwner]
+    [Summary("Server owner only commands")]
     public class Owner : Base
     {
         private readonly CommandService _service;

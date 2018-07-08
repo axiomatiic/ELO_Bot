@@ -12,6 +12,7 @@
     using global::Discord.Commands;
 
     [CustomPermissions(true)]
+    [Summary("Direct user stats modifications")]
     public class Stats : Base
     {
         [Command("ModifyPoints")]

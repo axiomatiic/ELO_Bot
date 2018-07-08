@@ -20,6 +20,7 @@
     [CustomPermissions]
     [CheckLobby]
     [CheckRegistered]
+    [Summary("Game Queuing and Information")]
     public class MatchMaking : Base
     {
         [Command("Join")]
