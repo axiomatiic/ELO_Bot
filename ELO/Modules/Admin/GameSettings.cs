@@ -82,5 +82,15 @@
             return SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.UseKd}");
         }
 
+        [Command("UserGameResults")]
+        [Summary("Toggle whether users are able to submit their own game results")]
+        public Task UserGameResultsAsync()
+        {
+            Context.Server.Settings.GameSettings.AllowUserSubmissions = !Context.Server.Settings.GameSettings.AllowUserSubmissions;
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Users are able to set game result: {Context.Server.Settings.GameSettings.AllowUserSubmissions}\n" + 
+                                    $"This requires a player from both teams to submit the same game result.\n");
+        }
     }
 }
