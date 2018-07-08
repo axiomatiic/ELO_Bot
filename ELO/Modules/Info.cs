@@ -135,7 +135,7 @@
 
         [CustomPermissions]
         [Command("GetUser")]
-        [Alias("uUerStats", "StatsUser", "stats")]
+        [Alias("userStats", "StatsUser", "stats")]
         [Summary("Get information about the specified user profile")]
         public Task GetUserAsync(IUser user = null)
         {

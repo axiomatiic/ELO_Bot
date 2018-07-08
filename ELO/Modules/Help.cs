@@ -232,10 +232,12 @@
                         continue;
                     }
 
+                    var summaryCommands = passingCommands.GroupBy(x => x.Name.ToLower()).Select(x => x.FirstOrDefault()).Where(x => x != null).ToList();
+
                     moduleIndex++;
 
                     // Add a new embed field with the info about our module and a list of all the command names
-                    fields.Add(new EmbedFieldBuilder { Name = $"[{moduleIndex}] {module.Name}", Value = string.Join(", ", passingCommands.Select(x => x.Aliases.FirstOrDefault()).Where(x => x != null).ToList()) });
+                    fields.Add(new EmbedFieldBuilder { Name = $"[{moduleIndex}] {module.Name}", Value = string.Join(", ", summaryCommands.Select(x => x.Aliases.FirstOrDefault()).Where(x => x != null).ToList()) });
 
                     try
                     {
