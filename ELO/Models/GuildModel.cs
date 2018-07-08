@@ -244,6 +244,8 @@
 
                 public bool AllowNegativeScore { get; set; } = false;
 
+                public bool AllowUserSubmissions { get; set; } = false;
+
                 public TimeSpan ReQueueDelay { get; set; } = TimeSpan.Zero;
 
                 public bool UseKd { get; set; } = false;

@@ -15,8 +15,6 @@
 
     using global::Discord.WebSocket;
 
-    using Raven.Client.Documents.Linq.Indexing;
-
     [CustomPermissions]
     [CheckLobby]
     [CheckRegistered]
@@ -169,7 +167,6 @@
             {
                 throw new Exception("You cannot replace a team captain");
             }
-
 
             if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
             {
@@ -325,10 +322,27 @@
         }
 
         [Command("GameResult")]
-        [Summary("Vote for the result of a game")]
-        public async Task GameResultAsync(ITextChannel lobbyChannel, int gameNumber, GuildModel.GameResult._Result result)
+        [Summary("Vote for the result of a game in the current channel")]
+        public Task GameResultAsync(int gameNumber, GuildModel.GameResult._Result result)
         {
-            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel.Id && x.GameNumber == gameNumber);
+            return GameResultAsync(Context.Channel.Id, gameNumber, result);
+        }
+
+        [Command("GameResult")]
+        [Summary("Vote for the result of a game in the given channel")]
+        public Task GameResultAsync(ITextChannel channel, int gameNumber, GuildModel.GameResult._Result result)
+        {
+            return GameResultAsync(channel.Id, gameNumber, result);
+        }
+
+        public async Task GameResultAsync(ulong lobbyChannel, int gameNumber, GuildModel.GameResult._Result result)
+        {
+            if (!Context.Server.Settings.GameSettings.AllowUserSubmissions)
+            {
+                throw new Exception("Users are not allowed to self submit game results in this server");
+            }
+
+            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel && x.GameNumber == gameNumber);
             if (selectedGame == null)
             {
                 throw new Exception("Game Unavailable. Incorrect Data.");
@@ -375,8 +389,8 @@
 
             Context.Server.Save();
             await SimpleEmbedAsync("Result Proposal\n" +
-                                   $"Team1 Submission: {selectedGame.Proposal.R1.ToString()} Player: {Context.Guild.GetUser(selectedGame.Proposal.P1)?.Mention ?? "N/A"}\n" +
-                                   $"Team2 Submission: {selectedGame.Proposal.R2.ToString()} Player: {Context.Guild.GetUser(selectedGame.Proposal.P2)?.Mention ?? "N/A"}");
+                                   $"Team1 Submission: {selectedGame.Proposal.R1} Player: {Context.Guild.GetUser(selectedGame.Proposal.P1)?.Mention ?? "N/A"}\n" +
+                                   $"Team2 Submission: {selectedGame.Proposal.R2} Player: {Context.Guild.GetUser(selectedGame.Proposal.P2)?.Mention ?? "N/A"}");
 
             if (selectedGame.Proposal.R1 == GuildModel.GameResult._Result.Undecided || selectedGame.Proposal.R2 == GuildModel.GameResult._Result.Undecided)
             {
@@ -391,22 +405,6 @@
             {
                 throw new Exception("Mismatched Game Result Proposals. Please allow an admin to manually submit a result");
             }
-        }
-
-        [CheckLobby]
-        [Command("ClearProposedResult")]
-        [Summary("Clear the result of a proposal")]
-        public Task ClearGResAsync(ITextChannel lobbyChannel, int gameNumber)
-        {
-            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel.Id && x.GameNumber == gameNumber);
-            if (selectedGame == null)
-            {
-                throw new Exception("Game Unavailable. Incorrect Data.");
-            }
-
-            selectedGame.Proposal = new GuildModel.GameResult.ResultProposal();
-            Context.Server.Save();
-            return ReplyAsync("Reset.");
         }
 
         [CheckLobby]

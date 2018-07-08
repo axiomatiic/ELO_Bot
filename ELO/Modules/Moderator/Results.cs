@@ -63,5 +63,34 @@
         {
             return GameManagement.LoseAsync(users.ToList(), Context);
         }
+
+        [CheckLobby]
+        [Command("ClearProposedResult")]
+        [Summary("Clear the result of a proposal in the current channel")]
+        public Task ClearGResAsync(int gameNumber)
+        {
+            return ClearGResAsync(Context.Channel.Id, gameNumber);
+        }
+
+        [Command("ClearProposedResult")]
+        [Summary("Clear the result of a proposal in the given channel")]
+        public Task ClearGResAsync(ITextChannel lobbyChannel, int gameNumber)
+        {
+            return ClearGResAsync(lobbyChannel.Id, gameNumber);
+        }
+
+        public Task ClearGResAsync(ulong lobbyChannel, int gameNumber)
+        {
+            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel && x.GameNumber == gameNumber);
+            if (selectedGame == null)
+            {
+                throw new Exception("Game Unavailable. Incorrect Data.");
+            }
+
+            selectedGame.Proposal = new GuildModel.GameResult.ResultProposal();
+            Context.Server.Save();
+            return ReplyAsync("Reset.");
+        }
+
     }
 }
