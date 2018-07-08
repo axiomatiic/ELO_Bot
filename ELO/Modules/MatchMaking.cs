@@ -321,6 +321,13 @@
             Context.Server.Save();
         }
 
+        [Command("ResultTypes")]
+        [Summary("list game result types")]
+        public Task ResultTypesAsync()
+        {
+            return SimpleEmbedAsync($"**Game Results:**\n{string.Join("\n", EloInfo.GameResults())}");
+        }
+
         [Command("GameResult")]
         [Summary("Vote for the result of a game in the current channel")]
         public Task GameResultAsync(int gameNumber, GuildModel.GameResult._Result result)

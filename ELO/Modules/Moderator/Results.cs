@@ -18,6 +18,13 @@
     [Summary("Game results submissions")]
     public class Results : Base
     {
+        [Command("ResultTypes")]
+        [Summary("list game result types")]
+        public Task ResultTypesAsync()
+        {
+            return SimpleEmbedAsync($"**Game Results:**\n{string.Join("\n", EloInfo.GameResults())}");
+        }
+
         [Command("Game")]
         [Summary("Submit a game result")]
         public async Task GameAsync(IMessageChannel lobbyChannel, int gameNumber, GuildModel.GameResult._Result result)
