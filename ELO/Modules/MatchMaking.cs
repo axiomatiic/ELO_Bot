@@ -59,7 +59,7 @@
 
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
                 Context.Server.Save();
-                await SimpleEmbedAsync($"Success, Added {Context.User.Mention} to queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
+                await SimpleEmbedAsync($"[{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}] Added {Context.User.Mention} to queue");
                 if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
                 {
                     // Game is ready to be played
@@ -88,7 +88,7 @@
                 }
 
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(Context.User.Id);
-                await SimpleEmbedAsync($"Success, Removed {Context.User.Mention} from queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
+                await SimpleEmbedAsync($"[{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}] Removed {Context.User.Mention} from queue");
                 Context.Server.Save();
             }
             else
