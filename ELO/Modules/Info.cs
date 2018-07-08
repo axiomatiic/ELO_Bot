@@ -316,7 +316,6 @@
             return ShowGameAsync(Context.Channel.Id, Context.Server.Results.Where(x => x.LobbyID == Context.Channel.Id).Max(x => x.GameNumber));
         }
 
-        [CheckLobby]
         [CustomPermissions]
         [Command("ShowGame")]
         [Summary("Displays the a game from the given lobby")]
@@ -334,6 +333,36 @@
             return ShowGameAsync(Context.Channel.Id, gameNumber);
         }
 
+        [CustomPermissions]
+        [Command("GameList")]
+        [Summary("Shows all games from the given lobby")]
+        public Task GameListAsync(ITextChannel lobbyChannel)
+        {
+            return GameListAsync(lobbyChannel.Id);
+        }
+
+        [CheckLobby]
+        [CustomPermissions]
+        [Command("GameList")]
+        [Summary("Shows all games from the current lobby")]
+        public Task GameListAsync()
+        {
+            return GameListAsync(Context.Channel.Id);
+        }
+
+        public Task GameListAsync(ulong channelId)
+        {
+            var lobbyResults = Context.Server.Results.Where(x => x.LobbyID == channelId);
+            if (!lobbyResults.Any())
+            {
+                throw new Exception("There are no game results for the supplied channel");
+            }
+
+            var games = Context.Server.Results.Where(x => x.LobbyID == channelId).OrderByDescending(x => x.GameNumber).ToList().SplitList(20);
+            var pages = games.Select(x => { return new PaginatedMessage.Page { Description = string.Join("\n", x.Select(g => $"`#{g.GameNumber.ToString()}` - {g.Result}")) }; });
+            return PagedReplyAsync(new PaginatedMessage { Pages = pages, Title = $"{Context.Guild.GetChannel(channelId)?.Name} Games" }, new ReactionList { Forward = true, Backward = true, Trash = true });
+        }
+
         [CheckLobby]
         [CustomPermissions]
         [Command("Comment")]
@@ -344,7 +373,7 @@
 
             if (game == null)
             {
-                throw new Exception("Invalid Game Number");
+                throw new Exception("Invalid Game Number or lobby");
             }
 
             if (comment.Length > 150)
