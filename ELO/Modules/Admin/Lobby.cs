@@ -151,13 +151,13 @@
         [CheckLobby]
         [Command("CaptainSortMode")]
         [Summary("Select how captains are picked")]
-        public Task CapSortModeAsync(GuildModel.Lobby.CaptainSort sortMode)
+        public Task CapSortModeAsync(GuildModel.Lobby.CaptainSort captainSortMode)
         {
-            Context.Elo.Lobby.CaptainSortMode = sortMode;
+            Context.Elo.Lobby.CaptainSortMode = captainSortMode;
             Context.Server.Save();
 
             return SimpleEmbedAsync("Success, captain sort mode has been modified to:\n" +
-                                    $"{sortMode.ToString()}");
+                                    $"{captainSortMode.ToString()}");
         }
 
         [CheckLobby]
@@ -196,12 +196,12 @@
         [CheckLobby]
         [Command("HostSelectionMode")]
         [Summary("Select how game hosts are chosen")]
-        public Task HostModeAsync(GuildModel.Lobby.HostSelector mode)
+        public Task HostModeAsync(GuildModel.Lobby.HostSelector hostSelectionMode)
         {
-            Context.Elo.Lobby.HostSelectionMode = mode;
+            Context.Elo.Lobby.HostSelectionMode = hostSelectionMode;
             Context.Server.Save();
 
-            return SimpleEmbedAsync($"Host selection mode = {mode.ToString()}");
+            return SimpleEmbedAsync($"Host selection mode = {hostSelectionMode.ToString()}");
         }
 
         [CheckLobby]
@@ -255,7 +255,7 @@
         [CheckLobby]
         [Command("AddMaps")]
         [Summary("Add multiple maps to the current lobby")]
-        [Remarks("Separate using commas")]
+        [Remarks("Separate using commas ie. Map 1,Map 2,Map 3,")]
         public async Task AddMapsAsync([Remainder] string mapList)
         {
             var maps = mapList.Split(",");

@@ -51,7 +51,7 @@
 
         [Command("AddPermissionOverride")]
         [Summary("Set custom access permissions for a specific command")]
-        public async Task AddOverrideAsync(string commandName, GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType type)
+        public async Task AddOverrideAsync(string commandName, GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType accessType)
         {
             var matched = _service.Commands.FirstOrDefault(x => x.Aliases.Any(a => string.Equals(a, commandName, StringComparison.CurrentCultureIgnoreCase)));
             if (matched == null)
@@ -63,7 +63,7 @@
             var toEdit = Context.Server.Settings.CustomPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(x.Name, matched.Name, StringComparison.CurrentCultureIgnoreCase));
             if (toEdit != null)
             {
-                toEdit.Setting = type;
+                toEdit.Setting = accessType;
                 modified = true;
             }
             else
@@ -71,11 +71,11 @@
                 Context.Server.Settings.CustomPermissions.CustomizedPermission.Add(new GuildModel.GuildSettings._CommandAccess.CustomPermission
                 {
                     Name = matched.Name,
-                    Setting = type
+                    Setting = accessType
                 });
             }
 
-            await SimpleEmbedAsync($"Custom Permission override {(modified ? "Modified" : "Added")}, users with {type.ToString()} and above permissions, will be able to access it");
+            await SimpleEmbedAsync($"Custom Permission override {(modified ? "Modified" : "Added")}, users with {accessType.ToString()} and above permissions, will be able to access it");
             Context.Server.Save();
         }
 

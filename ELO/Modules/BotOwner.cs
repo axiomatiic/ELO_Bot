@@ -16,13 +16,13 @@
     [RequireOwner]
     public class BotOwner : Base
     {
-        [Command("Migrate", RunMode = RunMode.Async)]
+        /*[Command("Migrate", RunMode = RunMode.Async)]
         [Summary("Migrates from the last file based config system (350) to RavenDB")]
         public Task Migrate()
         {
             ConfigParser.Parse();
             return Task.CompletedTask;
-        }
+        }*/
 
         [Command("CreateKeys")]
         [Summary("Creates premium keys")]

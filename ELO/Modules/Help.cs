@@ -44,7 +44,7 @@
         /// <summary>
         /// The help command.
         /// </summary>
-        /// <param name="checkForMatch">
+        /// <param name="moduleOrCommandName">
         /// The checkForMatch.
         /// </param>
         /// <returns>
@@ -53,15 +53,15 @@
         [Command("Help")]
         [Summary("Lists all accessible commands")]
         [Remarks("Use FullHelp for all commands")]
-        public Task HelpCommandAsync([Remainder] string checkForMatch = null)
+        public Task HelpCommandAsync([Remainder] string moduleOrCommandName = null)
         {
-            return GenerateHelpAsync(checkForMatch);
+            return GenerateHelpAsync(moduleOrCommandName);
         }
 
         /// <summary>
         /// The full help.
         /// </summary>
-        /// <param name="checkForMatch">
+        /// <param name="moduleOrCommandName">
         /// The check for match.
         /// </param>
         /// <returns>
@@ -69,9 +69,9 @@
         /// </returns>
         [Command("FullHelp")]
         [Summary("Lists all commands")]
-        public Task FullHelpAsync([Remainder] string checkForMatch = null)
+        public Task FullHelpAsync([Remainder] string moduleOrCommandName = null)
         {
-            return GenerateHelpAsync(checkForMatch, false);
+            return GenerateHelpAsync(moduleOrCommandName, false);
         }
 
         /// <summary>

@@ -23,7 +23,7 @@
     public class MatchMaking : Base
     {
         [Command("Join")]
-        [Alias("j")]
+        [Alias("j", "sign", "play", "rdy", "ready")]
         [Summary("Join the current lobby's queue")]
         public async Task JoinLobbyAsync()
         {
@@ -75,7 +75,7 @@
         }
 
         [Command("Leave")]
-        [Alias("l")]
+        [Alias("l", "out", "unSign", "remove", "unrdy", "unready")]
         [Summary("Leave the current lobby's queue")]
         public async Task LeaveLobbyAsync()
         {
@@ -100,7 +100,7 @@
         }
 
         [Command("Queue")]
-        [Alias("q", "listplayers", "playerlist", "lps")]
+        [Alias("q", "listPlayers", "playerList", "lps")]
         [Summary("View the current lobby's queue")]
         public async Task QueueAsync()
         {
@@ -131,7 +131,7 @@
         }
 
         [Command("Lobby")]
-        [Alias("lobbyinfo", "about", "info")]
+        [Alias("lobbyInfo", "about", "info")]
         [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
@@ -151,7 +151,7 @@
 
         [Command("Replace")]
         [Summary("Replace a user in the current queue")]
-        public async Task ReplaceAsync(SocketGuildUser user)
+        public async Task ReplaceAsync(SocketGuildUser userToReplace)
         {
             var g = Context.Elo.Lobby.Game;
             if (g.QueuedPlayerIDs.Contains(Context.User.Id) || g.Team1.Players.Contains(Context.User.Id) || g.Team2.Players.Contains(Context.User.Id) || g.Team2.Captain == Context.User.Id || g.Team1.Captain == Context.User.Id)
@@ -159,12 +159,12 @@
                 throw new Exception("You cannot replace a user if you are in the queue yourself");
             }
 
-            if (!g.QueuedPlayerIDs.Contains(user.Id) && !g.Team1.Players.Contains(user.Id) && !g.Team2.Players.Contains(user.Id))
+            if (!g.QueuedPlayerIDs.Contains(userToReplace.Id) && !g.Team1.Players.Contains(userToReplace.Id) && !g.Team2.Players.Contains(userToReplace.Id))
             {
                 throw new Exception("User is not queued.");
             }
 
-            if (g.Team1.Captain == user.Id || g.Team2.Captain == user.Id)
+            if (g.Team1.Captain == userToReplace.Id || g.Team2.Captain == userToReplace.Id)
             {
                 throw new Exception("You cannot replace a team captain");
             }
@@ -192,19 +192,19 @@
                 }
             }
 
-            if (g.QueuedPlayerIDs.Contains(user.Id))
+            if (g.QueuedPlayerIDs.Contains(userToReplace.Id))
             {
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
             }
-            else if (g.Team1.Players.Contains(user.Id))
+            else if (g.Team1.Players.Contains(userToReplace.Id))
             {
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
             }
-            else if (g.Team2.Players.Contains(user.Id))
+            else if (g.Team2.Players.Contains(userToReplace.Id))
             {
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(user.Id);
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
             }
             else
@@ -213,7 +213,7 @@
             }
 
             Context.Server.Save();
-            await SimpleEmbedAsync($"Success, {Context.User.Mention} replaced {user.Mention}");
+            await SimpleEmbedAsync($"Success, {Context.User.Mention} replaced {userToReplace.Mention}");
             if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
             {
                 // Game is ready to be played
@@ -325,9 +325,9 @@
 
         [Command("GameResult")]
         [Summary("Vote for the result of a game")]
-        public async Task GameResultAsync(ITextChannel channel, int gameNumber, GuildModel.GameResult._Result result)
+        public async Task GameResultAsync(ITextChannel lobbyChannel, int gameNumber, GuildModel.GameResult._Result result)
         {
-            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == channel.Id && x.GameNumber == gameNumber);
+            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel.Id && x.GameNumber == gameNumber);
             if (selectedGame == null)
             {
                 throw new Exception("Game Unavailable. Incorrect Data.");
@@ -395,9 +395,9 @@
         [CheckLobby]
         [Command("ClearProposedResult")]
         [Summary("Clear the result of a proposal")]
-        public Task ClearGResAsync(ITextChannel channel, int gameNumber)
+        public Task ClearGResAsync(ITextChannel lobbyChannel, int gameNumber)
         {
-            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == channel.Id && x.GameNumber == gameNumber);
+            var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel.Id && x.GameNumber == gameNumber);
             if (selectedGame == null)
             {
                 throw new Exception("Game Unavailable. Incorrect Data.");

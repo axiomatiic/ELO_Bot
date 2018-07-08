@@ -16,7 +16,7 @@
     {
         [Command("ModifyPoints")]
         [Summary("Add or subtract points from a user")]
-        public async Task ModifyPointsAsync(IUser user, int points)
+        public async Task ModifyPointsAsync(IUser user, int pointsToAddOrSubtract)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (eUser == null)
@@ -24,7 +24,7 @@
                 throw new Exception("User is not registered");
             }
 
-            eUser.Stats.Points += points;
+            eUser.Stats.Points += pointsToAddOrSubtract;
             await SimpleEmbedAsync($"{user.Mention} Points Modified: {eUser.Stats.Points}");
             var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
             var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
@@ -33,9 +33,9 @@
 
         [Command("ModifyPoints")]
         [Summary("Add or subtract points from a user")]
-        public Task ModifyPointsAsync(int points, IUser user)
+        public Task ModifyPointsAsync(int pointsToAddOrSubtract, IUser user)
         {
-            return ModifyPointsAsync(user, points);
+            return ModifyPointsAsync(user, pointsToAddOrSubtract);
         }
 
         [Command("SetPoints")]
@@ -64,7 +64,7 @@
 
         [Command("ModifyKills")]
         [Summary("Add or subtract kills from a user")]
-        public async Task ModifyKillsAsync(IUser user, int kills)
+        public async Task ModifyKillsAsync(IUser user, int killsToAddOrSubtract)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (eUser == null)
@@ -72,16 +72,16 @@
                 throw new Exception("User is not registered");
             }
 
-            eUser.Stats.Kills += kills;
+            eUser.Stats.Kills += killsToAddOrSubtract;
             await SimpleEmbedAsync($"{user.Mention} Kills Modified: {eUser.Stats.Kills}");
             Context.Server.Save();
         }
 
         [Command("ModifyKills")]
         [Summary("Add or subtract kills from a user")]
-        public Task ModifyKillsAsync(int kills, IUser user)
+        public Task ModifyKillsAsync(int killsToAddOrSubtract, IUser user)
         {
-            return ModifyKillsAsync(user, kills);
+            return ModifyKillsAsync(user, killsToAddOrSubtract);
         }
 
         [Command("SetKills")]
@@ -108,7 +108,7 @@
 
         [Command("ModifyDeaths")]
         [Summary("Add or subtract Deaths from a user")]
-        public async Task ModifyDeathsAsync(IUser user, int deaths)
+        public async Task ModifyDeathsAsync(IUser user, int deathsToAddOrSubtract)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (eUser == null)
@@ -116,16 +116,16 @@
                 throw new Exception("User is not registered");
             }
 
-            eUser.Stats.Deaths += deaths;
+            eUser.Stats.Deaths += deathsToAddOrSubtract;
             await SimpleEmbedAsync($"{user.Mention} Deaths Modified: {eUser.Stats.Deaths}");
             Context.Server.Save();
         }
 
         [Command("ModifyDeaths")]
         [Summary("Add or subtract Deaths from a user")]
-        public Task ModifyDeathsAsync(int deaths, IUser user)
+        public Task ModifyDeathsAsync(int deathsToAddOrSubtract, IUser user)
         {
-            return ModifyDeathsAsync(user, deaths);
+            return ModifyDeathsAsync(user, deathsToAddOrSubtract);
         }
 
         [Command("SetDeaths")]
@@ -152,7 +152,7 @@
 
         [Command("ModifyWins")]
         [Summary("Add or subtract Wins from a user")]
-        public async Task ModifyWinsAsync(IUser user, int wins)
+        public async Task ModifyWinsAsync(IUser user, int winsToAddOrSubtract)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (eUser == null)
@@ -160,16 +160,16 @@
                 throw new Exception("User is not registered");
             }
 
-            eUser.Stats.Wins += wins;
+            eUser.Stats.Wins += winsToAddOrSubtract;
             await SimpleEmbedAsync($"{user.Mention} Wins Modified: {eUser.Stats.Wins}");
             Context.Server.Save();
         }
 
         [Command("ModifyWins")]
         [Summary("Add or subtract Wins from a user")]
-        public Task ModifyWinsAsync(int wins, IUser user)
+        public Task ModifyWinsAsync(int winsToAddOrSubtract, IUser user)
         {
-            return ModifyWinsAsync(user, wins);
+            return ModifyWinsAsync(user, winsToAddOrSubtract);
         }
 
         [Command("SetWins")]
@@ -197,7 +197,7 @@
 
         [Command("ModifyLosses")]
         [Summary("Add or subtract Losses from a user")]
-        public Task ModifyLossesAsync(IUser user, int losses)
+        public Task ModifyLossesAsync(IUser user, int lossesToAddOrSubtract)
         {
             var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (eUser == null)
@@ -205,7 +205,7 @@
                 throw new Exception("User is not registered");
             }
 
-            eUser.Stats.Losses += losses;
+            eUser.Stats.Losses += lossesToAddOrSubtract;
             Context.Server.Save();
 
             return SimpleEmbedAsync($"{user.Mention} Losses Modified: {eUser.Stats.Losses}");
@@ -213,9 +213,9 @@
 
         [Command("ModifyLosses")]
         [Summary("Add or subtract Losses from a user")]
-        public Task ModifyLossesAsync(int losses, IUser user)
+        public Task ModifyLossesAsync(int lossesToAddOrSubtract, IUser user)
         {
-            return ModifyLossesAsync(user, losses);
+            return ModifyLossesAsync(user, lossesToAddOrSubtract);
         }
 
         [Command("SetLosses")]

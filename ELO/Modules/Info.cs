@@ -135,7 +135,7 @@
 
         [CustomPermissions]
         [Command("GetUser")]
-        [Alias("userstats", "statsuser", "stats")]
+        [Alias("uUerStats", "StatsUser", "stats")]
         [Summary("Get information about the specified user profile")]
         public Task GetUserAsync(IUser user = null)
         {
@@ -181,7 +181,7 @@
 
         [CustomPermissions]
         [Command("LeaderBoardSort")]
-        [Alias("sortleaderboard", "sortlb")]
+        [Alias("sortLeaderboard", "sortLb")]
         [Summary("Displays leaderboard sort modes")]
         public Task LSortAsync()
         {
@@ -198,11 +198,11 @@
         [CustomPermissions]
         [Command("Leaderboard")]
         [Summary("Displays the leaderboard")]
-        public Task LeaderboardAsync(LeaderboardSortMode mode = LeaderboardSortMode.Points)
+        public Task LeaderboardAsync(LeaderboardSortMode sortMode = LeaderboardSortMode.Points)
         {
             var rgx = new Regex("[^a-zA-Z0-9 -#]");
             List<string> userStrings;
-            switch (mode)
+            switch (sortMode)
             {
                 case LeaderboardSortMode.Points:
                 {

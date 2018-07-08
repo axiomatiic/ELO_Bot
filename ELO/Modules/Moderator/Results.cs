@@ -19,14 +19,14 @@
     {
         [Command("Game")]
         [Summary("Submit a game result")]
-        public async Task GameAsync(IMessageChannel lobby, int gameNumber, GuildModel.GameResult._Result result)
+        public async Task GameAsync(IMessageChannel lobbyChannel, int gameNumber, GuildModel.GameResult._Result result)
         {
-            if (Context.Server.Lobbies.All(x => x.ChannelID != lobby.Id))
+            if (Context.Server.Lobbies.All(x => x.ChannelID != lobbyChannel.Id))
             {
                 throw new Exception("Channel is not a lobby");
             }
 
-            var game = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobby.Id && x.GameNumber == gameNumber);
+            var game = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel.Id && x.GameNumber == gameNumber);
             if (game.Result != GuildModel.GameResult._Result.Undecided)
             {
                 await InlineReactionReplyAsync(
