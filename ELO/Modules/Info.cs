@@ -68,8 +68,10 @@
                 }
             };
 
+            string userSelfUpdate = null;
             if (Context.Elo.User != null)
             {
+                userSelfUpdate = $"{Context.Elo.User.Username} => {name}";
                 newUser.Stats = Context.Elo.User.Stats;
                 newUser.Banned = Context.Elo.User.Banned;
                 Context.Server.Users.Remove(Context.Elo.User);
@@ -108,11 +110,17 @@
             await UserManagement.UserRenameAsync(Context, newUser);
             Context.Server.Save();
 
-            await ReplyAsync(new EmbedBuilder
+            if (userSelfUpdate == null)
             {
-                Title = $"Success, Registered as {name}",
-                Description = Context.Server.Settings.Registration.Message
-            });
+                await ReplyAsync(new EmbedBuilder { Title = $"Success, Registered as {name}", Description = Context.Server.Settings.Registration.Message });
+            }
+            else
+            {
+                await SimpleEmbedAsync($"You have re-registered.\n" + 
+                                       $"Name: {userSelfUpdate}\n" + 
+                                       $"Role's have been updated\n" + 
+                                       $"Stats have been saved.");
+            }
 
             if (Context.Guild.GetRole(Context.Server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID ?? 0) is IRole RegRole)
             {

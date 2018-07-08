@@ -105,6 +105,11 @@
                     return;
                 }
 
+                if (gUser.Roles.Max(x => x.Position) >= context.Guild.CurrentUser.Roles.Max(x => x.Position))
+                {
+                    return;
+                }
+
                 await gUser.ModifyAsync(x => x.Nickname = rename);
             }
             catch (Exception e)
