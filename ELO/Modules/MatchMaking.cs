@@ -61,8 +61,15 @@
                 await SimpleEmbedAsync($"Success, Added {Context.User.Mention} to queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
                 if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
                 {
-                    //Game is ready to be played
+                    // Game is ready to be played
                     await FullGame.FullQueueAsync(Context);
+                }
+            }
+            else
+            {
+                if (Context.Server.Settings.Readability.JoinLeaveErrors)
+                {
+                    throw new Exception("You are already queued for this lobby");
                 }
             }
         }
@@ -82,6 +89,13 @@
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(Context.User.Id);
                 await SimpleEmbedAsync($"Success, Removed {Context.User.Mention} from queue, [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]");
                 Context.Server.Save();
+            }
+            else
+            {
+                if (Context.Server.Settings.Readability.JoinLeaveErrors)
+                {
+                    throw new Exception("You cannot leave a lobby you aren't queued for");
+                }
             }
         }
 

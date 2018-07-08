@@ -221,6 +221,8 @@
             public class _Readability
             {
                 public bool ReplyErrors { get; set; } = true;
+
+                public bool JoinLeaveErrors { get; set; } = false;
             }
 
             public class _Moderation
