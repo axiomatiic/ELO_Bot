@@ -63,20 +63,20 @@
 
         [Command("NickNameFormat")]
         [Summary("Set a custom user nickname format")]
-        public async Task NickFormatAsync([Remainder] string message)
+        public async Task NickFormatAsync([Remainder] string nicknameFormatting)
         {
-            if (message.Length > 32)
+            if (nicknameFormatting.Length > 32)
             {
                 throw new Exception("Format must be shorter than 32 characters");
             }
 
-            if (message.Length - "{username}".Length > 12)
+            if (nicknameFormatting.Length - "{username}".Length > 12)
             {
                 // Since discord limits username to 32 characters and out bot's registration limit is only 20 characters, there is a 12 character space to customize
                 throw new Exception("Format Length too long, please shorten it.");
             }
 
-            Context.Server.Settings.Registration.NameFormat = message.ToLower();
+            Context.Server.Settings.Registration.NameFormat = nicknameFormatting.ToLower();
             await SimpleEmbedAsync("Success Nickname Format has been set.");
             Context.Server.Save();
         }
@@ -91,42 +91,42 @@
 
         [Command("DefaultWinModifier")]
         [Summary("Set the default amount of points users are given when winning a match")]
-        public Task WinModifierAsync(int input = 10)
+        public Task WinModifierAsync(int pointsToAdd = 10)
         {
-            if (input <= 0)
+            if (pointsToAdd <= 0)
             {
                 throw new Exception("Win Modifier must be a positive integer");
             }
 
-            Context.Server.Settings.Registration.DefaultWinModifier = input;
+            Context.Server.Settings.Registration.DefaultWinModifier = pointsToAdd;
             Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success Default Win Modifier is now: +{input}");
+            return SimpleEmbedAsync($"Success Default Win Modifier is now: +{pointsToAdd}");
         }
 
         [Command("DefaultLossModifier")]
         [Summary("Set the default amount of points users lose wh")]
-        public Task LossModifierAsync(int input = 5)
+        public Task LossModifierAsync(int pointsToRemove = 5)
         {
-            Context.Server.Settings.Registration.DefaultLossModifier = Math.Abs(input);
+            Context.Server.Settings.Registration.DefaultLossModifier = Math.Abs(pointsToRemove);
             Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success, Default Loss Modifier is now: -{input}");
+            return SimpleEmbedAsync($"Success, Default Loss Modifier is now: -{pointsToRemove}");
         }
 
         [Command("ReQueueDelay")]
         [Summary("Set the amount of time users must wait between games")]
-        public Task ReQueueDelayAsync(int input = 0)
+        public Task ReQueueDelayAsync(int minutes = 0)
         {
-            if (input < 0)
+            if (minutes < 0)
             {
                 throw new Exception("Delay must be greater than or equal to zero");
             }
 
-            Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(input);
+            Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(minutes);
             Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success, users must wait {input} minutes before re-queuing");
+            return SimpleEmbedAsync($"Success, users must wait {minutes} minutes before re-queuing");
         }
 
         [Command("ShowKD")]

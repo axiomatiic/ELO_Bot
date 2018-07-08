@@ -207,56 +207,56 @@
                 case LeaderboardSortMode.Points:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Points).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Points: {x.Stats.Points}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Points: {x.Stats.Points}`").ToList();
                     break;
                 }
 
                 case LeaderboardSortMode.Win:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Wins).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Wins: {x.Stats.Wins}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Wins: {x.Stats.Wins}`").ToList();
                     break;
                 }
 
                 case LeaderboardSortMode.Loss:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Losses).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Losses: {x.Stats.Losses}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Losses: {x.Stats.Losses}`").ToList();
                     break;
                 }
 
                 case LeaderboardSortMode.Kills:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Kills).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Kills: {x.Stats.Kills}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Kills: {x.Stats.Kills}`").ToList();
                     break;
                 }
 
                 case LeaderboardSortMode.Deaths:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Deaths).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Deaths: {x.Stats.Deaths}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Deaths: {x.Stats.Deaths}`").ToList();
                     break;
                 }
 
                 case LeaderboardSortMode.Draws:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Draws).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Draws: {x.Stats.Draws}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Draws: {x.Stats.Draws}`").ToList();
                     break;
                 }
 
                 case LeaderboardSortMode.GamesPlayed:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.GamesPlayed).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Games: {x.Stats.GamesPlayed}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Games: {x.Stats.GamesPlayed}`").ToList();
                     break;
                 }
 
                 default:
                 {
                     var users = Context.Server.Users.OrderByDescending(x => x.Stats.Points).Where(x => Context.Guild.GetUser(x.UserID) != null).ToList();
-                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(40)}\u200B || Points: {x.Stats.Points}`").ToList();
+                    userStrings = users.Select(x => $"`{$"#{users.IndexOf(x) + 1} - {rgx.Replace(x.Username, "")}".PadRight(33)}\u200B || Points: {x.Stats.Points}`").ToList();
                     break;
                 }
             }
