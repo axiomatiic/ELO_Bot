@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
+    using ELO.Discord.Extensions;
     using ELO.Handlers;
 
     using global::Discord;
@@ -130,7 +131,7 @@
                 }
 
                 var info = passingCommands.Select(x => $"`{Context.Prefix}{x.Aliases.FirstOrDefault()} {string.Join(" ", x.Parameters.Select(ParameterInformation))}` {(x.Summary != null ? $"\nS: {x.Summary}" : "")} {(x.Remarks != null ? $"\nR: {x.Remarks}" : "")}").ToList();
-                var splitFields = SplitList(info, 10)
+                var splitFields = info.SplitList(10)
                     .Select(x => new EmbedFieldBuilder
                     {
                         Name = $"Module: {module.Name}",
@@ -199,7 +200,7 @@
                               service.Modules.OrderBy(x => x.Name).ToList();
             
             // Split the modules into groups of 5 to ensure the message doesn't get too long
-            var moduleSets = SplitList(modules, 5);
+            var moduleSets = modules.SplitList(5);
             moduleIndex += moduleSets.Count - 1;
             var fields = new List<EmbedFieldBuilder>
                                      {
@@ -275,7 +276,7 @@
             foreach (var contents in pageContents)
             {
                 // Split these into groups of 10 to ensure there is no embed field character limit being hit. (1024 characters bet field description)
-                var splitFields = SplitList(contents.Value, 10)
+                var splitFields = contents.Value.SplitList(10)
                     .Select(x => new EmbedFieldBuilder
                     {
                         Name = contents.Key,
@@ -327,24 +328,6 @@
             }
 
             return initial;
-        }
-
-        /// <summary>
-        ///     Split a list into a group of lists of a specified size.
-        /// </summary>
-        /// <typeparam name="T">Type of item held within the list</typeparam>
-        /// <param name="fullList">Input list</param>
-        /// <param name="groupSize">Size of Groups to output</param>
-        /// <returns>A list of lists of the specified size</returns>
-        public static List<List<T>> SplitList<T>(List<T> fullList, int groupSize = 30)
-        {
-            var splitList = new List<List<T>>();
-            for (var i = 0; i < fullList.Count; i += groupSize)
-            {
-                splitList.Add(fullList.Skip(i).Take(groupSize).ToList());
-            }
-
-            return splitList;
         }
 
         /// <summary>

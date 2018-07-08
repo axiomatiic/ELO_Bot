@@ -100,6 +100,11 @@
                     return;
                 }
 
+                if (gUser.Id == context.Guild.OwnerId)
+                {
+                    return;
+                }
+
                 await gUser.ModifyAsync(x => x.Nickname = rename);
             }
             catch (Exception e)

@@ -306,5 +306,124 @@
 
             return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", rankList)}");
         }
+
+        [CheckLobby]
+        [CustomPermissions]
+        [Command("LastGame")]
+        [Summary("Displays the last game in the current lobby")]
+        public Task LastGameAsync()
+        {
+            return ShowGameAsync(Context.Channel.Id, Context.Server.Results.Where(x => x.LobbyID == Context.Channel.Id).Max(x => x.GameNumber));
+        }
+
+        [CheckLobby]
+        [CustomPermissions]
+        [Command("ShowGame")]
+        [Summary("Displays the a game from the given lobby")]
+        public Task ShowGameAsync(ITextChannel lobbyChannel, int gameNumber)
+        {
+            return ShowGameAsync(lobbyChannel.Id, gameNumber);
+        }
+
+        [CheckLobby]
+        [CustomPermissions]
+        [Command("ShowGame")]
+        [Summary("Displays the a game from the current lobby")]
+        public Task ShowGameAsync(int gameNumber)
+        {
+            return ShowGameAsync(Context.Channel.Id, gameNumber);
+        }
+
+        [CheckLobby]
+        [CustomPermissions]
+        [Command("Comment")]
+        [Summary("Comments on a game from the current lobby")]
+        public Task CommentAsync(int gameNumber, [Remainder] string comment)
+        {
+            var game = Context.Server.Results.FirstOrDefault(l => l.LobbyID == Context.Channel.Id && l.GameNumber == gameNumber);
+
+            if (game == null)
+            {
+                throw new Exception("Invalid Game Number");
+            }
+
+            if (comment.Length > 150)
+            {
+                throw new Exception($"Comments must be less than 150 characters long (Current = {comment.Length})");
+            }
+
+            game.Comments.Add(new GuildModel.GameResult.Comment
+                                  {
+                                      Content = comment,
+                                      CommenterID = Context.User.Id,
+                                      ID = game.Comments.Count
+                                  });
+
+            Context.Server.Save();
+            return SimpleEmbedAsync($"Success, {Context.User.Mention} commented on game #{gameNumber}\n" + $"{comment}");
+        }
+
+        public Task ShowGameAsync(ulong lobbyId, int gameNumber)
+        {
+            var game = Context.Server.Results.FirstOrDefault(l => l.LobbyID == lobbyId && l.GameNumber == gameNumber);
+            if (game == null)
+            {
+                throw new Exception("Invalid game");
+            }
+
+            string resultProposalInfo = null;
+            if (game.Proposal != new GuildModel.GameResult.ResultProposal())
+            {
+                if (game.Proposal.R1 != GuildModel.GameResult._Result.Undecided || game.Proposal.R2 != GuildModel.GameResult._Result.Undecided)
+                {
+                    resultProposalInfo = "**Result Proposal:**\n" + $"{Context.Guild.GetUser(game.Proposal.P1)?.Mention ?? $"[{game.Proposal.P1}]"} {game.Proposal.R1}\n" + $"{Context.Guild.GetUser(game.Proposal.P2)?.Mention ?? $"[{game.Proposal.P2}]"} {game.Proposal.R2}\n\n";
+                }
+            }
+
+            if (game.Comments.Any())
+            {
+                var pages = new List<PaginatedMessage.Page>
+                                {
+                                    new PaginatedMessage.Page
+                                        {
+                                            Color = Color.Blue,
+                                            Title = $"{Context.Channel.Name} - #{game.GameNumber}",
+                                            Description = $"**Team 1:**\n{string.Join(" ", game.Team1.Select(x => Context.Guild.GetUser(x)?.Mention ?? $"[{x}]"))}\n\n" + 
+                                                          $"**Team 2:**\n{string.Join(" ", game.Team2.Select(x => Context.Guild.GetUser(x)?.Mention ?? $"[{x}]"))}\n\n" +
+                                                          $"Result:\n{game.Result}\n\n" + 
+                                                          $"{resultProposalInfo}" + 
+                                                          $"**For Comments, react with arrows.** (:arrow_backward: :arrow_forward:)"
+                                        }
+                                };
+                foreach (var commentGroup in game.Comments.OrderByDescending(x => x.ID).ToList().SplitList(5))
+                {
+                    pages.Add(new PaginatedMessage.Page
+                                  {
+                                      Description = $"{string.Join("\n", commentGroup.Select(c => $"`{c.ID}` - {Context.Guild.GetUser(c.CommenterID)?.Mention}\n{c.Content}"))}"
+                                  });
+                }
+
+                return PagedReplyAsync(new PaginatedMessage
+                                            {
+                                                Pages = pages
+                                            }, new ReactionList
+                                                  {
+                                                      Forward = true,
+                                                      Backward = true,
+                                                      Trash = true
+                                                  }, false);
+            }
+
+            return ReplyAsync(
+                new EmbedBuilder
+                    {
+                        Color = Color.Blue,
+                        Title = $"{Context.Channel.Name} - #{game.GameNumber}",
+                        Description =
+                            $"**Team 1:** {string.Join(" ", game.Team1.Select(x => Context.Guild.GetUser(x)?.Mention ?? $"[{x}]"))}\n\n"
+                            + $"**Team 2:** {string.Join(" ", game.Team2.Select(x => Context.Guild.GetUser(x)?.Mention ?? $"[{x}]"))}\n\n"
+                            + $"Result:\n{game.Result}\n\n" + $"{resultProposalInfo}"
+                    });
+        }
     }
 }

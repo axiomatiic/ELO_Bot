@@ -19,6 +19,7 @@
     {
         [Command("CreateLobby")]
         [Summary("Interactive lobby creation command")]
+        [RequireBotPermission(ChannelPermission.AddReactions)]
         public Task CreateLobbyAsync()
         {
             if (Context.Elo.Lobby != null)
@@ -37,7 +38,8 @@
                         new EmbedBuilder
                             {
                                 Description =
-                                    "Please react with the amount of players you would like **PER TEAM**"
+                                    "Please react with the amount of players you would like **PER TEAM**\n" + 
+                                    "ie. :two: = each team has two players (4 players total)"
                             }.Build(),
                         timeout: TimeSpan.FromMinutes(2), timeoutCallback: c => SimpleEmbedAsync("Command Timed Out"))
                     .WithCallback(new Emoji("1\u20e3"), (c, r) => SortModeAsync(lobby, 1))
