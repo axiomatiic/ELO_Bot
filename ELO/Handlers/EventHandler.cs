@@ -235,6 +235,49 @@
             });
         }
 
+        internal Task GuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
+        {
+            if (userBefore.Status != userAfter.Status)
+            {
+                if (userAfter.Status != UserStatus.Online)
+                {
+                    var guildModel = Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, userAfter.Guild.Id.ToString());
+                    if (guildModel.Settings.GameSettings.RemoveOnAfk)
+                    {
+                        var lobbies = guildModel.Lobbies.Where(x => x.Game.QueuedPlayerIDs.Contains(userAfter.Id) || x.Game.Team1.Players.Contains(userAfter.Id) || x.Game.Team2.Players.Contains(userAfter.Id)).ToList();
+                        if (lobbies.Any())
+                        {
+                            foreach (var lobby in lobbies)
+                            {
+                                var messageChannel = Client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
+                                if (lobby.Game.IsPickingTeams)
+                                {
+                                    messageChannel.SendMessageAsync("", false, new EmbedBuilder
+                                                                                         {
+                                                                                             Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue or use the replace command",
+                                                                                             Color = Color.DarkRed
+                                                                                         }.Build());
+                                }
+                                else
+                                {
+                                    lobby.Game.QueuedPlayerIDs.Remove(userAfter.Id);
+                                    messageChannel.SendMessageAsync("", false, new EmbedBuilder
+                                                                                         {
+                                                                                             Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()} and has been automatically removed from the queue",
+                                                                                             Color = Color.DarkBlue
+                                                                                         }.Build());
+                                }
+                            }
+
+                            guildModel.Save();
+                        }
+                    }
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         /// <summary>
         /// This event is triggered every time the a user sends a message in a channel, dm etc. that the bot has access to view.
         /// </summary>
@@ -276,27 +319,29 @@
                 }                
             }
 
-
             if (context.Elo.User != null)
             {
                 if (context.Elo.User.Banned.Banned)
                 {
                     if (context.Elo.User.Banned.ExpiryTime < DateTime.UtcNow)
                     {
-                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                                                                              {
-                                                                                  Description = $"{context.User.Mention} Your ban has expired.\n" +
-                                                                                                $"Reason: {context.Elo.User.Banned.Reason}\n" +
-                                                                                                $"Moderator: {context.Guild.GetUser(context.Elo.User.Banned.Moderator)?.Mention ?? $"[{context.Elo.User.Banned.Moderator}]"}",
-                                                                                  Color = Color.DarkOrange
-                                                                              }.Build());
+                        await context.Channel.SendMessageAsync(
+                            "",
+                            false,
+                            new EmbedBuilder
+                                {
+                                    Description =
+                                        $"{context.User.Mention} Your ban has expired.\n"
+                                        + $"Reason: {context.Elo.User.Banned.Reason}\n"
+                                        + $"Moderator: {context.Guild.GetUser(context.Elo.User.Banned.Moderator)?.Mention ?? $"[{context.Elo.User.Banned.Moderator}]"}",
+                                    Color = Color.DarkOrange
+                                }.Build());
                         context.Elo.User.Banned = new GuildModel.User.Ban();
                         context.Server.Save();
                     }
                 }
-
             }
-
+            
             // Here we attempt to execute a command based on the user message
             var result = await CommandService.ExecuteAsync(context, argPos, Provider, MultiMatchHandling.Best);
 

@@ -61,6 +61,7 @@
             Client.JoinedGuild += Event.JoinedGuildAsync;
             Client.ShardConnected += Event.ShardConnectedAsync;
             Client.MessageReceived += Event.MessageReceivedAsync;
+            Client.GuildMemberUpdated += Event.GuildMemberUpdatedAsync;
 
             // Here we log the bot in and start it. This MUST run for the bot to connect to discord.
             await Client.LoginAsync(TokenType.Bot, Config.Token);
