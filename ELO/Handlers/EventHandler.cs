@@ -235,6 +235,30 @@
             });
         }
 
+        /// <summary>
+        /// Tries to remove a user's profile if they leave the server
+        /// </summary>
+        /// <param name="user">
+        /// The user.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        internal Task UserLeftAsync(SocketGuildUser user)
+        {
+            var guild = Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, user.Guild.Id.ToString());
+            if (guild != null)
+            {
+                if (guild.Settings.Registration.DeleteProfileOnLeave)
+                {
+                    guild.Users.RemoveAll(x => x.UserID == user.Id);
+                    LogHandler.LogMessage($"Auto Deleted user from: {user.Guild.Name} (user left)");
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         internal Task GuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
         {
             if (userBefore.Status != userAfter.Status)
