@@ -15,6 +15,23 @@
     [Summary("Rank info and management")]
     public class Rank : Base
     {
+        [CustomPermissions]
+        [Command("RankInfo")]
+        [Summary("Display all ranks + Default")]
+        public Task ViewRanksAsync()
+        {
+
+            var rankList = Context.Server.Ranks.OrderByDescending(r => r.Threshold).Select(
+                r =>
+                    {
+                        var name = Context.Guild.GetRole(r.RoleID)?.Mention ?? $"[{r.RoleID}]";
+                        var scoreInfo = $"{r.Threshold.ToString().PadRight(10)} +{(r.WinModifier == 0 ? Context.Server.Settings.Registration.DefaultWinModifier : r.WinModifier).ToString().PadRight(10)} -{(r.LossModifier == 0 ? Context.Server.Settings.Registration.DefaultLossModifier : r.LossModifier).ToString().PadRight(10)}\u200B";
+                        return $"`{scoreInfo}` - {name}{(r.IsDefault ? " :small_orange_diamond:" : "")}";
+                    }).ToList();
+
+            return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", rankList)}");
+        }
+
         [Command("AddRank")]
         [Summary("Add a rank users can achieve by getting a certain amount of points")]
         public Task AddRankAsync(int points, IRole role)

@@ -15,6 +15,28 @@
     [Summary("Main server setup commands")]
     public class Setup : Base
     {
+        [Command("RegistrationInfo")]
+        public Task SetupInfoAsync()
+        {
+            var r = Context.Server.Settings.Registration;
+            return SimpleEmbedAsync(
+                $"**AllowMultiRegistration:** {r.AllowMultiRegistration}\n" + $"**DefaultLossModifier:** {r.DefaultLossModifier}\n"
+                                                      + $"**DefaultLossModifier:** {r.DefaultLossModifier}\n"
+                                                      + $"**RegistrationBonus:** {r.RegistrationBonus}\n"
+                                                      + $"**DeleteProfileOnLeave:** {r.DeleteProfileOnLeave}\n" 
+                                                      + $"**NameFormat:** {r.NameFormat}\n"
+                                                      + $"**Message:** \n{r.Message}\n");
+        }
+
+        [Command("ReadabilityInfo")]
+        public Task ReadabilityAsync()
+        {
+            var r = Context.Server.Settings.Readability;
+            return SimpleEmbedAsync(
+                $"**JoinLeaveErrors:** {r.JoinLeaveErrors}\n" + 
+                $"**ReplyErrors:** {r.ReplyErrors}");
+        }
+
         [Command("RegisterRole")]
         [Summary("Set the default role user's are given when registering")]
         public Task RegisterRoleAsync(IRole role)
