@@ -17,6 +17,23 @@
     [Summary("Lobby creation and setup commands")]
     public class Lobby : Base
     {
+        [CheckLobby]
+        [Command("LobbyInfo")]
+        [Summary("View information about the current lobby")]
+        public Task LobbyInfoAsync()
+        {
+            var l = Context.Elo.Lobby;
+            return SimpleEmbedAsync($"**UserLimit:** {l.UserLimit}\n" +
+                                    $"**RandomMapAnnounce:** {l.RandomMapAnnounce}\n" +
+                                    $"**CaptainSortMode:** {l.CaptainSortMode}\n" +
+                                    $"**PickMode:** {l.PickMode}\n" +
+                                    $"**HostSelectionMode:** {l.HostSelectionMode}\n" +
+                                    $"**GamesPlayed:** {l.GamesPlayed}\n" +
+                                    $"**Maps:** {string.Join(", ", l.Maps)}\n" +
+                                    $"**Description:** \n{l.Description}\n");
+        }
+
+
         [Command("CreateLobby")]
         [Summary("Interactive lobby creation command")]
         [RequireBotPermission(ChannelPermission.AddReactions)]

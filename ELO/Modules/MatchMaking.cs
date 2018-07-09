@@ -137,7 +137,6 @@
         }
 
         [Command("Lobby")]
-        [Alias("lobbyInfo")]
         [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
