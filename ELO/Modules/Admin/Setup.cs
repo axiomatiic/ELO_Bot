@@ -134,5 +134,15 @@
 
             return SimpleEmbedAsync($"Reply with Join Leave: {Context.Server.Settings.Readability.JoinLeaveErrors}");
         }
+
+        [Command("MultiRegister")]
+        [Summary("toggle whether users can use the register command more than once")]
+        public Task ToggleMultiRegisterAsync()
+        {
+            Context.Server.Settings.Registration.AllowMultiRegistration = !Context.Server.Settings.Registration.AllowMultiRegistration;
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Allow multi registration: {Context.Server.Settings.Registration.AllowMultiRegistration}");
+        }
     }
 }

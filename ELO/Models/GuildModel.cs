@@ -285,6 +285,8 @@
 
                 public bool DeleteProfileOnLeave { get; set; } = false;
 
+                public bool AllowMultiRegistration { get; set; } = true;
+
                 public string NameFormat { get; set; } = "[{score}] - {username}";
             }
 

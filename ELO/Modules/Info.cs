@@ -71,6 +71,11 @@
             string userSelfUpdate = null;
             if (Context.Elo.User != null)
             {
+                if (!Context.Server.Settings.Registration.AllowMultiRegistration)
+                {
+                    throw new Exception("You are not allowed to re-register");
+                }
+
                 userSelfUpdate = $"{Context.Elo.User.Username} => {name}";
                 newUser.Stats = Context.Elo.User.Stats;
                 newUser.Banned = Context.Elo.User.Banned;
