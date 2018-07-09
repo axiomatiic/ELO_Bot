@@ -142,7 +142,7 @@
                               $"**Sort Mode**: {Context.Elo.Lobby.PickMode.ToString()}\n" +
                               $"**Game Number**: {Context.Elo.Lobby.GamesPlayed + 1}\n" +
                               $"**Host Pick mode**: {Context.Elo.Lobby.HostSelectionMode}\n" +
-                              "Description:\n" +
+                              "**Description**:\n" +
                               $"{Context.Elo.Lobby.Description}",
                 Color = Color.Blue
             }.Build());
