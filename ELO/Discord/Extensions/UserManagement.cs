@@ -127,7 +127,6 @@
 
         public static async Task RegisterAsync(Context con, GuildModel server, IUser user, string name)
         {
-            
             if (name.Length > 20)
             {
                 throw new Exception("Name must be equal to or less than 20 characters long");
@@ -170,27 +169,8 @@
 
             server.Users.Add(newUser);
 
-            if (newUser.Stats.Points == server.Settings.Registration.RegistrationBonus && server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID != null)
-            {
-                var registerRole = con.Guild.GetRole(server.Ranks.FirstOrDefault(x => x.IsDefault).RoleID);
-                if (registerRole != null)
-                {
-                    try
-                    {
-                        await (user as IGuildUser).AddRoleAsync(registerRole);
-                    }
-                    catch
-                    {
-                        // user Permissions above the bot.
-                    }
-                }
-            }
-            else
-            {
-                await GiveMaxRoleAsync(con, newUser);
-            }
+            await RegisterUpdatesAsync(con, server, newUser, user);
 
-            await UserRenameAsync(con, newUser);
             server.Save();
 
             if (userSelfUpdate == null)
@@ -219,6 +199,31 @@
                     LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
                 }
             }
+        }
+
+        public static async Task RegisterUpdatesAsync(Context con, GuildModel server, GuildModel.User newUser, IUser user)
+        {
+            if (newUser.Stats.Points == server.Settings.Registration.RegistrationBonus && server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID != null)
+            {
+                var registerRole = con.Guild.GetRole(server.Ranks.FirstOrDefault(x => x.IsDefault).RoleID);
+                if (registerRole != null)
+                {
+                    try
+                    {
+                        await (user as IGuildUser).AddRoleAsync(registerRole);
+                    }
+                    catch
+                    {
+                        // user Permissions above the bot.
+                    }
+                }
+            }
+            else
+            {
+                await GiveMaxRoleAsync(con, newUser);
+            }
+
+            await UserRenameAsync(con, newUser);
         }
     }
 }
