@@ -15,8 +15,14 @@
         {
             try
             {
+                // Get the highest point threshold based of the users score
+                // This is the highest rank points that is lower than the user's points
                 var maxRankPoints = context.Server.Ranks.Where(x => x.Threshold <= (user?.Stats.Points ?? context.Elo.User.Stats.Points)).Max(x => x.Threshold);
-                var maxRank = context.Server.Ranks.FirstOrDefault(x => x.Threshold == maxRankPoints);
+
+                // Get the first role that matches this threshold
+                var maxRank = context.Server.Ranks.First(x => x.Threshold == maxRankPoints);
+
+                // Ensure that the returned role has a score. If not, use the default server modifier
                 maxRank.LossModifier = maxRank.LossModifier == 0 ? context.Server.Settings.Registration.DefaultLossModifier : maxRank.LossModifier;
                 maxRank.WinModifier = maxRank.WinModifier == 0 ? context.Server.Settings.Registration.DefaultWinModifier : maxRank.WinModifier;
                 return maxRank;
@@ -116,6 +122,102 @@
             {
                 // Error renaming user (permissions above bot.)
                 LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
+            }
+        }
+
+        public static async Task RegisterAsync(Context con, GuildModel server, IUser user, string name)
+        {
+            
+            if (name.Length > 20)
+            {
+                throw new Exception("Name must be equal to or less than 20 characters long");
+            }
+
+            var newUser = new GuildModel.User
+            {
+                UserID = user.Id,
+                Username = name,
+                Stats = new GuildModel.User.Score
+                {
+                    Points = server.Settings.Registration.RegistrationBonus
+                }
+            };
+
+            string userSelfUpdate = null;
+
+            var eloUser = server.Users.FirstOrDefault(x => x.UserID == user.Id);
+
+            if (eloUser != null)
+            {
+                if (!server.Settings.Registration.AllowMultiRegistration)
+                {
+                    throw new Exception("You are not allowed to re-register");
+                }
+
+                userSelfUpdate = $"{eloUser.Username} => {name}";
+                newUser.Stats = eloUser.Stats;
+                newUser.Banned = eloUser.Banned;
+                server.Users.Remove(eloUser);
+            }
+            else
+            {
+                if (server.Users.Count > 20 && (server.Settings.Premium.Expiry < DateTime.UtcNow || !server.Settings.Premium.IsPremium))
+                {
+                    throw new Exception($"Premium is required to register more than 20 users. {ConfigModel.Load().PurchaseLink}\n"
+                                        + $"Get the server owner to purchase a key and use the command `{con.Prefix}Premium <key>`");
+                }
+            }
+
+            server.Users.Add(newUser);
+
+            if (newUser.Stats.Points == server.Settings.Registration.RegistrationBonus && server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID != null)
+            {
+                var registerRole = con.Guild.GetRole(server.Ranks.FirstOrDefault(x => x.IsDefault).RoleID);
+                if (registerRole != null)
+                {
+                    try
+                    {
+                        await (user as IGuildUser).AddRoleAsync(registerRole);
+                    }
+                    catch
+                    {
+                        // user Permissions above the bot.
+                    }
+                }
+            }
+            else
+            {
+                await GiveMaxRoleAsync(con, newUser);
+            }
+
+            await UserRenameAsync(con, newUser);
+            server.Save();
+
+            if (userSelfUpdate == null)
+            {
+                await con.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = $"Success, Registered as {name}", Description = server.Settings.Registration.Message }.Build());
+            }
+            else
+            {
+                await con.Channel.SendMessageAsync("", false, new EmbedBuilder
+                                                                  {
+                                                                      Description = "You have re-registered.\n" + 
+                                                                                   $"Name: {userSelfUpdate}\n" + 
+                                                                                   "Role's have been updated\n" + 
+                                                                                   "Stats have been saved."
+                                                                  }.Build());
+            }
+
+            if (con.Guild.GetRole(server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID ?? 0) is IRole RegRole)
+            {
+                try
+                {
+                    await (user as IGuildUser).AddRoleAsync(RegRole);
+                }
+                catch (Exception e)
+                {
+                    LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
+                }
             }
         }
     }

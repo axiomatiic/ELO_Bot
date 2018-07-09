@@ -14,6 +14,7 @@
     using global::Discord;
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
+    using global::Discord.WebSocket;
 
     [CustomPermissions(true, true)]
     [Summary("User management commands")]
@@ -23,16 +24,7 @@
         [Summary("Deletes the specified user's profile")]
         public Task DeleteUserAsync(IUser user)
         {
-            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (profile == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            Context.Server.Users.Remove(profile);
-
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Success {user.Mention}'s profile has been deleted.");
+            return DeleteUserAsync(user.Id);
         }
 
         [Command("DelUser")]
@@ -46,14 +38,53 @@
             }
 
             Context.Server.Users.Remove(profile);
-
             Context.Server.Save();
+
+            if (Context.Guild.GetUser(userID) is SocketGuildUser user)
+            {
+                try
+                {
+                    user.RemoveRolesAsync(user.Roles.Where(r => Context.Server.Ranks.Any(x => x.RoleID == r.Id)));
+                }
+                catch
+                {
+                    // Ignored
+                }
+
+                try
+                {
+                    user.ModifyAsync(u => u.Nickname = null);
+                }
+                catch
+                {
+                    // Ignored
+                }
+            }
+            
             return SimpleEmbedAsync($"Success {profile.Username} [{userID}]'s profile has been deleted.");
+        }
+
+        [Command("RegisterUser")]
+        [Summary("Register the specified user")]
+        public Task RegisterUserAsync(IUser user, [Remainder]string nickname = null)
+        {
+            var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
+            if (profile != null)
+            {
+                throw new Exception("User is already registered");
+            }
+
+            if (nickname == null)
+            {
+                throw new Exception("User nickname must be provided");
+            }
+
+            return UserManagement.RegisterAsync(Context, Context.Server, user, nickname);
         }
 
         [Command("Rename")]
         [Summary("Rename the specified user")]
-        public Task RenameAsync(IUser user, string nickname)
+        public Task RenameAsync(IUser user, [Remainder]string nickname = null)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (profile == null)

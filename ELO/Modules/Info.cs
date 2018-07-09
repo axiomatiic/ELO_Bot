@@ -36,7 +36,7 @@
         {
             if (user.Id == Context.User.Id)
             {
-                return RegisterAsync(Context.User.Username);
+                return UserManagement.RegisterAsync(Context, Context.Server, Context.User, Context.User.Username);
             }
 
             throw new Exception("You cannot register by tagging another user");
@@ -46,98 +46,14 @@
         [Summary("Register using your username")]
         public Task RegisterAsync()
         {
-            return RegisterAsync(Context.User.Username);
+            return UserManagement.RegisterAsync(Context, Context.Server, Context.User, Context.User.Username);
         }
 
         [Command("Register")]
         [Summary("Register using a specified nickname")]
-        public async Task RegisterAsync([Remainder] string name)
+        public Task RegisterAsync([Remainder] string name)
         {
-            if (name.Length > 20)
-            {
-                throw new Exception("Name must be equal to or less than 20 characters long");
-            }
-
-            var newUser = new GuildModel.User
-            {
-                UserID = Context.User.Id,
-                Username = name,
-                Stats = new GuildModel.User.Score
-                {
-                    Points = Context.Server.Settings.Registration.RegistrationBonus
-                }
-            };
-
-            string userSelfUpdate = null;
-            if (Context.Elo.User != null)
-            {
-                if (!Context.Server.Settings.Registration.AllowMultiRegistration)
-                {
-                    throw new Exception("You are not allowed to re-register");
-                }
-
-                userSelfUpdate = $"{Context.Elo.User.Username} => {name}";
-                newUser.Stats = Context.Elo.User.Stats;
-                newUser.Banned = Context.Elo.User.Banned;
-                Context.Server.Users.Remove(Context.Elo.User);
-            }
-            else
-            {
-                if (Context.Server.Users.Count > 20 && (Context.Server.Settings.Premium.Expiry < DateTime.UtcNow || !Context.Server.Settings.Premium.IsPremium))
-                {
-                    throw new Exception($"Premium is required to register more than 20 users. {ConfigModel.Load().PurchaseLink}\n"
-                                        + $"Get the server owner to purchase a key and use the command `{Context.Prefix}Premium <key>`");
-                }
-            }
-
-            Context.Server.Users.Add(newUser);
-
-            if (newUser.Stats.Points == Context.Server.Settings.Registration.RegistrationBonus && Context.Server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID != null)
-            {
-                var registerRole = Context.Guild.GetRole(Context.Server.Ranks.FirstOrDefault(x => x.IsDefault).RoleID);
-                if (registerRole != null)
-                {
-                    try
-                    {
-                        await (Context.User as IGuildUser).AddRoleAsync(registerRole);
-                    }
-                    catch
-                    {
-                        // user Permissions above the bot.
-                    }
-                }
-            }
-            else
-            {
-                await UserManagement.GiveMaxRoleAsync(Context, newUser);
-            }
-
-            await UserManagement.UserRenameAsync(Context, newUser);
-            Context.Server.Save();
-
-            if (userSelfUpdate == null)
-            {
-                await ReplyAsync(new EmbedBuilder { Title = $"Success, Registered as {name}", Description = Context.Server.Settings.Registration.Message });
-            }
-            else
-            {
-                await SimpleEmbedAsync($"You have re-registered.\n" + 
-                                       $"Name: {userSelfUpdate}\n" + 
-                                       $"Role's have been updated\n" + 
-                                       $"Stats have been saved.");
-            }
-
-            if (Context.Guild.GetRole(Context.Server.Ranks.FirstOrDefault(x => x.IsDefault)?.RoleID ?? 0) is IRole RegRole)
-            {
-                try
-                {
-                    await (Context.User as IGuildUser).AddRoleAsync(RegRole);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
+            return UserManagement.RegisterAsync(Context, Context.Server, Context.User, name);
         }
 
         [Command("Invite")]
