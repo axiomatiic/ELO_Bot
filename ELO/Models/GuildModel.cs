@@ -62,6 +62,14 @@
                 None
             }
 
+            public enum MapSelector
+            {
+                Cycle,
+                Random,
+                NoRepeat,
+                None
+            }
+
             public ulong ChannelID { get; set; }
 
             public int UserLimit { get; set; } = 10;
@@ -72,7 +80,7 @@
 
             public HostSelector HostSelectionMode { get; set; } = HostSelector.MostPoints;
 
-            public bool RandomMapAnnounce { get; set; } = true;
+            public MapSelector MapMode { get; set; } = MapSelector.Random;
 
             public List<string> Maps { get; set; } = new List<string>();
 
@@ -80,7 +88,16 @@
 
             public CaptainSort CaptainSortMode { get; set; } = CaptainSort.MostPoints;
 
+            public _MapInfo MapInfo { get; set; } = new _MapInfo();
+
             public CurrentGame Game { get; set; } = new CurrentGame();
+
+            public class _MapInfo
+            {
+                public int LastMapIndex { get; set; } = 0;
+
+                public string LastMap { get; set; }
+            }
 
             public class CurrentGame
             {

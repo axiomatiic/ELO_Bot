@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
 
     using ELO.Discord.Context;
@@ -11,22 +12,53 @@
 
     public class AnnouncementManager
     {
-        public static EmbedFieldBuilder MapField(GuildModel.Lobby lobby)
+        public static GuildModel.Lobby._MapInfo MapField(GuildModel.Lobby lobby)
         {
+            var map = lobby.MapInfo;
             if (!lobby.Maps.Any())
             {
-                return null;
+                return map;
             }
 
-            var map = lobby.Maps.OrderByDescending(x => new Random().Next()).First();
-            return new EmbedFieldBuilder
+            if (lobby.MapMode == GuildModel.Lobby.MapSelector.None)
             {
-                Name = "Random Map",
-                Value = map
-            };
+                return map;
+            }
+            
+            if (lobby.MapMode == GuildModel.Lobby.MapSelector.Random)
+            {
+                var rnd = new Random();
+                map.LastMap = lobby.Maps.OrderByDescending(x => rnd.Next()).FirstOrDefault();
+            }
+
+            if (lobby.MapMode == GuildModel.Lobby.MapSelector.NoRepeat)
+            {
+                var rnd = new Random();
+                map.LastMap = lobby.Maps.OrderByDescending(x => rnd.Next()).FirstOrDefault(x => x != map.LastMap) ?? map.LastMap;
+            }
+
+            if (lobby.MapMode == GuildModel.Lobby.MapSelector.Cycle)
+            {
+                map.LastMapIndex++;
+                if (map.LastMapIndex >= lobby.Maps.Count)
+                {
+                    map.LastMapIndex = 0;
+                }
+                try
+                {
+                    map.LastMap = lobby.Maps[map.LastMapIndex];
+                }
+                catch
+                {
+                    map.LastMap = lobby.Maps[0];
+                    map.LastMapIndex = 0;
+                }
+            }
+
+            return map;
         }
 
-        public static EmbedFieldBuilder HostField(Context context, GuildModel.Lobby lobby)
+        public static string HostField(Context context, GuildModel.Lobby lobby)
         {
             var ulongs = new List<ulong>();
             ulongs.AddRange(lobby.Game.Team1.Players);
@@ -53,11 +85,8 @@
                 default:
                     return null;
             }
-            return new EmbedFieldBuilder
-            {
-                Name = "Selected Host",
-                Value = player ?? "N/A"
-            };
+
+            return player ?? "N/A";
         }
     }
 }

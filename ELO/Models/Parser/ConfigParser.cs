@@ -52,7 +52,7 @@
                                                     Team()
                                         };
                         item.GamesPlayed = 0;
-                        item.RandomMapAnnounce = true;
+                        item.MapMode = GuildModel.Lobby.MapSelector.Random;
                         item.UserLimit = q.UserLimit;
                         lobbies.Add(item);
                     }

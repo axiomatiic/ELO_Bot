@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
+    using ELO.Discord.Extensions;
     using ELO.Discord.Preconditions;
     using ELO.Models;
 
@@ -24,7 +25,7 @@
         {
             var l = Context.Elo.Lobby;
             return SimpleEmbedAsync($"**UserLimit:** {l.UserLimit}\n" +
-                                    $"**RandomMapAnnounce:** {l.RandomMapAnnounce}\n" +
+                                    $"**MapMode:** {l.MapMode}\n" +
                                     $"**CaptainSortMode:** {l.CaptainSortMode}\n" +
                                     $"**PickMode:** {l.PickMode}\n" +
                                     $"**HostSelectionMode:** {l.HostSelectionMode}\n" +
@@ -203,14 +204,23 @@
         }
 
         [CheckLobby]
-        [Command("RandomMap")]
+        [Command("MapMode")]
         [Summary("toggle whether to select a random map on game announcements")]
-        public Task RandomMapAsync()
+        public Task RandomMapAsync(GuildModel.Lobby.MapSelector mapMode)
         {
-            Context.Elo.Lobby.RandomMapAnnounce = !Context.Elo.Lobby.RandomMapAnnounce;
+            Context.Elo.Lobby.MapMode = mapMode;
             Context.Server.Save();
 
-            return SimpleEmbedAsync($"Random Map on game announcements: {Context.Elo.Lobby.RandomMapAnnounce}");
+            return SimpleEmbedAsync($"Map Selection mode: {Context.Elo.Lobby.MapMode}");
+        }
+
+        [CheckLobby]
+        [Command("MapMode")]
+        [Summary("lists map mode types")]
+        public Task MapModesAsync()
+        {
+            return SimpleEmbedAsync("Map Modes:\n" + 
+                                    $"{string.Join("\n", EloInfo.MapTypes())}");
         }
 
         [CheckLobby]

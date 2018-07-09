@@ -10,5 +10,10 @@
         {
             return Enum.GetNames(typeof(GuildModel.GameResult._Result));
         }
+
+        public static string[] MapTypes()
+        {
+            return Enum.GetNames(typeof(GuildModel.Lobby.MapSelector));
+        }
     }
 }
