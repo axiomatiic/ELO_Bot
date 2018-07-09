@@ -110,10 +110,10 @@
         }
 
         [CustomPermissions]
-        [Command("LeaderBoardSort")]
-        [Alias("sortLeaderboard", "sortLb")]
+        [Command("LeaderBoard")]
+        [Alias("SortLeaderboard", "SortLb", "LeaderboardSort")]
         [Summary("Displays leaderboard sort modes")]
-        public Task LSortAsync()
+        public Task LeaderboardAsync()
         {
             return SimpleEmbedAsync("Leader board Sort Options:\n" +
                                     "Win\r\n" +
@@ -127,6 +127,7 @@
 
         [CustomPermissions]
         [Command("Leaderboard")]
+        [Alias("SortLeaderboard", "SortLb", "LeaderboardSort")]
         [Summary("Displays the leaderboard")]
         public Task LeaderboardAsync(LeaderboardSortMode sortMode = LeaderboardSortMode.Points)
         {
