@@ -120,7 +120,9 @@
         /// </exception>
         public Task ModuleCommandHelpAsync(bool checkPreconditions, string checkForMatch)
         {
-            var module = service.Modules.FirstOrDefault(x => string.Equals(x.Name, checkForMatch, StringComparison.CurrentCultureIgnoreCase));
+            try
+            {
+            var module = service.Modules.FirstOrDefault(x => x.Name.Equals(checkForMatch, StringComparison.OrdinalIgnoreCase));
             var fields = new List<EmbedFieldBuilder>();
             if (module != null)
             {
@@ -143,12 +145,12 @@
             var command = service.Search(Context, Context.Message.Content.Substring(Command.Aliases.First().Length + Context.Prefix.Length + 1)).Commands?.FirstOrDefault().Command;
             if (command != null)
             {
-                if (command.CheckPreconditionsAsync(Context).Result.IsSuccess)
+                if (!checkPreconditions)
                 {
                     fields.Add(new EmbedFieldBuilder
-                    {
-                        Name = $"Command: {command.Name}",
-                        Value = "**Usage:**\n" +
+                                   {
+                                       Name = $"Command: {command.Name}",
+                                       Value = "**Usage:**\n" +
                                                $"{Context.Prefix}{command.Aliases.FirstOrDefault()} {string.Join(" ", command.Parameters.Select(ParameterInformation))}\n" +
                                                "**Aliases:**\n" +
                                                $"{string.Join("\n", command.Aliases)}\n" +
@@ -158,7 +160,24 @@
                                                $"{command.Summary ?? "N/A"}\n" +
                                                "**Remarks:**\n" +
                                                $"{command.Remarks ?? "N/A"}"
-                    });
+                                   });
+                }
+                else if (command.CheckPreconditionsAsync(Context).Result.IsSuccess)
+                {
+                    fields.Add(new EmbedFieldBuilder
+                                   {
+                                       Name = $"Command: {command.Name}",
+                                       Value = "**Usage:**\n" +
+                                               $"{Context.Prefix}{command.Aliases.FirstOrDefault()} {string.Join(" ", command.Parameters.Select(ParameterInformation))}\n" +
+                                               "**Aliases:**\n" +
+                                               $"{string.Join("\n", command.Aliases)}\n" +
+                                               "**Module:**\n" +
+                                               $"{command.Module.Name}\n" +
+                                               "**Summary:**\n" +
+                                               $"{command.Summary ?? "N/A"}\n" +
+                                               "**Remarks:**\n" +
+                                               $"{command.Remarks ?? "N/A"}"
+                                   });
                 }
             }
 
@@ -178,6 +197,12 @@
                             await r.Message.Value?.DeleteAsync();
                             await c.Message.DeleteAsync();
                         }));
+            }
+            catch (Exception e)
+            {
+                LogHandler.LogMessage(e.ToString(), LogSeverity.Error);
+                throw e;
+            }
         }
 
         /// <summary>
