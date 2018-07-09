@@ -74,7 +74,7 @@
         }
 
         [Command("Leave")]
-        [Alias("l", "out", "unSign", "remove", "unrdy", "unready")]
+        [Alias("l", "out", "unSign", "remove", "unready")]
         [Summary("Leave the current lobby's queue")]
         public async Task LeaveLobbyAsync()
         {
@@ -154,37 +154,34 @@
             }.Build());
         }
 
-        [Command("Replace")]
-        [Summary("Replace a user in the current queue")]
-        public async Task ReplaceAsync(SocketGuildUser userToReplace)
+        public Task CheckReplacePermissionAsync(GuildModel.Lobby.CurrentGame g, ulong userToReplace)
         {
-            var g = Context.Elo.Lobby.Game;
-            if (g.QueuedPlayerIDs.Contains(Context.User.Id) || g.Team1.Players.Contains(Context.User.Id) || g.Team2.Players.Contains(Context.User.Id) || g.Team2.Captain == Context.User.Id || g.Team1.Captain == Context.User.Id)
-            {
-                throw new Exception("You cannot replace a user if you are in the queue yourself");
-            }
-
-            if (!g.QueuedPlayerIDs.Contains(userToReplace.Id) && !g.Team1.Players.Contains(userToReplace.Id) && !g.Team2.Players.Contains(userToReplace.Id))
+            if (!g.QueuedPlayerIDs.Contains(userToReplace) && !g.Team1.Players.Contains(userToReplace) && !g.Team2.Players.Contains(userToReplace))
             {
                 throw new Exception("User is not queued.");
             }
 
-            if (g.Team1.Captain == userToReplace.Id || g.Team2.Captain == userToReplace.Id)
+            if (g.Team1.Captain == userToReplace || g.Team2.Captain == userToReplace)
             {
                 throw new Exception("You cannot replace a team captain");
             }
 
+            if (Context.Elo.User.Banned.Banned)
+            {
+                throw new Exception($"You are banned from matchmaking for another {(Context.Elo.User.Banned.ExpiryTime - DateTime.UtcNow).TotalMinutes} minutes");
+            }
+
+            if (g.QueuedPlayerIDs.Contains(Context.User.Id) || g.Team1.Players.Contains(Context.User.Id) || g.Team2.Players.Contains(Context.User.Id) || g.Team2.Captain == Context.User.Id || g.Team1.Captain == Context.User.Id)
+            {
+                throw new Exception("You cannot replace a user if you are in the queue yourself");
+            }
+            
             if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
             {
-                if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team1.Players.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team2.Players.Contains(Context.User.Id)))
+                if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id) || x.Game.Team1.Players.Contains(Context.User.Id) || x.Game.Team2.Players.Contains(Context.User.Id)))
                 {
                     throw new Exception("MultiQueuing is disabled by the server Admins");
                 }
-            }
-
-            if (Context.Elo.User.Banned.Banned)
-            {
-                throw new Exception($"You are banned from matchmaking for another {(Context.Elo.User.Banned.ExpiryTime - DateTime.UtcNow).TotalMinutes}");
             }
 
             var previous = Context.Server.Results.Where(x => x.LobbyID == Context.Elo.Lobby.ChannelID && (x.Team1.Contains(Context.User.Id) || x.Team2.Contains(Context.User.Id))).OrderByDescending(x => x.Time).FirstOrDefault();
@@ -196,6 +193,16 @@
                 }
             }
 
+            return Task.CompletedTask;
+        }
+
+        [Command("Replace")]
+        [Summary("Replace a user in the current queue")]
+        public async Task ReplaceAsync(SocketGuildUser userToReplace)
+        {
+            var g = Context.Elo.Lobby.Game;
+            await CheckReplacePermissionAsync(g, userToReplace.Id);
+          
             if (g.QueuedPlayerIDs.Contains(userToReplace.Id))
             {
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);

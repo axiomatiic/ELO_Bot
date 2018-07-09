@@ -1,7 +1,6 @@
 ﻿namespace ELO.Modules.Admin
 {
     using System;
-    using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
@@ -106,7 +105,7 @@
             Context.Server.Save();
 
             return SimpleEmbedAsync($"Users are able to set game result: {Context.Server.Settings.GameSettings.AllowUserSubmissions}\n" + 
-                                    $"This requires a player from both teams to submit the same game result.\n");
+                                    "This requires a player from both teams to submit the same game result.\n");
         }
     }
 }

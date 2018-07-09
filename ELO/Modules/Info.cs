@@ -217,15 +217,6 @@
         [Summary("Display all ranks")]
         public Task ViewRanksAsync()
         {
-            /*
-            var list = Context.Server.Ranks
-                .Select(x => new Tuple<GuildModel.Rank, IRole>(x, Context.Guild.GetRole(x.RoleID)))
-                .Where(x => x.Item2 != null).OrderByDescending(x => x.Item1.Threshold).Select(
-                    x =>
-                        $"{x.Item1.Threshold} - {x.Item2.Mention} - W: {x.Item1.WinModifier} L: {x.Item1.LossModifier}").ToList();
-            return SimpleEmbedAsync($"Ranks\n\n{string.Join("\n", list)}");
-            */
-
             var rankList = Context.Server.Ranks.OrderByDescending(r => r.Threshold).Select(
                 r =>
                     {
@@ -351,7 +342,7 @@
                                                           $"**Team 2:**\n{string.Join(" ", game.Team2.Select(x => Context.Guild.GetUser(x)?.Mention ?? $"[{x}]"))}\n\n" +
                                                           $"Result:\n{game.Result}\n\n" + 
                                                           $"{resultProposalInfo}" + 
-                                                          $"**For Comments, react with arrows.** (:arrow_backward: :arrow_forward:)"
+                                                          "**For Comments, react with arrows.** (:arrow_backward: :arrow_forward:)"
                                         }
                                 };
                 foreach (var commentGroup in game.Comments.OrderByDescending(x => x.ID).ToList().SplitList(5))

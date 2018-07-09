@@ -2,13 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
 
     using ELO.Discord.Context;
     using ELO.Models;
-
-    using global::Discord;
 
     public class AnnouncementManager
     {
