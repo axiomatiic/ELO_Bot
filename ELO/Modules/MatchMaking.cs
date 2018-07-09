@@ -30,7 +30,7 @@
             {
                 if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
                 {
-                    if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team1.Players.Contains(Context.User.Id)) || Context.Server.Lobbies.Any(x => x.Game.Team2.Players.Contains(Context.User.Id)))
+                    if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id) || x.Game.Team1.Players.Contains(Context.User.Id) || x.Game.Team2.Players.Contains(Context.User.Id)))
                     {
                         throw new Exception("MultiQueuing is disabled by the server Admins");
                     }
