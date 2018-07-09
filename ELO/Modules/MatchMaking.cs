@@ -113,8 +113,15 @@
 
             if (!Context.Elo.Lobby.Game.IsPickingTeams)
             {
-                await SimpleEmbedAsync($"**Player List [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]**\n" +
-                                       $"{string.Join("\n", queuedPlayers.Select(x => x.Mention))}");
+                if (queuedPlayers.Any())
+                {
+                    await SimpleEmbedAsync($"**Player List [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]**\n" + 
+                                           $"{string.Join("\n", queuedPlayers.Select(x => x.Mention))}");
+                }
+                else
+                {
+                    await SimpleEmbedAsync($"[0/{Context.Elo.Lobby.UserLimit}] The queue is empty");
+                }
             }
             else
             {
