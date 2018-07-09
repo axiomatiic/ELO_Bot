@@ -210,8 +210,13 @@
         /// </returns>
         internal Task LeftGuildAsync(SocketGuild guild)
         {
-            return Task.Run(()
-                => Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.DELETE, id: guild.Id.ToString()));
+            var handler = Provider.GetRequiredService<DatabaseHandler>();
+            if (handler.Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, guild.Id.ToString())?.Settings.Premium.IsPremium == false)
+            {
+                return Task.Run(() => handler.Execute<GuildModel>(DatabaseHandler.Operation.DELETE, id: guild.Id.ToString()));
+            }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
