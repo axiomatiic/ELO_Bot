@@ -23,6 +23,16 @@
             _service = service;
         }
 
+        [Command("PremiumInfo")]
+        [Summary("View info about the Premium settings")]
+        public Task OwnerAsync()
+        {
+            return SimpleEmbedAsync(
+                "**Premium:**\n" + $"**Has Used Premium?:** {Context.Server.Settings.Premium.IsPremium}\n" +
+                                 $"**Keys Used:** \n{string.Join("\n", Context.Server.Settings.Premium.PremiumKeys.Select(x => $"{x.Token} => {x.ValidFor.TotalDays} Days"))}\n" + 
+                                 $"**Expires:** {Context.Server.Settings.Premium.Expiry.ToLongDateString()} {Context.Server.Settings.Premium.Expiry.ToLongTimeString()}\n");
+        }
+
         [Command("Premium")]
         [Summary("Upgrade the current server to premium or extend the current premium period")]
         public Task DoPremiumAsync([Remainder]string code = null)
