@@ -1,15 +1,17 @@
 ﻿namespace ELO.Modules.Admin
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
     using ELO.Discord.Extensions;
     using ELO.Discord.Preconditions;
-
-    using global::Discord;
+    
     using global::Discord.Commands;
+    using global::Discord.WebSocket;
 
     [CustomPermissions(true)]
     [Summary("Direct user stats modifications")]
@@ -17,229 +19,255 @@
     {
         [Command("ModifyPoints")]
         [Summary("Add or subtract points from a user")]
-        public async Task ModifyPointsAsync(IUser user, int pointsToAddOrSubtract)
+        public Task ModifyPointsAsync(SocketGuildUser user, int pointsToAddOrSubtract)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Points += pointsToAddOrSubtract;
-            await SimpleEmbedAsync($"{user.Mention} Points Modified: {eUser.Stats.Points}");
-            var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
-            var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
-            Context.Server.Save();
+            return ModifyAsync(new List<SocketGuildUser> { user }, ScoreType.point, pointsToAddOrSubtract);
         }
 
         [Command("ModifyPoints")]
-        [Summary("Add or subtract points from a user")]
-        public Task ModifyPointsAsync(int pointsToAddOrSubtract, IUser user)
+        [Summary("Add or subtract points from the given user(s)")]
+        public Task ModifyPointsAsync(int pointsToAddOrSubtract, params SocketGuildUser[] users)
         {
-            return ModifyPointsAsync(user, pointsToAddOrSubtract);
+            return ModifyAsync(users.ToList(), ScoreType.point, pointsToAddOrSubtract);
         }
 
         [Command("SetPoints")]
         [Summary("Set the points of a user")]
-        public async Task SetPointsAsync(IUser user, int points)
+        public Task SetPointsAsync(SocketGuildUser user, int points)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Points = points;
-            await SimpleEmbedAsync($"{user.Mention} Points Set: {eUser.Stats.Points}");
-            var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
-            var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
-            Context.Server.Save();
+            return SetAsync(new List<SocketGuildUser> { user }, ScoreType.point, points);
         }
 
         [Command("SetPoints")]
-        [Summary("Set the points of a user")]
-        public Task SetPointsAsync(int points, IUser user)
+        [Summary("Set the points of the given user(s)")]
+        public Task SetPointsAsync(int points, params SocketGuildUser[] users)
         {
-            return SetPointsAsync(user, points);
+            return SetAsync(users.ToList(), ScoreType.point, points);
         }
 
         [Command("ModifyKills")]
         [Summary("Add or subtract kills from a user")]
-        public async Task ModifyKillsAsync(IUser user, int killsToAddOrSubtract)
+        public Task ModifyKillsAsync(SocketGuildUser user, int killsToAddOrSubtract)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Kills += killsToAddOrSubtract;
-            await SimpleEmbedAsync($"{user.Mention} Kills Modified: {eUser.Stats.Kills}");
-            Context.Server.Save();
+            return ModifyAsync(new List<SocketGuildUser> { user }, ScoreType.kill, killsToAddOrSubtract);
         }
 
         [Command("ModifyKills")]
-        [Summary("Add or subtract kills from a user")]
-        public Task ModifyKillsAsync(int killsToAddOrSubtract, IUser user)
+        [Summary("Add or subtract kills from the given user(s)")]
+        public Task ModifyKillsAsync(int killsToAddOrSubtract, params SocketGuildUser[] users)
         {
-            return ModifyKillsAsync(user, killsToAddOrSubtract);
+            return ModifyAsync(users.ToList(), ScoreType.kill, killsToAddOrSubtract);
         }
 
         [Command("SetKills")]
         [Summary("Set the kills of a user")]
-        public async Task SetKillsAsync(IUser user, int kills)
+        public Task SetKillsAsync(SocketGuildUser user, int kills)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Kills = kills;
-            await SimpleEmbedAsync($"{user.Mention} Kills Set: {eUser.Stats.Kills}");
-            Context.Server.Save();
+            return SetAsync(new List<SocketGuildUser> { user }, ScoreType.kill, kills);
         }
 
         [Command("SetKills")]
-        [Summary("Set the kills of a user")]
-        public Task SetKillsAsync(int kills, IUser user)
+        [Summary("Set the kills of the given user(s)")]
+        public Task SetKillsAsync(int kills, params SocketGuildUser[] users)
         {
-            return SetKillsAsync(user, kills);
+            return SetAsync(users.ToList(), ScoreType.kill, kills);
         }
 
         [Command("ModifyDeaths")]
         [Summary("Add or subtract Deaths from a user")]
-        public async Task ModifyDeathsAsync(IUser user, int deathsToAddOrSubtract)
+        public Task ModifyDeathsAsync(SocketGuildUser user, int deathsToAddOrSubtract)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Deaths += deathsToAddOrSubtract;
-            await SimpleEmbedAsync($"{user.Mention} Deaths Modified: {eUser.Stats.Deaths}");
-            Context.Server.Save();
+            return ModifyAsync(new List<SocketGuildUser> { user }, ScoreType.death, deathsToAddOrSubtract);
         }
 
         [Command("ModifyDeaths")]
-        [Summary("Add or subtract Deaths from a user")]
-        public Task ModifyDeathsAsync(int deathsToAddOrSubtract, IUser user)
+        [Summary("Add or subtract Deaths from the given user(s)")]
+        public Task ModifyDeathsAsync(int deathsToAddOrSubtract, params SocketGuildUser[] users)
         {
-            return ModifyDeathsAsync(user, deathsToAddOrSubtract);
+            return ModifyAsync(users.ToList(), ScoreType.death, deathsToAddOrSubtract);
         }
 
         [Command("SetDeaths")]
         [Summary("Set the Deaths of a user")]
-        public async Task SetDeathsAsync(IUser user, int deaths)
+        public Task SetDeathsAsync(SocketGuildUser user, int deaths)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Deaths = deaths;
-            await SimpleEmbedAsync($"{user.Mention} Deaths Set: {eUser.Stats.Deaths}");
-            Context.Server.Save();
+            return SetAsync(new List<SocketGuildUser> { user }, ScoreType.death, deaths);
         }
 
         [Command("SetDeaths")]
-        [Summary("Set the Deaths of a user")]
-        public Task SetDeathsAsync(int deaths, IUser user)
+        [Summary("Set the Deaths of the given user(s)")]
+        public Task SetDeathsAsync(int deaths, params SocketGuildUser[] users)
         {
-            return SetDeathsAsync(user, deaths);
+            return SetAsync(users.ToList(), ScoreType.death, deaths);
         }
 
         [Command("ModifyWins")]
         [Summary("Add or subtract Wins from a user")]
-        public async Task ModifyWinsAsync(IUser user, int winsToAddOrSubtract)
+        public Task ModifyWinsAsync(SocketGuildUser user, int winsToAddOrSubtract)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Wins += winsToAddOrSubtract;
-            await SimpleEmbedAsync($"{user.Mention} Wins Modified: {eUser.Stats.Wins}");
-            Context.Server.Save();
+            return ModifyAsync(new List<SocketGuildUser> { user }, ScoreType.win, winsToAddOrSubtract);
         }
 
         [Command("ModifyWins")]
-        [Summary("Add or subtract Wins from a user")]
-        public Task ModifyWinsAsync(int winsToAddOrSubtract, IUser user)
+        [Summary("Add or subtract Wins from the given user(s)")]
+        public Task ModifyWinsAsync(int winsToAddOrSubtract, params SocketGuildUser[] users)
         {
-            return ModifyWinsAsync(user, winsToAddOrSubtract);
+            return ModifyAsync(users.ToList(), ScoreType.win, winsToAddOrSubtract);
         }
 
         [Command("SetWins")]
         [Summary("Set the Wins of a user")]
-        public Task SetWinsAsync(IUser user, int wins)
+        public Task SetWinsAsync(SocketGuildUser user, int wins)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Wins = wins;
-            Context.Server.Save();
-
-            return SimpleEmbedAsync($"{user.Mention} Wins Set: {eUser.Stats.Wins}");
+            return SetAsync(new List<SocketGuildUser> { user }, ScoreType.win, wins);
         }
 
         [Command("SetWins")]
-        [Summary("Set the Wins of a user")]
-        public Task SetWinsAsync(int wins, IUser user)
+        [Summary("Set the Wins of the given user(s)")]
+        public Task SetWinsAsync(int wins, params SocketGuildUser[] users)
         {
-            return SetWinsAsync(user, wins);
+            return SetAsync(users.ToList(), ScoreType.win, wins);
         }
 
         [Command("ModifyLosses")]
         [Summary("Add or subtract Losses from a user")]
-        public Task ModifyLossesAsync(IUser user, int lossesToAddOrSubtract)
+        public Task ModifyLossesAsync(SocketGuildUser user, int lossesToAddOrSubtract)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
-            {
-                throw new Exception("User is not registered");
-            }
-
-            eUser.Stats.Losses += lossesToAddOrSubtract;
-            Context.Server.Save();
-
-            return SimpleEmbedAsync($"{user.Mention} Losses Modified: {eUser.Stats.Losses}");
+            return ModifyAsync(new List<SocketGuildUser> { user }, ScoreType.loss, lossesToAddOrSubtract);
         }
 
         [Command("ModifyLosses")]
-        [Summary("Add or subtract Losses from a user")]
-        public Task ModifyLossesAsync(int lossesToAddOrSubtract, IUser user)
+        [Summary("Add or subtract Losses from the given user(s)")]
+        public Task ModifyLossesAsync(int lossesToAddOrSubtract, params SocketGuildUser[] users)
         {
-            return ModifyLossesAsync(user, lossesToAddOrSubtract);
+            return ModifyAsync(users.ToList(), ScoreType.loss, lossesToAddOrSubtract);
         }
 
         [Command("SetLosses")]
         [Summary("Set the Losses of a user")]
-        public Task SetLossesAsync(IUser user, int losses)
+        public Task SetLossesAsync(SocketGuildUser user, int losses)
         {
-            var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
-            if (eUser == null)
+            return SetAsync(new List<SocketGuildUser> { user }, ScoreType.loss, losses);
+        }
+
+        [Command("SetLosses")]
+        [Summary("Set the Losses of the given user(s)")]
+        public Task SetLossesAsync(int losses, params SocketGuildUser[] users)
+        {
+            return SetAsync(users.ToList(), ScoreType.loss, losses);
+        }
+
+        public Task SetAsync(List<SocketGuildUser> users, ScoreType type, int modifier)
+        {
+            var sb = new StringBuilder();
+            foreach (var user in users)
             {
-                throw new Exception("User is not registered");
+                var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
+                if (eUser == null)
+                {
+                    sb.AppendLine("User is not registered");
+                    continue;
+                }
+
+                int finalValue;
+                switch (type)
+                {
+                    case ScoreType.win:
+                        eUser.Stats.Wins = modifier;
+                        finalValue = eUser.Stats.Wins;
+                        break;
+                    case ScoreType.loss:
+                        eUser.Stats.Losses = modifier;
+                        finalValue = eUser.Stats.Losses;
+                        break;
+                    case ScoreType.draw:
+                        eUser.Stats.Draws = modifier;
+                        finalValue = eUser.Stats.Draws;
+                        break;
+                    case ScoreType.kill:
+                        eUser.Stats.Kills = modifier;
+                        finalValue = eUser.Stats.Kills;
+                        break;
+                    case ScoreType.death:
+                        eUser.Stats.Deaths = modifier;
+                        finalValue = eUser.Stats.Deaths;
+                        break;
+                    case ScoreType.point:
+                        eUser.Stats.Points = modifier;
+                        finalValue = eUser.Stats.Points;
+                        var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
+                        var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unable to modify stats with provided type");
+                }
+
+                sb.AppendLine($"{user.Mention} {type}'s set to: {finalValue}");
+            }
+            Context.Server.Save();
+            return SimpleEmbedAsync(sb.ToString());
+        }
+
+        public Task ModifyAsync(List<SocketGuildUser> users, ScoreType type, int modifier)
+        {
+            var sb = new StringBuilder();
+            foreach (var user in users)
+            {
+                var eUser = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
+                if (eUser == null)
+                {
+                    sb.AppendLine("User is not registered");
+                    continue;
+                }
+
+                int finalValue;
+                switch (type)
+                {
+                    case ScoreType.win:
+                        eUser.Stats.Wins += modifier;
+                        finalValue = eUser.Stats.Wins;
+                        break;
+                    case ScoreType.loss:
+                        eUser.Stats.Losses += modifier;
+                        finalValue = eUser.Stats.Losses;
+                        break;
+                    case ScoreType.draw:
+                        eUser.Stats.Draws += modifier;
+                        finalValue = eUser.Stats.Draws;
+                        break;
+                    case ScoreType.kill:
+                        eUser.Stats.Kills += modifier;
+                        finalValue = eUser.Stats.Kills;
+                        break;
+                    case ScoreType.death:
+                        eUser.Stats.Deaths += modifier;
+                        finalValue = eUser.Stats.Deaths;
+                        break;
+                    case ScoreType.point:
+                        eUser.Stats.Points += modifier;
+                        finalValue = eUser.Stats.Points;
+                        var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
+                        var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unable to modify stats with provided type");
+                }
+
+                sb.AppendLine($"{user.Mention} {type}'s modified: {finalValue}");
             }
 
-            eUser.Stats.Losses = losses;
             Context.Server.Save();
-
-            return SimpleEmbedAsync($"{user.Mention} Losses Set: {eUser.Stats.Losses}");
+            return SimpleEmbedAsync(sb.ToString());
         }
 
-        [Command("SetLosses")]
-        [Summary("Set the Losses of a user")]
-        public Task SetLossesAsync(int losses, IUser user)
+        public enum ScoreType
         {
-            return ModifyLossesAsync(user, losses);
+            win,
+            loss,
+            draw,
+            kill,
+            death,
+            point
         }
     }
 }
