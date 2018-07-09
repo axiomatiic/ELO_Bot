@@ -144,5 +144,15 @@
 
             return SimpleEmbedAsync($"Allow multi registration: {Context.Server.Settings.Registration.AllowMultiRegistration}");
         }
+
+        [Command("AutoDeleteOnLeave")]
+        [Summary("toggle whether user profiles are auto-deleted when they leave the server")]
+        public Task ToggleAutoDeleteOnLeaveAsync()
+        {
+            Context.Server.Settings.Registration.DeleteProfileOnLeave = !Context.Server.Settings.Registration.DeleteProfileOnLeave;
+            Context.Server.Save();
+
+            return SimpleEmbedAsync($"Auto Delete user profiles on leave: {Context.Server.Settings.Registration.DeleteProfileOnLeave}");
+        }
     }
 }
