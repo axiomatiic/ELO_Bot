@@ -196,7 +196,7 @@
                         eUser.Stats.Points = modifier;
                         finalValue = eUser.Stats.Points;
                         var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
-                        var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
+                        var role = Task.Run(() => UserManagement.UpdateUserRanksAsync(Context, eUser));
                         break;
                     default:
                         throw new InvalidOperationException("Unable to modify stats with provided type");
@@ -247,7 +247,7 @@
                         eUser.Stats.Points += modifier;
                         finalValue = eUser.Stats.Points;
                         var nick = Task.Run(() => UserManagement.UserRenameAsync(Context, eUser));
-                        var role = Task.Run(() => UserManagement.GiveMaxRoleAsync(Context, eUser));
+                        var role = Task.Run(() => UserManagement.UpdateUserRanksAsync(Context, eUser));
                         break;
                     default:
                         throw new InvalidOperationException("Unable to modify stats with provided type");

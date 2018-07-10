@@ -68,6 +68,10 @@
                             return;
                         }
 
+                        var rolesToRemove = gUser.Roles.Where(x => context.Server.Ranks.Any(r => r.RoleID == x.Id) && x.Id != serverRole.Id);
+
+                        await gUser.RemoveRolesAsync(rolesToRemove);
+
                         await gUser.AddRoleAsync(serverRole);
                     }
                     catch (Exception e)
