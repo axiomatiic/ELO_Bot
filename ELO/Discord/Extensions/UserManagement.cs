@@ -40,7 +40,7 @@
             }
         }
 
-        public static async Task GiveMaxRoleAsync(Context context, GuildModel.User user = null)
+        public static async Task UpdateUserRanksAsync(Context context, GuildModel.User user = null)
         {
             try
             {
@@ -224,7 +224,7 @@
             }
             else
             {
-                await GiveMaxRoleAsync(con, newUser);
+                await UpdateUserRanksAsync(con, newUser);
             }
 
             await UserRenameAsync(con, newUser);
