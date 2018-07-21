@@ -120,6 +120,12 @@
                 Settings = JsonConvert.DeserializeObject<DatabaseObject>(File.ReadAllText("setup/DBConfig.json"));
             }
 
+            if (Settings.Urls.Count == 0)
+            {
+                 LogHandler.LogMessage("Failed to build document store.", LogSeverity.Critical);
+                 throw new Exception("No database urls have been detected in config, please add one");
+            }
+
             // This initializes the document store, and ensures that RavenDB is working properly
             Store = new Lazy<IDocumentStore>(() => new DocumentStore { Database = Settings.Name, Urls = Settings.Urls.ToArray() }.Initialize(), true).Value;
             if (Store == null)
