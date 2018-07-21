@@ -1,6 +1,7 @@
 ﻿namespace ELO.Handlers
 {
     using System;
+    using System.Collections.Generic;
 
     using ELO.Discord.Context;
     using ELO.Models;
@@ -134,7 +135,7 @@
         public static void PrintApplicationInformation(DatabaseObject settings, ConfigModel config)
         {
             Console.WriteLine("-> INFORMATION\n" +
-                              $"-> Database URL: {settings?.URL}\n" +
+                              $"-> Database URL(s): {string.Join("\n", settings?.Urls ?? new List<string>())}\n" +
                               $"-> Database Name: {settings?.Name}\n" +
                               $"-> Prefix: {config.Prefix}\n" +
                               "    Author: PassiveModding | Discord: https://discord.me/Passive\n" +

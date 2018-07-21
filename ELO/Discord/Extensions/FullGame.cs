@@ -140,7 +140,7 @@
             context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(cap1.Id);
             context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(cap2.Id);
             context.Channel.SendMessageAsync($"**Team1 Captain** {cap1.Mention}\n" +
-                                                   $"**Team2 Captain** {cap2.Mention}\n" +
+                                                   $"**Team2 Captain** {cap2.Mention}\n\n" +
                                                    $"**Select Your Teams using `{context.Prefix}pick <@user>`**\n" +
                                                    "**Captain 1 Always Picks First**\n" +
                                                    "**Player Pool**\n" +
