@@ -270,37 +270,32 @@
             {
                 if (userAfter.Status != UserStatus.Online)
                 {
-                    var guildModel = Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, userAfter.Guild.Id.ToString());
-                    if (guildModel.Settings.GameSettings.RemoveOnAfk)
-                    {
-                        var lobbies = guildModel.Lobbies.Where(x => x.Game.QueuedPlayerIDs.Contains(userAfter.Id) || x.Game.Team1.Players.Contains(userAfter.Id) || x.Game.Team2.Players.Contains(userAfter.Id)).ToList();
-                        if (lobbies.Any())
+                    var _ = Task.Run(() =>
                         {
-                            foreach (var lobby in lobbies)
+                            var guildModel = Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, userAfter.Guild.Id.ToString());
+                            if (guildModel.Settings.GameSettings.RemoveOnAfk)
                             {
-                                var messageChannel = Client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
-                                if (lobby.Game.IsPickingTeams)
+                                var lobbies = guildModel.Lobbies.Where(x => x.Game.QueuedPlayerIDs.Contains(userAfter.Id) || x.Game.Team1.Players.Contains(userAfter.Id) || x.Game.Team2.Players.Contains(userAfter.Id)).ToList();
+                                if (lobbies.Any())
                                 {
-                                    messageChannel.SendMessageAsync("", false, new EmbedBuilder
-                                                                                         {
-                                                                                             Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue or use the replace command",
-                                                                                             Color = Color.DarkRed
-                                                                                         }.Build());
-                                }
-                                else
-                                {
-                                    lobby.Game.QueuedPlayerIDs.Remove(userAfter.Id);
-                                    messageChannel.SendMessageAsync("", false, new EmbedBuilder
-                                                                                         {
-                                                                                             Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()} and has been automatically removed from the queue",
-                                                                                             Color = Color.DarkBlue
-                                                                                         }.Build());
+                                    foreach (var lobby in lobbies)
+                                    {
+                                        var messageChannel = Client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
+                                        if (lobby.Game.IsPickingTeams)
+                                        {
+                                            messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue or use the replace command", Color = Color.DarkRed }.Build());
+                                        }
+                                        else
+                                        {
+                                            lobby.Game.QueuedPlayerIDs.Remove(userAfter.Id);
+                                            messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()} and has been automatically removed from the queue", Color = Color.DarkBlue }.Build());
+                                        }
+                                    }
+
+                                    guildModel.Save();
                                 }
                             }
-
-                            guildModel.Save();
-                        }
-                    }
+                        });
                 }
             }
 
@@ -322,14 +317,7 @@
             {
                 return;
             }
-
-            var context = new Context(Client, Message, Provider);
-
-            if (Config.LogUserMessages)
-            {
-                LogHandler.LogMessage(context);
-            }
-
+            
             var argPos = 0;
 
             if (PrefixOverride != null)
@@ -342,12 +330,14 @@
             else
             {
                 // Filter out all messages that don't start with our Bot Prefix, bot mention or server specific prefix.
-                if (!(Message.HasStringPrefix(Config.Prefix, ref argPos) || Message.HasMentionPrefix(context.Client.CurrentUser, ref argPos) || Message.HasStringPrefix(context.Server.Settings.CustomPrefix, ref argPos)))
+                if (!(Message.HasStringPrefix(Config.Prefix, ref argPos) || Message.HasMentionPrefix(Client.CurrentUser, ref argPos)))
                 {
                     return;
                 }                
             }
 
+            var context = new Context(Client, Message, Provider);
+            
             if (context.Elo.User != null)
             {
                 if (context.Elo.User.Banned.Banned)

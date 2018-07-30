@@ -14,12 +14,12 @@
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
 
-    [CustomPermissions(true)]
+    [CustomPermissions(DefaultPermissionLevel.Administrators)]
     [Summary("Lobby creation and setup commands")]
     public class Lobby : Base
     {
         [CheckLobby]
-        [Command("LobbyInfo")]
+        [Command("LobbyInfo", RunMode = RunMode.Async)]
         [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
@@ -156,7 +156,7 @@
         }
 
         [CheckLobby]
-        [Command("LobbySortMode")]
+        [Command("LobbySortMode", RunMode = RunMode.Async)]
         [Summary("Show sort modes for teams")]
         public Task LobbySortModeAsync()
         {
@@ -182,7 +182,7 @@
         }
 
         [CheckLobby]
-        [Command("CaptainSortMode")]
+        [Command("CaptainSortMode", RunMode = RunMode.Async)]
         [Summary("Show captain sort modes")]
         public Task CapSortModeAsync()
         {
@@ -215,7 +215,7 @@
         }
 
         [CheckLobby]
-        [Command("MapMode")]
+        [Command("MapMode", RunMode = RunMode.Async)]
         [Summary("lists map mode types")]
         public Task MapModesAsync()
         {
@@ -235,7 +235,7 @@
         }
 
         [CheckLobby]
-        [Command("HostSelectionMode")]
+        [Command("HostSelectionMode", RunMode = RunMode.Async)]
         [Summary("Display host selection modes")]
         public Task HostModeAsync()
         {

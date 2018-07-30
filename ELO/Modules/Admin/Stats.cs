@@ -13,7 +13,7 @@
     using global::Discord.Commands;
     using global::Discord.WebSocket;
 
-    [CustomPermissions(true)]
+    [CustomPermissions(DefaultPermissionLevel.Moderators)]
     [Summary("Direct user stats modifications")]
     public class Stats : Base
     {

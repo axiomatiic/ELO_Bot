@@ -56,7 +56,7 @@
                     {
                         ThrowOnError = false,
                         IgnoreExtraArgs = false,
-                        DefaultRunMode = RunMode.Async
+                        DefaultRunMode = RunMode.Sync
                     }))
                     .AddSingleton<BotHandler>()
                     .AddSingleton<EventHandler>()

@@ -51,7 +51,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        [Command("Help")]
+        [Command("Help", RunMode = RunMode.Async)]
         [Summary("Lists all accessible commands")]
         [Remarks("Use FullHelp for all commands")]
         public Task HelpCommandAsync([Remainder] string moduleOrCommandName = null)
@@ -68,7 +68,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        [Command("FullHelp")]
+        [Command("FullHelp", RunMode = RunMode.Async)]
         [Summary("Lists all commands")]
         public Task FullHelpAsync([Remainder] string moduleOrCommandName = null)
         {

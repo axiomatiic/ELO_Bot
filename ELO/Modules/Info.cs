@@ -15,6 +15,7 @@
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
 
+    [CustomPermissions(DefaultPermissionLevel.AllUsers)]
     [RequireContext(ContextType.Guild)]
     [Summary("User Registration and Info")]
     public class Info : Base
@@ -56,15 +57,14 @@
             return UserManagement.RegisterAsync(Context, Context.Server, Context.User, name);
         }
 
-        [Command("Invite")]
+        [Command("Invite", RunMode = RunMode.Async)]
         [Summary("Invite the bot")]
         public Task InviteAsync()
         {
             return SimpleEmbedAsync($"You may invite the bot to your own server using the following URL: {BotInfo.GetInvite(Context)}");
         }
-
-        [CustomPermissions]
-        [Command("GetUser")]
+        
+        [Command("GetUser", RunMode = RunMode.Async)]
         [Alias("userStats", "StatsUser", "stats")]
         [Summary("Get information about the specified user profile")]
         public Task GetUserAsync(IUser user = null)
@@ -108,9 +108,8 @@
 
             return ReplyAsync(embed);
         }
-
-        [CustomPermissions]
-        [Command("LeaderBoard")]
+        
+        [Command("LeaderBoard", RunMode = RunMode.Async)]
         [Alias("SortLeaderboard", "SortLb", "LeaderboardSort")]
         [Summary("Displays leaderboard sort modes")]
         public Task LeaderboardAsync()
@@ -124,9 +123,8 @@
                                     "Deaths\r\n" +
                                     "Draws");
         }
-
-        [CustomPermissions]
-        [Command("Leaderboard")]
+        
+        [Command("Leaderboard", RunMode = RunMode.Async)]
         [Alias("SortLeaderboard", "SortLb", "LeaderboardSort")]
         [Summary("Displays the leaderboard")]
         public Task LeaderboardAsync(LeaderboardSortMode sortMode = LeaderboardSortMode.Points)
@@ -212,8 +210,7 @@
                                               });
         }
         
-        [CustomPermissions]
-        [Command("Ranks")]
+        [Command("Ranks", RunMode = RunMode.Async)]
         [Summary("Display all ranks")]
         public Task ViewRanksAsync()
         {
@@ -229,16 +226,14 @@
         }
 
         [CheckLobby]
-        [CustomPermissions]
-        [Command("LastGame")]
+        [Command("LastGame", RunMode = RunMode.Async)]
         [Summary("Displays the last game in the current lobby")]
         public Task LastGameAsync()
         {
             return ShowGameAsync(Context.Channel.Id, Context.Server.Results.Where(x => x.LobbyID == Context.Channel.Id).Max(x => x.GameNumber));
         }
-
-        [CustomPermissions]
-        [Command("ShowGame")]
+        
+        [Command("ShowGame", RunMode = RunMode.Async)]
         [Summary("Displays the a game from the given lobby")]
         public Task ShowGameAsync(ITextChannel lobbyChannel, int gameNumber)
         {
@@ -246,16 +241,14 @@
         }
 
         [CheckLobby]
-        [CustomPermissions]
-        [Command("ShowGame")]
+        [Command("ShowGame", RunMode = RunMode.Async)]
         [Summary("Displays the a game from the current lobby")]
         public Task ShowGameAsync(int gameNumber)
         {
             return ShowGameAsync(Context.Channel.Id, gameNumber);
         }
-
-        [CustomPermissions]
-        [Command("GameList")]
+        
+        [Command("GameList", RunMode = RunMode.Async)]
         [Summary("Shows all games from the given lobby")]
         public Task GameListAsync(ITextChannel lobbyChannel)
         {
@@ -263,8 +256,7 @@
         }
 
         [CheckLobby]
-        [CustomPermissions]
-        [Command("GameList")]
+        [Command("GameList", RunMode = RunMode.Async)]
         [Summary("Shows all games from the current lobby")]
         public Task GameListAsync()
         {
@@ -285,7 +277,6 @@
         }
 
         [CheckLobby]
-        [CustomPermissions]
         [Command("Comment")]
         [Summary("Comments on a game from the current lobby")]
         public Task CommentAsync(int gameNumber, [Remainder] string comment)

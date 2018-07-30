@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
 
+    using ELO.Discord.Preconditions;
     using ELO.Handlers;
 
     public class GuildModel
@@ -231,7 +232,7 @@
 
             public _GameSettings GameSettings { get; set; } = new _GameSettings();
 
-            public _CommandAccess CustomPermissions { get; set; } = new _CommandAccess();
+            public CommandAccess CustomCommandPermissions { get; set; } = new CommandAccess();
 
             public _Readability Readability { get; set; } = new _Readability();
 
@@ -268,25 +269,17 @@
                 public bool UseKd { get; set; } = false;
             }
 
-            public class _CommandAccess
+            public class CommandAccess
             {
                 public List<CustomPermission> CustomizedPermission { get; set; } = new List<CustomPermission>();
 
                 public class CustomPermission
                 {
-                    public enum AccessType
-                    {
-                        ServerOwner,
-                        Admin,
-                        Moderator,
-                        Registered
-                    }
-
                     public bool IsCommand { get; set; } = true;
 
                     public string Name { get; set; }
 
-                    public AccessType Setting { get; set; } = AccessType.Admin;
+                    public DefaultPermissionLevel Setting { get; set; }
                 }
             }
 

@@ -8,11 +8,11 @@
 
     using global::Discord.Commands;
 
-    [CustomPermissions(true)]
+    [CustomPermissions(DefaultPermissionLevel.Administrators)]
     [Summary("Game setup settings")]
     public class GameSettings : Base
     {
-        [Command("GameSettings")]
+        [Command("GameSettings", RunMode = RunMode.Async)]
         [Summary("GameSettings module settings")]
         public Task GameSettingsAsync()
         {

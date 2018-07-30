@@ -23,7 +23,7 @@
             return Task.CompletedTask;
         }*/
 
-        [Command("CreateKeys")]
+        [Command("CreateKeys", RunMode = RunMode.Async)]
         [Summary("Creates premium keys")]
         public Task CreateKeysAsync(int keyCount, int days)
         {

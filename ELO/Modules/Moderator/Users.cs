@@ -16,7 +16,7 @@
     using global::Discord.Commands;
     using global::Discord.WebSocket;
 
-    [CustomPermissions(true, true)]
+    [CustomPermissions(DefaultPermissionLevel.Moderators)]
     [Summary("User management commands")]
     public class Users : Base
     {

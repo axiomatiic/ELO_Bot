@@ -11,12 +11,11 @@
     using global::Discord;
     using global::Discord.Commands;
 
-    [CustomPermissions(true)]
+    [CustomPermissions(DefaultPermissionLevel.Administrators)]
     [Summary("Rank info and management")]
     public class Rank : Base
     {
-        [CustomPermissions]
-        [Command("RankInfo")]
+        [Command("RankInfo", RunMode = RunMode.Async)]
         [Summary("Display all ranks + Default")]
         public Task ViewRanksAsync()
         {

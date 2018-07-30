@@ -14,11 +14,11 @@
     using global::Discord.Commands;
     using global::Discord.WebSocket;
 
-    [CustomPermissions(true, true)]
+    [CustomPermissions(DefaultPermissionLevel.Moderators)]
     [Summary("Game results submissions")]
     public class Results : Base
     {
-        [Command("ResultTypes")]
+        [Command("ResultTypes", RunMode = RunMode.Async)]
         [Summary("list game result types")]
         public Task ResultTypesAsync()
         {

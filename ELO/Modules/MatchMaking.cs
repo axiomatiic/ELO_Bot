@@ -15,9 +15,8 @@
 
     using global::Discord.WebSocket;
 
-    [CustomPermissions]
+    [CustomPermissions(DefaultPermissionLevel.Registered)]
     [CheckLobby]
-    [CheckRegistered]
     [Summary("Game Queuing and Information")]
     public class MatchMaking : Base
     {
@@ -98,7 +97,7 @@
             }
         }
 
-        [Command("Queue")]
+        [Command("Queue", RunMode = RunMode.Async)]
         [Alias("q", "listPlayers", "playerList", "lps")]
         [Summary("View the current lobby's queue")]
         public async Task QueueAsync()
@@ -136,7 +135,7 @@
             }
         }
 
-        [Command("Lobby")]
+        [Command("Lobby", RunMode = RunMode.Async)]
         [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
         {
@@ -334,7 +333,7 @@
             Context.Server.Save();
         }
 
-        [Command("ResultTypes")]
+        [Command("ResultTypes", RunMode = RunMode.Async)]
         [Summary("list game result types")]
         public Task ResultTypesAsync()
         {
@@ -428,7 +427,7 @@
         }
 
         [CheckLobby]
-        [Command("Maps")]
+        [Command("Maps", RunMode = RunMode.Async)]
         [Summary("Show a list of all maps for the current lobby")]
         public Task MapsAsync()
         {
@@ -436,7 +435,7 @@
         }
 
         [CheckLobby]
-        [Command("Map")]
+        [Command("Map", RunMode = RunMode.Async)]
         [Summary("select a random map for the lobby")]
         public Task MapAsync()
         {

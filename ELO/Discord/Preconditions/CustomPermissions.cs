@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using ELO.Discord.Extensions;
     using ELO.Handlers;
     using ELO.Models;
 
@@ -12,104 +13,116 @@
 
     using Microsoft.Extensions.DependencyInjection;
 
+    public enum DefaultPermissionLevel
+    {
+        AllUsers,
+        Registered,
+        Moderators,
+        Administrators,
+        ServerOwner,
+        BotOwner
+    }
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class CustomPermissions : PreconditionAttribute
     {
-        private readonly bool defaultAdmin;
-        private readonly bool defaultMod;
+        private DefaultPermissionLevel defaultPermissionLevel;
 
-        public CustomPermissions(bool defaultAdministrator = false, bool defaultModerator = false)
+        public CustomPermissions(DefaultPermissionLevel defaultPermission)
         {
-            defaultAdmin = defaultAdministrator;
-            defaultMod = defaultModerator;
+            defaultPermissionLevel = defaultPermission;
         }
 
-        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext iContext, CommandInfo command, IServiceProvider services)
         {
+            var context = iContext as SocketCommandContext;
             if (context.Channel is IDMChannel)
             {
                 return Task.FromResult(PreconditionResult.FromError("This is a Guild command"));
             }
 
-            if (context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id || context.Guild.OwnerId == context.User.Id)
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
             var server = services.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, context.Guild.Id.ToString());
-            if (server.Users.All(u => u.UserID != context.User.Id))
-            {
-                return Task.FromResult(PreconditionResult.FromError("User is not registered"));
-            }
 
-            var gUser = context.User as IGuildUser;
+            var resultInfo = new AccessResult();
 
-            // At this point, all users are registered, not the server owner and not the bot owner
-            if (server.Settings.CustomPermissions.CustomizedPermission.Any())
+            if (server.Settings.CustomCommandPermissions.CustomizedPermission.Any())
             {
-                var match = server.Settings.CustomPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(command.Name, x.Name, StringComparison.CurrentCultureIgnoreCase));
+                // Check for a command match
+                var match = server.Settings.CustomCommandPermissions.CustomizedPermission.FirstOrDefault(x => x.IsCommand == true && x.Name.Equals(string.IsNullOrWhiteSpace(command.Aliases.FirstOrDefault()) ? command.Name : command.Aliases.FirstOrDefault(), StringComparison.OrdinalIgnoreCase));
                 if (match != null)
                 {
-                    return CheckPermsAsync(match.Setting, gUser, server);
+                    defaultPermissionLevel = match.Setting;
+                    resultInfo.IsCommand = true;
+                    resultInfo.IsOverridden = true;
+                    resultInfo.MatchName = match.Name;
+                }
+                else
+                {
+                    // Check for a module match
+                    match = server.Settings.CustomCommandPermissions.CustomizedPermission.FirstOrDefault(x => x.IsCommand == false && x.Name.Equals(string.IsNullOrWhiteSpace(command.Module.Aliases.FirstOrDefault()) ? command.Module.Name : command.Module.Aliases.FirstOrDefault(), StringComparison.OrdinalIgnoreCase));
+                    if (match != null)
+                    {
+                        defaultPermissionLevel = match.Setting;
+                        resultInfo.IsCommand = false;
+                        resultInfo.IsOverridden = true;
+                        resultInfo.MatchName = match.Name;
+                    }
                 }
             }
 
-            if (!defaultMod && !defaultAdmin)
+            if (defaultPermissionLevel == DefaultPermissionLevel.AllUsers)
             {
                 return Task.FromResult(PreconditionResult.FromSuccess());
             }
 
-            if ((gUser.RoleIds.Any(x => server.Settings.Moderation.ModRoles.Contains(x)) || gUser.RoleIds.Any(x => server.Settings.Moderation.AdminRoles.Contains(x))) && defaultMod)
+            if (defaultPermissionLevel == DefaultPermissionLevel.Registered)
             {
-                return Task.FromResult(PreconditionResult.FromSuccess());
+                if (server.Users.Any(x => x.UserID == context.User.Id))
+                {
+                    return Task.FromResult(PreconditionResult.FromSuccess());
+                }
+            }
+            else if (defaultPermissionLevel == DefaultPermissionLevel.Moderators)
+            {
+                if (context.User.CastToSocketGuildUser().IsModeratorOrHigher(server.Settings.Moderation, context.Client))
+                {
+                    return Task.FromResult(PreconditionResult.FromSuccess());
+                }
+            }
+            else if (defaultPermissionLevel == DefaultPermissionLevel.Administrators)
+            {
+                if (context.User.CastToSocketGuildUser().IsAdminOrHigher(server.Settings.Moderation, context.Client))
+                {
+                    return Task.FromResult(PreconditionResult.FromSuccess());
+                }
+            }
+            else if (defaultPermissionLevel == DefaultPermissionLevel.ServerOwner)
+            {
+                if (context.User.Id == context.Guild.OwnerId
+                    || context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id)
+                {
+                    return Task.FromResult(PreconditionResult.FromSuccess());
+                }
+            }
+            else if (defaultPermissionLevel == DefaultPermissionLevel.BotOwner)
+            {
+                if (context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id)
+                {
+                    return Task.FromResult(PreconditionResult.FromSuccess());
+                }
             }
 
-            if (gUser.RoleIds.Any(x => server.Settings.Moderation.AdminRoles.Contains(x)) && defaultAdmin)
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
-            return Task.FromResult(PreconditionResult.FromError($"This command is {(defaultMod ? "Moderator+" : string.Empty)}{(defaultAdmin ? "Admin+" : string.Empty)} Only"));
+            return Task.FromResult(PreconditionResult.FromError($"You do not have the access level of {defaultPermissionLevel}, which is required to run this commandn\n" +
+                $"IsCommand: {resultInfo.IsCommand}\n" +
+                $"IsOverridden: {resultInfo.IsCommand}\n" +
+                $"Match Name: {resultInfo.MatchName}"));
         }
 
-        public Task<PreconditionResult> CheckPermsAsync(GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType setting, IGuildUser gUser, GuildModel server)
+        public class AccessResult
         {
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.Registered)
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.Moderator && gUser.RoleIds.Any(x => server.Settings.Moderation.ModRoles.Contains(x)))
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.Moderator && gUser.RoleIds.Any(x => server.Settings.Moderation.AdminRoles.Contains(x)))
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.Moderator)
-            {
-                return Task.FromResult(PreconditionResult.FromError("This is a server Moderator only command"));
-            }
-
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.Admin && gUser.RoleIds.Any(x => server.Settings.Moderation.AdminRoles.Contains(x)))
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.Admin)
-            {
-                return Task.FromResult(PreconditionResult.FromError("This is a server Admin only command"));
-            }
-
-            if (setting == GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType.ServerOwner)
-            {
-                return Task.FromResult(PreconditionResult.FromError("This is a server Owner only command"));
-            }
-
-            return Task.FromResult(PreconditionResult.FromError("Unknown error in permissions"));
+            public bool IsCommand { get; set; } = true;
+            public string MatchName { get; set; } = "Default";
+            public bool IsOverridden { get; set; } = false;
         }
     }
 }

@@ -11,11 +11,11 @@
     using global::Discord;
     using global::Discord.Commands;
 
-    [CustomPermissions(true)]
+    [CustomPermissions(DefaultPermissionLevel.Administrators)]
     [Summary("Main server setup commands")]
     public class Setup : Base
     {
-        [Command("RegistrationInfo")]
+        [Command("RegistrationInfo", RunMode = RunMode.Async)]
         public Task SetupInfoAsync()
         {
             var r = Context.Server.Settings.Registration;
@@ -28,7 +28,7 @@
                                                       + $"**Message:** \n{r.Message}\n");
         }
 
-        [Command("ReadabilityInfo")]
+        [Command("ReadabilityInfo", RunMode = RunMode.Async)]
         public Task ReadabilityAsync()
         {
             var r = Context.Server.Settings.Readability;
@@ -104,7 +104,7 @@
             Context.Server.Save();
         }
 
-        [Command("NickNameFormat")]
+        [Command("NickNameFormat", RunMode = RunMode.Async)]
         [Summary("Info about setting a user's nickname format")]
         public Task NickFormatAsync()
         {

@@ -22,7 +22,7 @@
             _service = service;
         }
 
-        [Command("PremiumInfo")]
+        [Command("PremiumInfo", RunMode = RunMode.Async)]
         [Summary("View info about the Premium settings")]
         public Task OwnerAsync()
         {
@@ -62,7 +62,7 @@
 
         [Command("AddPermissionOverride")]
         [Summary("Set custom access permissions for a specific command")]
-        public async Task AddOverrideAsync(string commandName, GuildModel.GuildSettings._CommandAccess.CustomPermission.AccessType accessType)
+        public async Task AddOverrideAsync(string commandName, DefaultPermissionLevel accessType)
         {
             var matched = _service.Commands.FirstOrDefault(x => x.Aliases.Any(a => string.Equals(a, commandName, StringComparison.CurrentCultureIgnoreCase)));
             if (matched == null)
@@ -71,7 +71,7 @@
             }
 
             var modified = false;
-            var toEdit = Context.Server.Settings.CustomPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(x.Name, matched.Name, StringComparison.CurrentCultureIgnoreCase));
+            var toEdit = Context.Server.Settings.CustomCommandPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(x.Name, matched.Name, StringComparison.CurrentCultureIgnoreCase));
             if (toEdit != null)
             {
                 toEdit.Setting = accessType;
@@ -79,7 +79,7 @@
             }
             else
             {
-                Context.Server.Settings.CustomPermissions.CustomizedPermission.Add(new GuildModel.GuildSettings._CommandAccess.CustomPermission
+                Context.Server.Settings.CustomCommandPermissions.CustomizedPermission.Add(new GuildModel.GuildSettings.CommandAccess.CustomPermission
                 {
                     Name = matched.Name,
                     Setting = accessType
@@ -94,13 +94,13 @@
         [Summary("Remove/Reset custom access for a command")]
         public async Task RemoveOverrideAsync(string commandName)
         {
-            var matched = Context.Server.Settings.CustomPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(x.Name, commandName, StringComparison.CurrentCultureIgnoreCase));
+            var matched = Context.Server.Settings.CustomCommandPermissions.CustomizedPermission.FirstOrDefault(x => string.Equals(x.Name, commandName, StringComparison.CurrentCultureIgnoreCase));
             if (matched == null)
             {
                 throw new Exception("Unknown override name");
             }
 
-            Context.Server.Settings.CustomPermissions.CustomizedPermission.Remove(matched);
+            Context.Server.Settings.CustomCommandPermissions.CustomizedPermission.Remove(matched);
             await SimpleEmbedAsync("Custom Permission override removed.");
             Context.Server.Save();
         }
@@ -109,7 +109,7 @@
         [Summary("Display custom permissions for commands")]
         public Task ListAsync()
         {
-            var list = Context.Server.Settings.CustomPermissions.CustomizedPermission.Select(x => $"Name: {x.Name} Accessibility: {x.Setting.ToString()}");
+            var list = Context.Server.Settings.CustomCommandPermissions.CustomizedPermission.Select(x => $"Name: {x.Name} Accessibility: {x.Setting.ToString()}");
             return SimpleEmbedAsync(string.Join("\n", list));
         }
 
@@ -141,7 +141,7 @@
             return SimpleEmbedAsync("Admin Role Added.");
         }
 
-        [Command("ModeratorList")]
+        [Command("ModeratorList", RunMode = RunMode.Async)]
         [Summary("View all moderator roles in the server")]
         public Task ModeratorListAsync()
         {
@@ -150,7 +150,7 @@
                                     $"{string.Join("\n", role)}");
         }
 
-        [Command("AdminList")]
+        [Command("AdminList", RunMode = RunMode.Async)]
         [Summary("View all admin roles in the server")]
         public Task AdminListAsync()
         {
