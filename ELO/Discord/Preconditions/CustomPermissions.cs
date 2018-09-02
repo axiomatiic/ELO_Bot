@@ -48,7 +48,7 @@
             if (server.Settings.CustomCommandPermissions.CustomizedPermission.Any())
             {
                 // Check for a command match
-                var match = server.Settings.CustomCommandPermissions.CustomizedPermission.FirstOrDefault(x => x.IsCommand == true && x.Name.Equals(string.IsNullOrWhiteSpace(command.Aliases.FirstOrDefault()) ? command.Name : command.Aliases.FirstOrDefault(), StringComparison.OrdinalIgnoreCase));
+                var match = server.Settings.CustomCommandPermissions.CustomizedPermission.FirstOrDefault(x => x.IsCommand && x.Name.Equals(command.Name, StringComparison.OrdinalIgnoreCase));
                 if (match != null)
                 {
                     defaultPermissionLevel = match.Setting;
@@ -56,6 +56,8 @@
                     resultInfo.IsOverridden = true;
                     resultInfo.MatchName = match.Name;
                 }
+
+                /*
                 else
                 {
                     // Check for a module match
@@ -68,6 +70,7 @@
                         resultInfo.MatchName = match.Name;
                     }
                 }
+                */
             }
 
             if (defaultPermissionLevel == DefaultPermissionLevel.AllUsers)
@@ -112,7 +115,7 @@
                 }
             }
 
-            return Task.FromResult(PreconditionResult.FromError($"You do not have the access level of {defaultPermissionLevel}, which is required to run this commandn\n" +
+            return Task.FromResult(PreconditionResult.FromError($"You do not have the access level of {defaultPermissionLevel}, which is required to run this command\n" +
                 $"IsCommand: {resultInfo.IsCommand}\n" +
                 $"IsOverridden: {resultInfo.IsCommand}\n" +
                 $"Match Name: {resultInfo.MatchName}"));
@@ -121,7 +124,9 @@
         public class AccessResult
         {
             public bool IsCommand { get; set; } = true;
+            
             public string MatchName { get; set; } = "Default";
+
             public bool IsOverridden { get; set; } = false;
         }
     }

@@ -176,5 +176,25 @@
 
             return SimpleEmbedAsync($"Auto Delete user profiles on leave: {Context.Server.Settings.Registration.DeleteProfileOnLeave}");
         }
+
+        [Command("ResetLeaderboard")]
+        [Summary("Reset all wins, losses, K/D, points and other user stats")]
+        public Task ResetLeaderboardAsync([Remainder]string confirm = null)
+        {
+            if (confirm.ToLower() != "2ifh2")
+            {
+                return ReplyAsync("Please run the command using the following confirmation code in order to re-set the leaderboard.");
+            }
+
+            foreach (var serverUser in Context.Server.Users)
+            {
+                serverUser.Stats = new GuildModel.User.Score();
+            }
+
+            Context.Server.Save();
+
+            return SimpleEmbedAsync("All user stats have been restored. \n" + 
+                                    "NOTE: Nicknames and roles will not be re-set, player names and roles will be automatically updated when they play a new game, run the register command or have a game result");
+        }
     }
 }
