@@ -181,9 +181,9 @@
         [Summary("Reset all wins, losses, K/D, points and other user stats")]
         public Task ResetLeaderboardAsync([Remainder]string confirm = null)
         {
-            if (confirm.ToLower() != "2ifh2")
+            if (confirm?.ToLower() != "2ifh2")
             {
-                return ReplyAsync("Please run the command using the following confirmation code in order to re-set the leaderboard.");
+                return ReplyAsync("Please run the command using the following confirmation code in order to re-set the leaderboard: `2ifh2`");
             }
 
             foreach (var serverUser in Context.Server.Users)
