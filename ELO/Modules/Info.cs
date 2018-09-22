@@ -214,15 +214,29 @@
         [Summary("Display all ranks")]
         public Task ViewRanksAsync()
         {
+
             var rankList = Context.Server.Ranks.OrderByDescending(r => r.Threshold).Select(
                 r =>
                     {
                         var name = Context.Guild.GetRole(r.RoleID)?.Mention ?? $"[{r.RoleID}]";
                         var scoreInfo = $"{r.Threshold.ToString().PadRight(10)} +{(r.WinModifier == 0 ? Context.Server.Settings.Registration.DefaultWinModifier : r.WinModifier).ToString().PadRight(10)} -{(r.LossModifier == 0 ? Context.Server.Settings.Registration.DefaultLossModifier : r.LossModifier).ToString().PadRight(10)}\u200B";
-                        return $"`{scoreInfo}` - {name}";
+                        return $"`{scoreInfo}` - {name}{(r.IsDefault ? " :small_orange_diamond:" : "")}";
                     }).ToList();
 
-            return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", rankList)}");
+            var rankListString = string.Join("\n", rankList);
+            if (rankListString.Length >= 1500)
+            {
+                var groups = rankList.SplitList(10).Select(x => new PaginatedMessage.Page
+                                                                    {
+                                                                        Description = $"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", x)}"
+                                                                    });
+
+
+
+                return PagedReplyAsync(new PaginatedMessage { Pages = groups }, new ReactionList { Backward = true, Forward = true });
+            }
+
+            return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{rankListString}");
         }
 
         [CheckLobby]

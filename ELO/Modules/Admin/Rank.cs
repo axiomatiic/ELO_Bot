@@ -1,14 +1,17 @@
 ﻿namespace ELO.Modules.Admin
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
     using ELO.Discord.Context;
+    using ELO.Discord.Extensions;
     using ELO.Discord.Preconditions;
     using ELO.Models;
 
     using global::Discord;
+    using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
 
     [CustomPermissions(DefaultPermissionLevel.Administrators)]
@@ -28,7 +31,20 @@
                         return $"`{scoreInfo}` - {name}{(r.IsDefault ? " :small_orange_diamond:" : "")}";
                     }).ToList();
 
-            return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", rankList)}");
+            var rankListString = string.Join("\n", rankList);
+            if (rankListString.Length >= 1500)
+            {
+                var groups = rankList.SplitList(10).Select(x => new PaginatedMessage.Page
+                                                                   {
+                                                                        Description = $"`Threshold  +Win        -Lose      \u200B `\n{string.Join("\n", x)}"
+                                                                   });
+
+
+
+                return PagedReplyAsync(new PaginatedMessage { Pages = groups }, new ReactionList { Backward = true, Forward = true });
+            }
+
+            return SimpleEmbedAsync($"`Threshold  +Win        -Lose      \u200B `\n{rankListString}");
         }
 
         [Command("AddRank")]
