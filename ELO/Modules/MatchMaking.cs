@@ -209,13 +209,13 @@
             }
             else if (g.Team1.Players.Contains(userToReplace.Id))
             {
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+                Context.Elo.Lobby.Game.Team1.Players.Remove(userToReplace.Id);
+                Context.Elo.Lobby.Game.Team1.Players.Add(Context.User.Id);
             }
             else if (g.Team2.Players.Contains(userToReplace.Id))
             {
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);
-                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
+                Context.Elo.Lobby.Game.Team2.Players.Remove(userToReplace.Id);
+                Context.Elo.Lobby.Game.Team2.Players.Add(Context.User.Id);
             }
             else
             {
