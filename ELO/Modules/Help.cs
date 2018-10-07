@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -41,6 +42,49 @@
         /// Gets or sets the current command being executed
         /// </summary>
         private CommandInfo Command { get; set; }
+
+        [Command("BotInfo", RunMode = RunMode.Async)]
+        [Summary("Shows information about the bot")]
+        public Task BotInfoasync()
+        {
+            var embed = new EmbedBuilder { Title = "Bot Statistics", Color = Color.DarkRed, Timestamp = DateTimeOffset.UtcNow };
+
+            embed.AddField(
+                "Loaded Users",
+                $":robot: **Bot:** {Context.Client.Guilds.Sum(x => x.Users.Count(z => z.IsBot))}\n"
+                + $":man_in_tuxedo: **Human:** {Context.Client.Guilds.Sum(x => x.Users.Count(z => !z.IsBot))}\n"
+                + $"**Total:** {Context.Client.Guilds.Sum(x => x.Users.Count)}",
+                true);
+
+            embed.AddField(
+                "Channels",
+                $":abc: **Text:** {Context.Client.Guilds.Sum(x => x.TextChannels.Count)}\n"
+                + $":microphone: **Voice:** {Context.Client.Guilds.Sum(x => x.VoiceChannels.Count)}\n"
+                + $"**Total:** {Context.Client.Guilds.Sum(x => x.Channels.Count)}",
+                true);
+
+            var orderedShards = Context.Client.Shards.OrderByDescending(x => x.Guilds.Count).ToList();
+            embed.AddField(
+                "Stats",
+                $":small_orange_diamond: **Guilds:** {Context.Client.Guilds.Count}\n"
+                + $":small_blue_diamond: **Users:** {Context.Client.Guilds.Sum(x => x.MemberCount)}\n"
+                + $":boom: **Shards:** {Context.Client.Shards.Count}\n"
+                + $"**Max Shard:** G:{orderedShards.First().Guilds.Count} ID:{orderedShards.First().ShardId}\n"
+                + $"**Min Shard:** G:{orderedShards.Last().Guilds.Count} ID:{orderedShards.Last().ShardId}");
+            
+            embed.AddField(
+                ":hammer_pick:",
+                $"Heap: {Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2)} MB\n" + $"Up: {(DateTime.Now - Process.GetCurrentProcess().StartTime):dd\\D\\ hh\\H\\ mm\\M\\ ss\\S}",
+                true);
+
+            embed.AddField(
+                ":beginner:",
+                "Written by: [PassiveModding](https://github.com/PassiveModding)\n"
+                + $"Discord.Net {DiscordConfig.Version}",
+                true);
+
+            return ReplyAsync(embed);
+        }
 
         /// <summary>
         /// The help command.
