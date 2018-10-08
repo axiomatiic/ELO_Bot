@@ -114,7 +114,7 @@
             {
                 if (queuedPlayers.Any())
                 {
-                    await SimpleEmbedAsync($"**Player List [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]**\n" + 
+                    await SimpleEmbedAsync($"**Player List [{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}]**\n" +
                                            $"{string.Join("\n", queuedPlayers.Select(x => x.Mention))}");
                 }
                 else
@@ -174,7 +174,7 @@
             {
                 throw new Exception("You cannot replace a user if you are in the queue yourself");
             }
-            
+
             if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
             {
                 if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(Context.User.Id) || x.Game.Team1.Players.Contains(Context.User.Id) || x.Game.Team2.Players.Contains(Context.User.Id)))
@@ -201,7 +201,7 @@
         {
             var g = Context.Elo.Lobby.Game;
             await CheckReplacePermissionAsync(g, userToReplace.Id);
-          
+
             if (g.QueuedPlayerIDs.Contains(userToReplace.Id))
             {
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(userToReplace.Id);
@@ -250,6 +250,12 @@
             if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(pickedUser.Id))
             {
                 throw new Exception($"{pickedUser.Mention} is not able to be picked");
+            }
+
+            if (Context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Pick2)
+            {
+                await Pick2Captains(Context, pickedUser);
+                return;
             }
 
             int nextTeam;
@@ -331,6 +337,147 @@
             }
 
             Context.Server.Save();
+        }
+
+        public async Task Pick2Captains(Context context, IGuildUser pickedUser)
+        {
+            if (context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Pick2)
+            {
+                context.Elo.Lobby.Game.PickIndex++;
+                var ind = context.Elo.Lobby.Game.PickIndex;
+                var nextTeam = 1;
+                if (ind == 1)
+                {
+                    if (Context.User.Id != Context.Elo.Lobby.Game.Team1.Captain)
+                    {
+                        throw new Exception("It is not your turn to pick.");
+                    }
+
+                    nextTeam = 2;
+                    Context.Elo.Lobby.Game.Team2.TurnToPick = true;
+                    Context.Elo.Lobby.Game.Team1.TurnToPick = false;
+                    Context.Elo.Lobby.Game.Team1.Players.Add(pickedUser.Id);
+                }
+                else if (ind == 2 || ind == 3)
+                {
+                    if (Context.User.Id != Context.Elo.Lobby.Game.Team2.Captain)
+                    {
+                        throw new Exception("It is not your turn to pick.");
+                    }
+
+                    if (ind == 2)
+                    {
+                        nextTeam = 2;
+                        Context.Elo.Lobby.Game.Team1.TurnToPick = false;
+                        Context.Elo.Lobby.Game.Team2.TurnToPick = true;
+                    }
+                    else
+                    {
+                        nextTeam = 1;
+                        Context.Elo.Lobby.Game.Team2.TurnToPick = false;
+                        Context.Elo.Lobby.Game.Team1.TurnToPick = true;
+                    }
+
+                    Context.Elo.Lobby.Game.Team2.Players.Add(pickedUser.Id);
+                }
+                else if (ind == 4 || ind == 5)
+                {
+                    if (Context.User.Id != Context.Elo.Lobby.Game.Team1.Captain)
+                    {
+                        throw new Exception("It is not your turn to pick.");
+                    }
+
+                    if (ind == 4)
+                    {
+                        nextTeam = 1;
+                        Context.Elo.Lobby.Game.Team1.TurnToPick = true;
+                        Context.Elo.Lobby.Game.Team2.TurnToPick = false;
+                    }
+                    else
+                    {
+                        nextTeam = 2;
+                        Context.Elo.Lobby.Game.Team2.TurnToPick = true;
+                        Context.Elo.Lobby.Game.Team1.TurnToPick = false;
+                    }
+
+                    Context.Elo.Lobby.Game.Team1.Players.Add(pickedUser.Id);
+                }
+                else
+                {
+                    if (Context.Elo.Lobby.Game.Team1.TurnToPick)
+                    {
+                        if (Context.User.Id != Context.Elo.Lobby.Game.Team1.Captain)
+                        {
+                            throw new Exception("It is not your turn to pick.");
+                        }
+
+                        Context.Elo.Lobby.Game.Team1.Players.Add(pickedUser.Id);
+                        nextTeam = 2;
+                        Context.Elo.Lobby.Game.Team2.TurnToPick = true;
+                        Context.Elo.Lobby.Game.Team1.TurnToPick = false;
+                    }
+                    else
+                    {
+                        if (Context.User.Id != Context.Elo.Lobby.Game.Team2.Captain)
+                        {
+                            throw new Exception("It is not your turn to pick.");
+                        }
+
+                        Context.Elo.Lobby.Game.Team2.Players.Add(pickedUser.Id);
+                        nextTeam = 1;
+                        Context.Elo.Lobby.Game.Team2.TurnToPick = false;
+                        Context.Elo.Lobby.Game.Team1.TurnToPick = true;
+                    }
+                }
+
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(pickedUser.Id);
+
+                if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 1)
+                {
+                    var lastPlayer = Context.Elo.Lobby.Game.QueuedPlayerIDs.FirstOrDefault();
+                    if (Context.Elo.Lobby.Game.Team1.TurnToPick)
+                    {
+                        Context.Elo.Lobby.Game.Team1.Players.Add(lastPlayer);
+                    }
+                    else
+                    {
+                        Context.Elo.Lobby.Game.Team2.Players.Add(lastPlayer);
+                    }
+
+                    Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(lastPlayer);
+                }
+
+                if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count == 0)
+                {
+                    Context.Elo.Lobby.GamesPlayed++;
+
+                    Context.Server.Results.Add(new GuildModel.GameResult
+                    {
+                        Comments = new List<GuildModel.GameResult.Comment>(),
+                        GameNumber = Context.Elo.Lobby.GamesPlayed,
+                        LobbyID = Context.Elo.Lobby.ChannelID,
+                        Result = GuildModel.GameResult._Result.Undecided,
+                        Team1 = Context.Elo.Lobby.Game.Team1.Players,
+                        Team2 = Context.Elo.Lobby.Game.Team2.Players,
+                        Time = DateTime.UtcNow
+                    });
+                    await FullGame.AnnounceGameAsync(Context);
+                    Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
+                }
+                else
+                {
+                    await SimpleEmbedAsync($"**Team1 Captain** {Context.Guild.GetUser(Context.Elo.Lobby.Game.Team1.Captain)?.Mention}\n" +
+                                           $"**Team1:** {string.Join(", ", Context.Elo.Lobby.Game.Team1.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n\n" +
+                                           $"**Team2 Captain** {Context.Guild.GetUser(Context.Elo.Lobby.Game.Team2.Captain)?.Mention}\n" +
+                                           $"**Team2:** {string.Join(", ", Context.Elo.Lobby.Game.Team2.Players.Select(x => Context.Guild.GetUser(x)?.Mention).ToList())}\n\n" +
+                                           $"**Select Your Teams using `{Context.Prefix}pick <@user>`**\n" +
+                                           $"**It is Captain {nextTeam}'s Turn to pick**\n\n" +
+                                           "**Player Pool**\n" +
+                                           $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Guild.GetUser(x)?.Mention))}");
+                }
+
+                Context.Server.Save();
+            }
         }
 
         [Command("ResultTypes", RunMode = RunMode.Async)]

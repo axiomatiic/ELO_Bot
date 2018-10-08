@@ -40,7 +40,8 @@
             {
                 CompleteRandom,
                 Captains,
-                SortByScore
+                SortByScore,
+                Pick2
             }
 
             public enum CaptainSort
@@ -105,6 +106,8 @@
                 public bool IsPickingTeams { get; set; } = false;
 
                 public List<ulong> QueuedPlayerIDs { get; set; } = new List<ulong>();
+
+                public int PickIndex { get; set; } = 0;
 
                 public Team Team1 { get; set; } = new Team();
 

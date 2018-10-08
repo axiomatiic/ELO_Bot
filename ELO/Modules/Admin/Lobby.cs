@@ -8,11 +8,14 @@
     using ELO.Discord.Context;
     using ELO.Discord.Extensions;
     using ELO.Discord.Preconditions;
+    using ELO.Handlers;
     using ELO.Models;
 
     using global::Discord;
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
+
+    using Microsoft.Extensions.DependencyInjection;
 
     [CustomPermissions(DefaultPermissionLevel.Administrators)]
     [Summary("Lobby creation and setup commands")]
@@ -86,12 +89,15 @@
                                     "2\u20e3 `Captains` __**Captains Mode**__\n" +
                                     "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
                                     "3\u20e3 `SortByScore` __**Score Balance Mode**__\n" +
-                                    "Players will be automatically selected and teams will be balanced based on player scores"
+                                    "Players will be automatically selected and teams will be balanced based on player scores\n" + 
+                                    "4\u20e3  `Pick2` __**Balanced Captains Mode**__\n" +
+                                    "1,2,2,1,1,2,1,2,1... pick order. Makes team balancing fairer!"
                             }.Build(),
                         timeout: TimeSpan.FromMinutes(2), timeoutCallback: c => SimpleEmbedAsync("Command Timed Out"))
                     .WithCallback(new Emoji("1\u20e3"), (c, r) => CompleteLobbyCreationAsync(lobby, GuildModel.Lobby._PickMode.CompleteRandom))
                     .WithCallback(new Emoji("2\u20e3"), (c, r) => CompleteLobbyCreationAsync(lobby, GuildModel.Lobby._PickMode.Captains))
-                    .WithCallback(new Emoji("3\u20e3"), (c, r) => CompleteLobbyCreationAsync(lobby, GuildModel.Lobby._PickMode.SortByScore)));
+                    .WithCallback(new Emoji("3\u20e3"), (c, r) => CompleteLobbyCreationAsync(lobby, GuildModel.Lobby._PickMode.SortByScore))
+                    .WithCallback(new Emoji("4\u20e3"), (c, r) => CompleteLobbyCreationAsync(lobby, GuildModel.Lobby._PickMode.Pick2)));
         }
 
         public Task CompleteLobbyCreationAsync(GuildModel.Lobby lobby, GuildModel.Lobby._PickMode pickMode)
@@ -165,6 +171,8 @@
                                     "All teams are chosen completely randomly\n\n" +
                                     "`Captains` __**Captains Mode**__\n" +
                                     "Two team captains are chosen, they each take turns picking players until teams are both filled.\n\n" +
+                                    "`Pick2` __**Balanced Captains Mode**__\n" +
+                                    "1,2,2,1,1,2,1,2,1... pick order. Makes team balancing fairer!\n\n" +
                                     "`SortByScore` __**Score Balance Mode**__\n" +
                                     "Players will be automatically selected and teams will be balanced based on player scores");
         }
@@ -186,7 +194,7 @@
         [Summary("Show captain sort modes")]
         public Task CapSortModeAsync()
         {
-            return SimpleEmbedAsync($"Please use command `{Context.Prefix}CapSortMode <mode>` with the captain selection mode you would like for this lobby:\n" +
+            return SimpleEmbedAsync($"Please use command `{Context.Prefix}CaptainSortMode <mode>` with the captain selection mode you would like for this lobby:\n" +
                                     "`MostWins` __**Choose Two Players with Highest Wins**__\n" +
                                     "Selects the two players with the highest amount of Wins\n\n" +
                                     "`MostPoints` __**Choose Two Players with Highest Points**__\n" +
@@ -310,6 +318,58 @@
             Context.Elo.Lobby.Maps = new List<string>();
             Context.Server.Save();
             return SimpleEmbedAsync("Map List for this lobby has been reset.");
+        }
+
+        [CheckLobby]
+        [Command("ForceJoin")]
+        [Summary("Join the current lobby's queue")]
+        public async Task JoinLobbyAsync(IGuildUser User)
+        {
+            if (!Context.Elo.Lobby.Game.QueuedPlayerIDs.Contains(User.Id))
+            {
+                if (Context.Server.Settings.GameSettings.BlockMultiQueuing)
+                {
+                    if (Context.Server.Lobbies.Any(x => x.Game.QueuedPlayerIDs.Contains(User.Id) || x.Game.Team1.Players.Contains(User.Id) || x.Game.Team2.Players.Contains(User.Id)))
+                    {
+                        throw new Exception("MultiQueuing is disabled by the server Admins");
+                    }
+                }
+
+                if (Context.Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, Context.Guild.Id.ToString())?.Users?.FirstOrDefault(x => x.UserID == User.Id) == null)
+                {
+                    throw new Exception("Not Registered.");
+                }
+
+                if (Context.Elo.Lobby.Game.IsPickingTeams)
+                {
+                    throw new Exception("Currently Picking teams. Please wait until this is completed");
+                }
+
+                var previous = Context.Server.Results.Where(x => x.LobbyID == Context.Elo.Lobby.ChannelID && (x.Team1.Contains(User.Id) || x.Team2.Contains(User.Id))).OrderByDescending(x => x.Time).FirstOrDefault();
+                if (previous != null && previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay > DateTime.UtcNow)
+                {
+                    if (previous.Result == GuildModel.GameResult._Result.Undecided)
+                    {
+                        throw new Exception($"You must wait another {(previous.Time + Context.Server.Settings.GameSettings.ReQueueDelay - DateTime.UtcNow).TotalMinutes} minutes before rejoining the queue");
+                    }
+                }
+
+                Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(User.Id);
+                Context.Server.Save();
+                await SimpleEmbedAsync($"[{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}] Added {User.Mention} to queue");
+                if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
+                {
+                    // Game is ready to be played
+                    await FullGame.FullQueueAsync(Context);
+                }
+            }
+            else
+            {
+                if (Context.Server.Settings.Readability.JoinLeaveErrors)
+                {
+                    throw new Exception("You are already queued for this lobby");
+                }
+            }
         }
     }
 }

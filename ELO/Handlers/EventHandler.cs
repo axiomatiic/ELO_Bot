@@ -281,6 +281,12 @@
                                     foreach (var lobby in lobbies)
                                     {
                                         var messageChannel = Client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
+
+                                        if (messageChannel == null)
+                                        {
+                                            continue;
+                                        }
+
                                         if (lobby.Game.IsPickingTeams)
                                         {
                                             messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue or use the replace command", Color = Color.DarkRed }.Build());

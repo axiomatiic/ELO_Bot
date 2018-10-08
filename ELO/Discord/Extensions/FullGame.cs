@@ -48,7 +48,7 @@
                         }
                     }
                 }
-                else if (context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Captains)
+                else if (context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Captains || context.Elo.Lobby.PickMode == GuildModel.Lobby._PickMode.Pick2)
                 {
                     await FullQueueCaptainsAsync(context, users);
                     return;
