@@ -68,7 +68,7 @@
                             return;
                         }
 
-                        var rolesToRemove = gUser.Roles.Where(x => context.Server.Ranks.Any(r => r.RoleID == x.Id) && x.Id != serverRole.Id);
+                        var rolesToRemove = gUser.Roles.Where(x => context.Server.Ranks.Any(r => r.RoleID == x.Id && r.IsDefault == false) && x.Id != serverRole.Id);
 
                         await gUser.RemoveRolesAsync(rolesToRemove);
 
