@@ -145,6 +145,7 @@
                     // You should also disable this if you are working with multiple shards.
                     if (Client.Shards.Count == 1)
                     {
+                        /*
                         foreach (var Server in Servers)
                         {
                             if (!socketClient.Guilds.Select(x => x.Id).Contains(Convert.ToUInt64(Server)))
@@ -152,6 +153,7 @@
                                 Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.DELETE, id: Server.ToString());
                             }
                         }
+                        */
                     }
 
                     // Ensure that this is only run once as the bot initially connects.

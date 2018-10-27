@@ -16,10 +16,10 @@
     using global::Discord.WebSocket;
 
     [CustomPermissions(DefaultPermissionLevel.Registered)]
-    [CheckLobby]
     [Summary("Game Queuing and Information")]
     public class MatchMaking : Base
     {
+        [CheckLobby]
         [Command("Join")]
         [Alias("j", "sign", "play", "rdy", "ready")]
         [Summary("Join the current lobby's queue")]
@@ -72,6 +72,7 @@
             }
         }
 
+        [CheckLobby]
         [Command("Leave")]
         [Alias("l", "out", "unSign", "remove", "unready")]
         [Summary("Leave the current lobby's queue")]
@@ -97,6 +98,7 @@
             }
         }
 
+        [CheckLobby]
         [Command("Queue", RunMode = RunMode.Async)]
         [Alias("q", "listPlayers", "playerList", "lps")]
         [Summary("View the current lobby's queue")]
@@ -135,6 +137,7 @@
             }
         }
 
+        [CheckLobby]
         [Command("Lobby", RunMode = RunMode.Async)]
         [Summary("View information about the current lobby")]
         public Task LobbyInfoAsync()
@@ -195,6 +198,7 @@
             return Task.CompletedTask;
         }
 
+        [CheckLobby]
         [Command("Replace")]
         [Summary("Replace a user in the current queue")]
         public async Task ReplaceAsync(SocketGuildUser userToReplace)
@@ -231,6 +235,7 @@
             }
         }
 
+        [CheckLobby]
         [Command("Pick")]
         [Alias("p")]
         [Summary("Pick a player for your team")]
@@ -487,6 +492,7 @@
             return SimpleEmbedAsync($"**Game Results:**\n{string.Join("\n", EloInfo.GameResults())}");
         }
 
+        [CheckLobby]
         [Command("GameResult")]
         [Summary("Vote for the result of a game in the current channel")]
         public Task GameResultAsync(int gameNumber, GuildModel.GameResult._Result result)
