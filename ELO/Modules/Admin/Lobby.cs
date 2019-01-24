@@ -14,6 +14,7 @@
     using global::Discord;
     using global::Discord.Addons.Interactive;
     using global::Discord.Commands;
+    using global::Discord.WebSocket;
 
     using Microsoft.Extensions.DependencyInjection;
 
@@ -132,6 +133,30 @@
             Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
             Context.Server.Save();
             return SimpleEmbedAsync("Queue has been cleared");
+        }
+
+        [Command("PurgeQueues")]
+        [Summary("Kick all users from all queues or all queues that contain a specific user")]
+        public Task PurgeQueues(SocketGuildUser user = null)
+        {
+            foreach (var lobby in Context.Server.Lobbies)
+            {
+                if (user != null)
+                {
+                    var g = lobby.Game;
+                    if (g.QueuedPlayerIDs.Contains(user.Id) || g.Team1.Players.Contains(user.Id) || g.Team1.Captain == user.Id || g.Team2.Players.Contains(user.Id) || g.Team2.Captain == user.Id)
+                    {
+                        lobby.Game = new GuildModel.Lobby.CurrentGame();
+                    }
+                }
+                else
+                {
+                    lobby.Game = new GuildModel.Lobby.CurrentGame();
+                }
+            }
+
+            Context.Server.Save();
+            return SimpleEmbedAsync("Queues has been cleared");
         }
 
         [CheckLobby]

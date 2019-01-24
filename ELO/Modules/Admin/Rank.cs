@@ -112,7 +112,7 @@
                 throw new Exception("This is not a rank");
             }
 
-            if (points <= 0)
+            if (points < 0)
             {
                 throw new Exception("Point modifier must be a positive integer");
             }
@@ -133,11 +133,6 @@
             }
 
             points = Math.Abs(points);
-
-            if (points == 0)
-            {
-                throw new Exception("Point modifier must be an integer");
-            }
 
             var rank = Context.Server.Ranks.FirstOrDefault(x => x.RoleID == role.Id);
             rank.LossModifier = points;
