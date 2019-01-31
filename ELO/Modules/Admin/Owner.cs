@@ -34,7 +34,7 @@
 
         [Command("Premium")]
         [Summary("Upgrade the current server to premium or extend the current premium period")]
-        public Task DoPremiumAsync([Remainder]string code = null)
+        public async Task DoPremiumAsync([Remainder]string code = null)
         {
             var tokenModel = TokenModel.Load();
             var tokens = tokenModel.TokenList;
@@ -51,11 +51,11 @@
                                                                     Token = code,
                                                                     ValidFor = TimeSpan.FromDays(match.Days)
                                                                 });
-            Context.Server.Save();
+            await Context.Server.Save();
             tokens.Remove(match);
             tokenModel.TokenList = tokens;
             tokenModel.Save();
-            return SimpleEmbedAsync(
+            await SimpleEmbedAsync(
                 $"Success, Token Redeemed ({match.Days} days)\n"
                 + $"Server expires on {Context.Server.Settings.Premium.Expiry.ToLongDateString()} {Context.Server.Settings.Premium.Expiry.ToLongTimeString()}");
         }
@@ -87,7 +87,7 @@
             }
 
             await SimpleEmbedAsync($"Custom Permission override {(modified ? "Modified" : "Added")}, users with {accessType.ToString()} and above permissions, will be able to access it");
-            Context.Server.Save();
+            await Context.Server.Save();
         }
 
         [Command("RemovePermissionOverride")]
@@ -102,7 +102,7 @@
 
             Context.Server.Settings.CustomCommandPermissions.CustomizedPermission.Remove(matched);
             await SimpleEmbedAsync("Custom Permission override removed.");
-            Context.Server.Save();
+            await Context.Server.Save();
         }
 
         [Command("OverrideList")]
@@ -115,7 +115,7 @@
 
         [Command("AddMod")]
         [Summary("Add a moderator role for the bot")]
-        public Task ModAddAsync(IRole modRole)
+        public async Task ModAddAsync(IRole modRole)
         {
             if (Context.Server.Settings.Moderation.ModRoles.Contains(modRole.Id))
             {
@@ -123,13 +123,13 @@
             }
 
             Context.Server.Settings.Moderation.ModRoles.Add(modRole.Id);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Mod Role Added.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Mod Role Added.");
         }
 
         [Command("AddAdmin")]
         [Summary("Add an administrator role for the bot")]
-        public Task AdminAddAsync(IRole adminRole)
+        public async Task AdminAddAsync(IRole adminRole)
         {
             if (Context.Server.Settings.Moderation.AdminRoles.Contains(adminRole.Id))
             {
@@ -137,8 +137,8 @@
             }
 
             Context.Server.Settings.Moderation.AdminRoles.Add(adminRole.Id);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Admin Role Added.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Admin Role Added.");
         }
 
         [Command("ModeratorList", RunMode = RunMode.Async)]
@@ -161,7 +161,7 @@
 
         [Command("DelMod")]
         [Summary("Remove a moderator role")]
-        public Task ModDelAsync(IRole modRole)
+        public async Task ModDelAsync(IRole modRole)
         {
             if (!Context.Server.Settings.Moderation.ModRoles.Contains(modRole.Id))
             {
@@ -169,13 +169,13 @@
             }
 
             Context.Server.Settings.Moderation.ModRoles.Remove(modRole.Id);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Moderator Role Removed.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Moderator Role Removed.");
         }
 
         [Command("DelAdmin")]
         [Summary("Delete an administrator role")]
-        public Task AdminDelAsync(IRole adminRole)
+        public async Task AdminDelAsync(IRole adminRole)
         {
             if (!Context.Server.Settings.Moderation.AdminRoles.Contains(adminRole.Id))
             {
@@ -183,8 +183,8 @@
             }
 
             Context.Server.Settings.Moderation.AdminRoles.Remove(adminRole.Id);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Admin Role Added.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Admin Role Added.");
         }
     }
 }

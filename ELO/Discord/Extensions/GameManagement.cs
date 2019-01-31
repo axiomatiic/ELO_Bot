@@ -22,7 +22,7 @@
                 if (result == GuildModel.GameResult._Result.Canceled)
                 {
                     gameObject.Result = result;
-                    context.Server.Save();
+                    await context.Server.Save();
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder
                     {
                         Color = Color.DarkOrange,
@@ -82,7 +82,7 @@
                 }
 
                 gameObject.Result = result;
-                context.Server.Save();
+                await context.Server.Save();
                 await context.Channel.SendMessageAsync("", false, winEmbed.Build());
                 await context.Channel.SendMessageAsync("", false, loseEmbed.Build());
             }
@@ -92,7 +92,7 @@
             }
         }
 
-        public static Task WinAsync(List<SocketGuildUser> userList, Context context)
+        public static async Task WinAsync(List<SocketGuildUser> userList, Context context)
         {
             var winEmbed = new EmbedBuilder
                                {
@@ -112,11 +112,11 @@
                     var role = Task.Run(() => UserManagement.UpdateUserRanksAsync(context, eloUser));
                 }
             }
-            context.Server.Save();
-            return context.Channel.SendMessageAsync("", false, winEmbed.Build());
+            await context.Server.Save();
+            await context.Channel.SendMessageAsync("", false, winEmbed.Build());
         }
 
-        public static Task LoseAsync(List<SocketGuildUser> userList, Context context)
+        public static async Task LoseAsync(List<SocketGuildUser> userList, Context context)
         {
             var loseEmbed = new EmbedBuilder
                                 {
@@ -144,8 +144,8 @@
                     var role = Task.Run(() => UserManagement.UpdateUserRanksAsync(context, eloUser));
                 }
             }
-            context.Server.Save();
-            return context.Channel.SendMessageAsync("", false, loseEmbed.Build());
+            await context.Server.Save();
+            await context.Channel.SendMessageAsync("", false, loseEmbed.Build());
         }
     }
 }

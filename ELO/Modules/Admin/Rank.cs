@@ -56,7 +56,7 @@
 
         [Command("AddRank")]
         [Summary("Add a rank users can achieve by getting a certain amount of points")]
-        public Task AddRankAsync(IRole role, int points)
+        public async Task AddRankAsync(IRole role, int points)
         {
             if (Context.Server.Ranks.Any(x => x.RoleID == role.Id))
             {
@@ -72,8 +72,8 @@
                 Threshold = points
             };
             Context.Server.Ranks.Add(rank);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Rank added.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Rank added.");
         }
 
         [Command("DelRank")]
@@ -85,7 +85,7 @@
 
         [Command("DelRank")]
         [Summary("Delete a rank via role ID")]
-        public Task DelRankAsync(ulong roleId)
+        public async Task DelRankAsync(ulong roleId)
         {
             if (Context.Server.Ranks.All(x => x.RoleID != roleId))
             {
@@ -99,13 +99,13 @@
             }
 
             Context.Server.Ranks.Remove(rank);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Rank Removed.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Rank Removed.");
         }
 
         [Command("WinModifier")]
         [Summary("Set the amount of points a role receives upon winning with a specific rank")]
-        public Task WinModifierAsync(IRole role, int points)
+        public async Task WinModifierAsync(IRole role, int points)
         {
             if (Context.Server.Ranks.All(x => x.RoleID != role.Id))
             {
@@ -119,13 +119,13 @@
 
             var rank = Context.Server.Ranks.FirstOrDefault(x => x.RoleID == role.Id);
             rank.WinModifier = points;
-            Context.Server.Save();
-            return SimpleEmbedAsync("Rank Win Modifier Updated.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Rank Win Modifier Updated.");
         }
 
         [Command("LossModifier")]
         [Summary("Set the amount of points a role loses upon losing with a specific rank")]
-        public Task LossModifierAsync(IRole role, int points)
+        public async Task LossModifierAsync(IRole role, int points)
         {
             if (Context.Server.Ranks.All(x => x.RoleID != role.Id))
             {
@@ -136,8 +136,8 @@
 
             var rank = Context.Server.Ranks.FirstOrDefault(x => x.RoleID == role.Id);
             rank.LossModifier = points;
-            Context.Server.Save();
-            return SimpleEmbedAsync("Rank Loss Modifier Updated.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Rank Loss Modifier Updated.");
         }
     }
 }

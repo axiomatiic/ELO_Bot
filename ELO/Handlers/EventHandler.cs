@@ -266,48 +266,43 @@
             return Task.CompletedTask;
         }
 
-        internal Task GuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
+        internal async Task GuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
         {
             if (userBefore.Status != userAfter.Status)
             {
                 if (userAfter.Status != UserStatus.Online)
                 {
-                    var _ = Task.Run(() =>
+                    var guildModel = Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, userAfter.Guild.Id.ToString());
+                    if (guildModel.Settings.GameSettings.RemoveOnAfk)
+                    {
+                        var lobbies = guildModel.Lobbies.Where(x => x.Game.QueuedPlayerIDs.Contains(userAfter.Id) || x.Game.Team1.Players.Contains(userAfter.Id) || x.Game.Team2.Players.Contains(userAfter.Id)).ToList();
+                        if (lobbies.Any())
                         {
-                            var guildModel = Provider.GetRequiredService<DatabaseHandler>().Execute<GuildModel>(DatabaseHandler.Operation.LOAD, null, userAfter.Guild.Id.ToString());
-                            if (guildModel.Settings.GameSettings.RemoveOnAfk)
+                            foreach (var lobby in lobbies)
                             {
-                                var lobbies = guildModel.Lobbies.Where(x => x.Game.QueuedPlayerIDs.Contains(userAfter.Id) || x.Game.Team1.Players.Contains(userAfter.Id) || x.Game.Team2.Players.Contains(userAfter.Id)).ToList();
-                                if (lobbies.Any())
+                                var messageChannel = Client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
+
+                                if (messageChannel == null)
                                 {
-                                    foreach (var lobby in lobbies)
-                                    {
-                                        var messageChannel = Client.GetChannel(lobby.ChannelID) as ISocketMessageChannel;
+                                    continue;
+                                }
 
-                                        if (messageChannel == null)
-                                        {
-                                            continue;
-                                        }
-
-                                        if (lobby.Game.IsPickingTeams)
-                                        {
-                                            messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue or use the replace command", Color = Color.DarkRed }.Build());
-                                        }
-                                        else
-                                        {
-                                            lobby.Game.QueuedPlayerIDs.Remove(userAfter.Id);
-                                            messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()} and has been automatically removed from the queue", Color = Color.DarkBlue }.Build());
-                                        }
-                                    }
-
-                                    guildModel.Save();
+                                if (lobby.Game.IsPickingTeams)
+                                {
+                                   await messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()}, but this lobby is currently picking teams. If they are inactive it is suggested that you clear the queue or use the replace command", Color = Color.DarkRed }.Build());
+                                }
+                                else
+                                {
+                                    lobby.Game.QueuedPlayerIDs.Remove(userAfter.Id);
+                                   await messageChannel.SendMessageAsync("", false, new EmbedBuilder { Description = $"{userAfter.Mention} has gone {userAfter.Status.ToString()} and has been automatically removed from the queue", Color = Color.DarkBlue }.Build());
                                 }
                             }
-                        });
+
+                            await guildModel.Save();
+                        }
+                    }
                 }
             }
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -364,7 +359,7 @@
                                     Color = Color.DarkOrange
                                 }.Build());
                         context.Elo.User.Banned = new GuildModel.User.Ban();
-                        context.Server.Save();
+                        await context.Server.Save();
                     }
                 }
             }

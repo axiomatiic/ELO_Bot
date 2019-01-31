@@ -42,7 +42,7 @@
         [Command("CreateLobby")]
         [Summary("Interactive lobby creation command")]
         [RequireBotPermission(ChannelPermission.AddReactions)]
-        public Task CreateLobbyAsync()
+        public async Task CreateLobbyAsync()
         {
             if (Context.Elo.Lobby != null)
             {
@@ -54,7 +54,7 @@
                                 ChannelID = Context.Channel.Id
                             };
 
-            return InlineReactionReplyAsync(
+            await InlineReactionReplyAsync(
                 new ReactionCallbackData(
                         "",
                         new EmbedBuilder
@@ -101,12 +101,12 @@
                     .WithCallback(new Emoji("4\u20e3"), (c, r) => CompleteLobbyCreationAsync(lobby, GuildModel.Lobby._PickMode.Pick2)));
         }
 
-        public Task CompleteLobbyCreationAsync(GuildModel.Lobby lobby, GuildModel.Lobby._PickMode pickMode)
+        public async Task CompleteLobbyCreationAsync(GuildModel.Lobby lobby, GuildModel.Lobby._PickMode pickMode)
         {
             lobby.PickMode = pickMode;
             Context.Server.Lobbies.Add(lobby);
-            Context.Server.Save();
-            return SimpleEmbedAsync(
+            await Context.Server.Save();
+            await SimpleEmbedAsync(
                 "Success, Lobby has been created.\n" + $"`Size:` {lobby.UserLimit}\n"
                                                       + $"`Team Size:` {lobby.UserLimit / 2}\n"
                                                       + $"`Team Mode:` {(lobby.PickMode == GuildModel.Lobby._PickMode.Captains ? $"Captains => {lobby.CaptainSortMode}" : $"{lobby.PickMode}")}\n"
@@ -118,26 +118,26 @@
         [CheckLobby]
         [Command("RemoveLobby")]
         [Summary("Deletes the current lobby")]
-        public Task RemoveLobbyAsync()
+        public async Task RemoveLobbyAsync()
         {
             Context.Server.Lobbies.Remove(Context.Elo.Lobby);
-            Context.Server.Save();
-            return SimpleEmbedAsync("Success, Lobby has been removed.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Success, Lobby has been removed.");
         }
 
         [CheckLobby]
         [Command("ClearQueue")]
         [Summary("Kick all users out of the current queue")]
-        public Task ClearQueueAsync()
+        public async Task ClearQueueAsync()
         {
             Context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
-            Context.Server.Save();
-            return SimpleEmbedAsync("Queue has been cleared");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Queue has been cleared");
         }
 
         [Command("PurgeQueues")]
         [Summary("Kick all users from all queues or all queues that contain a specific user")]
-        public Task PurgeQueues(SocketGuildUser user = null)
+        public async Task PurgeQueues(SocketGuildUser user = null)
         {
             foreach (var lobby in Context.Server.Lobbies)
             {
@@ -155,14 +155,14 @@
                 }
             }
 
-            Context.Server.Save();
-            return SimpleEmbedAsync("Queues has been cleared");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Queues has been cleared");
         }
 
         [CheckLobby]
         [Command("LobbyDescription")]
         [Summary("Set the description of the current lobby")]
-        public Task SetDescriptionAsync([Remainder] string description)
+        public async Task SetDescriptionAsync([Remainder] string description)
         {
             if (description.Length > 200)
             {
@@ -170,19 +170,19 @@
             }
 
             Context.Elo.Lobby.Description = description;
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Success, Description is now:\n{description}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Success, Description is now:\n{description}");
         }
 
         [CheckLobby]
         [Command("LobbySortMode")]
         [Summary("Select hor players are sorted into teams")]
-        public Task LobbySortModeAsync(GuildModel.Lobby._PickMode sortMode)
+        public async Task LobbySortModeAsync(GuildModel.Lobby._PickMode sortMode)
         {
             Context.Elo.Lobby.PickMode = sortMode;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync("Success, lobby team sort mode has been modified to:\n" +
+            await SimpleEmbedAsync("Success, lobby team sort mode has been modified to:\n" +
                                     $"{sortMode.ToString()}");
         }
 
@@ -205,12 +205,12 @@
         [CheckLobby]
         [Command("CaptainSortMode")]
         [Summary("Select how captains are picked")]
-        public Task CapSortModeAsync(GuildModel.Lobby.CaptainSort captainSortMode)
+        public async Task CapSortModeAsync(GuildModel.Lobby.CaptainSort captainSortMode)
         {
             Context.Elo.Lobby.CaptainSortMode = captainSortMode;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync("Success, captain sort mode has been modified to:\n" +
+            await SimpleEmbedAsync("Success, captain sort mode has been modified to:\n" +
                                     $"{captainSortMode.ToString()}");
         }
 
@@ -239,12 +239,12 @@
         [CheckLobby]
         [Command("MapMode")]
         [Summary("toggle whether to select a random map on game announcements")]
-        public Task RandomMapAsync(GuildModel.Lobby.MapSelector mapMode)
+        public async Task RandomMapAsync(GuildModel.Lobby.MapSelector mapMode)
         {
             Context.Elo.Lobby.MapMode = mapMode;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Map Selection mode: {Context.Elo.Lobby.MapMode}");
+            await SimpleEmbedAsync($"Map Selection mode: {Context.Elo.Lobby.MapMode}");
         }
 
         [CheckLobby]
@@ -259,12 +259,12 @@
         [CheckLobby]
         [Command("HostSelectionMode")]
         [Summary("Select how game hosts are chosen")]
-        public Task HostModeAsync(GuildModel.Lobby.HostSelector hostSelectionMode)
+        public async Task HostModeAsync(GuildModel.Lobby.HostSelector hostSelectionMode)
         {
             Context.Elo.Lobby.HostSelectionMode = hostSelectionMode;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Host selection mode = {hostSelectionMode.ToString()}");
+            await SimpleEmbedAsync($"Host selection mode = {hostSelectionMode.ToString()}");
         }
 
         [CheckLobby]
@@ -287,7 +287,7 @@
             if (!Context.Elo.Lobby.Maps.Contains(mapName))
             {
                 Context.Elo.Lobby.Maps.Add(mapName);
-                Context.Server.Save();
+                await Context.Server.Save();
                 await SimpleEmbedAsync("Success, Lobby Map list is now:\n" +
                                        $"{string.Join("\n", Context.Elo.Lobby.Maps)}");
             }
@@ -305,7 +305,7 @@
             if (Context.Elo.Lobby.Maps.Contains(mapName))
             {
                 Context.Elo.Lobby.Maps.Remove(mapName);
-                Context.Server.Save();
+                await Context.Server.Save();
                 await SimpleEmbedAsync("Success, Lobby Map list is now:\n" +
                                        $"{string.Join("\n", Context.Elo.Lobby.Maps)}");
             }
@@ -325,7 +325,7 @@
             if (!Context.Elo.Lobby.Maps.Any(x => maps.Contains(x)))
             {
                 Context.Elo.Lobby.Maps.AddRange(maps);
-                Context.Server.Save();
+                await Context.Server.Save();
                 await SimpleEmbedAsync("Success, Lobby Map list is now:\n" +
                                        $"{string.Join("\n", Context.Elo.Lobby.Maps)}");
             }
@@ -338,11 +338,11 @@
         [CheckLobby]
         [Command("ClearMaps")]
         [Summary("Remove all maps from the current lobby")]
-        public Task ClearMapsAsync()
+        public async Task ClearMapsAsync()
         {
             Context.Elo.Lobby.Maps = new List<string>();
-            Context.Server.Save();
-            return SimpleEmbedAsync("Map List for this lobby has been reset.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync("Map List for this lobby has been reset.");
         }
 
         [CheckLobby]
@@ -380,7 +380,7 @@
                 }
 
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(User.Id);
-                Context.Server.Save();
+                await Context.Server.Save();
                 await SimpleEmbedAsync($"[{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}] Added {User.Mention} to queue");
                 if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
                 {

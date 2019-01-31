@@ -39,7 +39,7 @@
 
         [Command("RegisterRole")]
         [Summary("Set the default role user's are given when registering")]
-        public Task RegisterRoleAsync(IRole role)
+        public async Task RegisterRoleAsync(IRole role)
         {
             if (Context.Server.Ranks.Any(x => x.IsDefault))
             {
@@ -54,24 +54,24 @@
                 RoleID = role.Id,
                 Threshold = 0
             });
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync("Success Default Registration Role has been set.");
+            await SimpleEmbedAsync("Success Default Registration Role has been set.");
         }
 
         [Command("RegisterMessage")]
         [Summary("Set the message that is displayed to users when registering")]
-        public Task RegisterMessageAsync([Remainder] string message)
+        public async Task RegisterMessageAsync([Remainder] string message)
         {
             Context.Server.Settings.Registration.Message = message;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync("Success Registration message has been set.");
+            await SimpleEmbedAsync("Success Registration message has been set.");
         }
 
         [Command("RegisterPoints")]
         [Summary("Set the default points users are given when registering")]
-        public Task RegisterPointsAsync(int points = 0)
+        public async Task RegisterPointsAsync(int points = 0)
         {
             if (points < 0)
             {
@@ -79,9 +79,9 @@
             }
 
             Context.Server.Settings.Registration.RegistrationBonus = points;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success, users who register for a first time will be given {points}");
+            await SimpleEmbedAsync($"Success, users who register for a first time will be given {points}");
         }
 
         [Command("NickNameFormat")]
@@ -101,7 +101,7 @@
 
             Context.Server.Settings.Registration.NameFormat = nicknameFormatting.ToLower();
             await SimpleEmbedAsync("Success Nickname Format has been set.");
-            Context.Server.Save();
+            await Context.Server.Save();
         }
 
         [Command("NickNameFormat", RunMode = RunMode.Async)]
@@ -114,7 +114,7 @@
 
         [Command("DefaultWinModifier")]
         [Summary("Set the default amount of points users are given when winning a match")]
-        public Task WinModifierAsync(int pointsToAdd = 10)
+        public async Task WinModifierAsync(int pointsToAdd = 10)
         {
             if (pointsToAdd <= 0)
             {
@@ -122,68 +122,69 @@
             }
 
             Context.Server.Settings.Registration.DefaultWinModifier = pointsToAdd;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success Default Win Modifier is now: +{pointsToAdd}");
+            await SimpleEmbedAsync($"Success Default Win Modifier is now: +{pointsToAdd}");
         }
 
         [Command("DefaultLossModifier")]
         [Summary("Set the default amount of points users lose wh")]
-        public Task LossModifierAsync(int pointsToRemove = 5)
+        public async Task LossModifierAsync(int pointsToRemove = 5)
         {
             Context.Server.Settings.Registration.DefaultLossModifier = Math.Abs(pointsToRemove);
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success, Default Loss Modifier is now: -{pointsToRemove}");
+            await SimpleEmbedAsync($"Success, Default Loss Modifier is now: -{pointsToRemove}");
         }
 
         [Command("ShowErrors")]
         [Summary("Toggle the response of error messages in chat")]
-        public Task ToggleErrorsAsync()
+        public async Task ToggleErrorsAsync()
         {
             Context.Server.Settings.Readability.ReplyErrors = !Context.Server.Settings.Readability.ReplyErrors;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Reply with errors: {Context.Server.Settings.Readability.ReplyErrors}");
+            await SimpleEmbedAsync($"Reply with errors: {Context.Server.Settings.Readability.ReplyErrors}");
         }
 
         [Command("JoinLeaveErrors")]
         [Summary("Toggle the response of error messages in chat when users try to join a queue they are already in and leave a queue they aren't in")]
-        public Task ToggleJLErrorsAsync()
+        public async Task ToggleJLErrorsAsync()
         {
             Context.Server.Settings.Readability.JoinLeaveErrors = !Context.Server.Settings.Readability.JoinLeaveErrors;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Reply with Join Leave: {Context.Server.Settings.Readability.JoinLeaveErrors}");
+            await SimpleEmbedAsync($"Reply with Join Leave: {Context.Server.Settings.Readability.JoinLeaveErrors}");
         }
 
         [Command("MultiRegister")]
         [Summary("toggle whether users can use the register command more than once")]
-        public Task ToggleMultiRegisterAsync()
+        public async Task ToggleMultiRegisterAsync()
         {
             Context.Server.Settings.Registration.AllowMultiRegistration = !Context.Server.Settings.Registration.AllowMultiRegistration;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Allow multi registration: {Context.Server.Settings.Registration.AllowMultiRegistration}");
+            await SimpleEmbedAsync($"Allow multi registration: {Context.Server.Settings.Registration.AllowMultiRegistration}");
         }
 
         [Command("AutoDeleteOnLeave")]
         [Summary("toggle whether user profiles are auto-deleted when they leave the server")]
-        public Task ToggleAutoDeleteOnLeaveAsync()
+        public async Task ToggleAutoDeleteOnLeaveAsync()
         {
             Context.Server.Settings.Registration.DeleteProfileOnLeave = !Context.Server.Settings.Registration.DeleteProfileOnLeave;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Auto Delete user profiles on leave: {Context.Server.Settings.Registration.DeleteProfileOnLeave}");
+            await SimpleEmbedAsync($"Auto Delete user profiles on leave: {Context.Server.Settings.Registration.DeleteProfileOnLeave}");
         }
 
         [Command("ResetLeaderboard")]
         [Summary("Reset all wins, losses, K/D, points and other user stats")]
-        public Task ResetLeaderboardAsync([Remainder]string confirm = null)
+        public async Task ResetLeaderboardAsync([Remainder]string confirm = null)
         {
             if (confirm?.ToLower() != "2ifh2")
             {
-                return ReplyAsync("Please run the command using the following confirmation code in order to re-set the leaderboard: `2ifh2`");
+                await ReplyAsync("Please run the command using the following confirmation code in order to re-set the leaderboard: `2ifh2`");
+                return;
             }
 
             foreach (var serverUser in Context.Server.Users)
@@ -191,9 +192,9 @@
                 serverUser.Stats = new GuildModel.User.Score();
             }
 
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync("All user stats have been restored. \n" + 
+            await SimpleEmbedAsync("All user stats have been restored. \n" + 
                                     "NOTE: Nicknames and roles will not be re-set, player names and roles will be automatically updated when they play a new game, run the register command or have a game result");
         }
     }

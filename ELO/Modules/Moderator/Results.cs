@@ -86,7 +86,7 @@
             return ClearGResAsync(lobbyChannel.Id, gameNumber);
         }
 
-        public Task ClearGResAsync(ulong lobbyChannel, int gameNumber)
+        public async Task ClearGResAsync(ulong lobbyChannel, int gameNumber)
         {
             var selectedGame = Context.Server.Results.FirstOrDefault(x => x.LobbyID == lobbyChannel && x.GameNumber == gameNumber);
             if (selectedGame == null)
@@ -95,8 +95,8 @@
             }
 
             selectedGame.Proposal = new GuildModel.GameResult.ResultProposal();
-            Context.Server.Save();
-            return ReplyAsync("Reset.");
+            await Context.Server.Save();
+            await ReplyAsync("Reset.");
         }
 
     }

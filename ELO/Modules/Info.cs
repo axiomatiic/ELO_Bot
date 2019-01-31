@@ -293,7 +293,7 @@
         [CheckLobby]
         [Command("Comment")]
         [Summary("Comments on a game from the current lobby")]
-        public Task CommentAsync(int gameNumber, [Remainder] string comment)
+        public async Task CommentAsync(int gameNumber, [Remainder] string comment)
         {
             var game = Context.Server.Results.FirstOrDefault(l => l.LobbyID == Context.Channel.Id && l.GameNumber == gameNumber);
 
@@ -314,8 +314,8 @@
                                       ID = game.Comments.Count
                                   });
 
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Success, {Context.User.Mention} commented on game #{gameNumber}\n" + $"{comment}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Success, {Context.User.Mention} commented on game #{gameNumber}\n" + $"{comment}");
         }
 
         public Task ShowGameAsync(ulong lobbyId, int gameNumber)

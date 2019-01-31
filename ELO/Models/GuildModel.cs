@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     using ELO.Discord.Preconditions;
     using ELO.Handlers;
@@ -25,12 +26,12 @@
 
         public GuildSettings Settings { get; set; } = new GuildSettings();
 
-        public void Save()
+        public async Task Save()
         {
-            using (var session = DatabaseHandler.Store.OpenSession())
+            using (var session = DatabaseHandler.Store.OpenAsyncSession())
             {
-                session.Store(this, ID.ToString());
-                session.SaveChanges();
+                await session.StoreAsync(this, ID.ToString());
+                await session.SaveChangesAsync();
             }
         }
 

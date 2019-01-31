@@ -157,7 +157,7 @@
             return SetAsync(users.ToList(), ScoreType.loss, losses);
         }
 
-        public Task SetAsync(List<SocketGuildUser> users, ScoreType type, int modifier)
+        public async Task SetAsync(List<SocketGuildUser> users, ScoreType type, int modifier)
         {
             var sb = new StringBuilder();
             foreach (var user in users)
@@ -204,11 +204,11 @@
 
                 sb.AppendLine($"{user.Mention} {type}'s set to: {finalValue}");
             }
-            Context.Server.Save();
-            return SimpleEmbedAsync(sb.ToString());
+            await Context.Server.Save();
+            await SimpleEmbedAsync(sb.ToString());
         }
 
-        public Task ModifyAsync(List<SocketGuildUser> users, ScoreType type, int modifier)
+        public async Task ModifyAsync(List<SocketGuildUser> users, ScoreType type, int modifier)
         {
             var sb = new StringBuilder();
             foreach (var user in users)
@@ -256,8 +256,8 @@
                 sb.AppendLine($"{user.Mention} {type}'s modified: {finalValue}");
             }
 
-            Context.Server.Save();
-            return SimpleEmbedAsync(sb.ToString());
+            await Context.Server.Save();
+            await SimpleEmbedAsync(sb.ToString());
         }
 
         public enum ScoreType

@@ -29,7 +29,7 @@
 
         [Command("DelUser")]
         [Summary("Deletes the specified user's profile via user ID")]
-        public Task DeleteUserAsync(ulong userID)
+        public async Task DeleteUserAsync(ulong userID)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == userID);
             if (profile == null)
@@ -38,13 +38,13 @@
             }
 
             Context.Server.Users.Remove(profile);
-            Context.Server.Save();
+            await Context.Server.Save();
 
             if (Context.Guild.GetUser(userID) is SocketGuildUser user)
             {
                 try
                 {
-                    user.RemoveRolesAsync(user.Roles.Where(r => Context.Server.Ranks.Any(x => x.RoleID == r.Id)));
+                    await user.RemoveRolesAsync(user.Roles.Where(r => Context.Server.Ranks.Any(x => x.RoleID == r.Id)));
                 }
                 catch
                 {
@@ -53,7 +53,7 @@
 
                 try
                 {
-                    user.ModifyAsync(u => u.Nickname = null);
+                    await user.ModifyAsync(u => u.Nickname = null);
                 }
                 catch
                 {
@@ -61,7 +61,7 @@
                 }
             }
             
-            return SimpleEmbedAsync($"Success {profile.Username} [{userID}]'s profile has been deleted.");
+            await SimpleEmbedAsync($"Success {profile.Username} [{userID}]'s profile has been deleted.");
         }
 
         [Command("RegisterUser")]
@@ -84,7 +84,7 @@
 
         [Command("Rename")]
         [Summary("Rename the specified user")]
-        public Task RenameAsync(IUser user, [Remainder]string nickname = null)
+        public async Task RenameAsync(IUser user, [Remainder]string nickname = null)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (profile == null)
@@ -98,14 +98,14 @@
             }
 
             profile.Username = nickname;
-            Context.Server.Save();
+            await Context.Server.Save();
             var rename = Task.Run(() => UserManagement.UserRenameAsync(Context, profile));
-            return SimpleEmbedAsync($"Success {user.Mention} renamed to {nickname}");
+            await SimpleEmbedAsync($"Success {user.Mention} renamed to {nickname}");
         }
 
         [Command("Ban")]
         [Summary("Ban the specified user for the given amount of hours")]
-        public Task BanAsync(IUser user, int hours, [Remainder] string reason = null)
+        public async Task BanAsync(IUser user, int hours, [Remainder] string reason = null)
         {
             var profile = Context.Server.Users.FirstOrDefault(x => x.UserID == user.Id);
             if (profile == null)
@@ -122,8 +122,8 @@
             profile.Banned.Moderator = Context.User.Id;
             profile.Banned.Reason = reason;
             profile.Banned.ExpiryTime = DateTime.UtcNow + TimeSpan.FromHours(hours);
-            Context.Server.Save();
-            return SimpleEmbedAsync($"{user.Mention} has been banned for {hours} hours by {Context.User.Mention}\n" +
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"{user.Mention} has been banned for {hours} hours by {Context.User.Mention}\n" +
                                     "**Reason**\n" +
                                     $"{reason}");
         }
@@ -149,7 +149,7 @@
                                    $"Moderator: {Context.Guild.GetUser(profile.Banned.Moderator)?.Mention ?? $"[{profile.Banned.Moderator}]"}\n" +
                                    $"Expiry: {profile.Banned.ExpiryTime.ToString(CultureInfo.InvariantCulture)}");
             profile.Banned = new GuildModel.User.Ban();
-            Context.Server.Save();
+            await Context.Server.Save();
         }
 
         [Command("Unban")]
@@ -173,12 +173,12 @@
                                    $"Moderator: {Context.Guild.GetUser(profile.Banned.Moderator)?.Mention ?? $"[{profile.Banned.Moderator}]"}\n" +
                                    $"Expiry: {profile.Banned.ExpiryTime.ToString(CultureInfo.InvariantCulture)}");
             profile.Banned = new GuildModel.User.Ban();
-            Context.Server.Save();
+            await Context.Server.Save();
         }
 
         [Command("UnbanAll")]
         [Summary("Unban a user via User ID")]
-        public Task UnbanAllAsync()
+        public async Task UnbanAllAsync()
         {
             var modified = Context.Server.Users.Count(x => x.Banned.Banned);
             foreach (var user in Context.Server.Users.Where(x => x.Banned.Banned))
@@ -186,13 +186,13 @@
                 user.Banned = new GuildModel.User.Ban();
             }
 
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Success, {modified} users have been unbanned.");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Success, {modified} users have been unbanned.");
         }
 
         [Command("Bans")]
         [Summary("Shows all bans")]
-        public Task BansAsync()
+        public async Task BansAsync()
         {
             var pages = new List<PaginatedMessage.Page>();
 
@@ -234,14 +234,14 @@
                 }
             }
 
-            Context.Server.Save();
+            await Context.Server.Save();
             var pager = new PaginatedMessage
             {
                 Pages = pages,
                 Title = "Bans"
             };
 
-            return PagedReplyAsync(pager, new ReactionList
+            await PagedReplyAsync(pager, new ReactionList
                                               {
                                                   Forward = true,
                                                   Backward = true, Trash = true

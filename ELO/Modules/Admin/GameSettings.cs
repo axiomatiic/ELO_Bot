@@ -29,52 +29,52 @@
 
         [Command("AllowNegativeScore")]
         [Summary("Toggle the ability to use negative scores")]
-        public Task NegativeScoreAsync()
+        public async Task NegativeScoreAsync()
         {
             Context.Server.Settings.GameSettings.AllowNegativeScore = !Context.Server.Settings.GameSettings.AllowNegativeScore;
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Negative Scores Allowed: {Context.Server.Settings.GameSettings.AllowNegativeScore}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Negative Scores Allowed: {Context.Server.Settings.GameSettings.AllowNegativeScore}");
         }
 
         [Command("BlockMultiQueuing")]
         [Summary("Toggle whether users are allowed in multiple queues at the same time")]
-        public Task BlockMultiQueuingAsync()
+        public async Task BlockMultiQueuingAsync()
         {
             Context.Server.Settings.GameSettings.BlockMultiQueuing = !Context.Server.Settings.GameSettings.BlockMultiQueuing;
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Multi Queuing Disabled: {Context.Server.Settings.GameSettings.BlockMultiQueuing}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Multi Queuing Disabled: {Context.Server.Settings.GameSettings.BlockMultiQueuing}");
         }
 
         [Command("RemoveOnAFK")]
         [Summary("Toggle the auto-removal of users from queue when they go afk")]
-        public Task RemoveOnAfkAsync()
+        public async Task RemoveOnAfkAsync()
         {
             Context.Server.Settings.GameSettings.RemoveOnAfk = !Context.Server.Settings.GameSettings.RemoveOnAfk;
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Players will be removed from queue on AFK: {Context.Server.Settings.GameSettings.RemoveOnAfk}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Players will be removed from queue on AFK: {Context.Server.Settings.GameSettings.RemoveOnAfk}");
         }
 
         [Command("AnnouncementsChannel")]
         [Summary("Ser the current channel as the announcements channel")]
-        public Task AnnouncementsChannelAsync()
+        public async Task AnnouncementsChannelAsync()
         {
             Context.Server.Settings.GameSettings.AnnouncementsChannel = Context.Channel.Id;
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Game announcements will now be posted to {Context.Channel.Name}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Game announcements will now be posted to {Context.Channel.Name}");
         }
 
         [Command("DMAnnouncements")]
         [Summary("Toggle whether to dm users announcements")]
-        public Task DMAnnouncementsAsync()
+        public async Task DMAnnouncementsAsync()
         {
             Context.Server.Settings.GameSettings.DMAnnouncements = !Context.Server.Settings.GameSettings.DMAnnouncements;
-            Context.Server.Save();
-            return SimpleEmbedAsync($"Users will be DM'ed Announcements: {Context.Server.Settings.GameSettings.DMAnnouncements}");
+            await Context.Server.Save();
+            await SimpleEmbedAsync($"Users will be DM'ed Announcements: {Context.Server.Settings.GameSettings.DMAnnouncements}");
         }
 
         [Command("ReQueueDelay")]
         [Summary("Set the amount of time users must wait between games")]
-        public Task ReQueueDelayAsync(int minutes = 0)
+        public async Task ReQueueDelayAsync(int minutes = 0)
         {
             if (minutes < 0)
             {
@@ -82,29 +82,29 @@
             }
 
             Context.Server.Settings.GameSettings.ReQueueDelay = TimeSpan.FromMinutes(minutes);
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Success, users must wait {minutes} minutes before re-queuing");
+            await SimpleEmbedAsync($"Success, users must wait {minutes} minutes before re-queuing");
         }
 
         [Command("ShowKD")]
         [Summary("Toggle the use of K/D ratio in the server")]
-        public Task ShowKDAsync()
+        public async Task ShowKDAsync()
         {
             Context.Server.Settings.GameSettings.UseKd = !Context.Server.Settings.GameSettings.UseKd;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.UseKd}");
+            await SimpleEmbedAsync($"Show user KD: {Context.Server.Settings.GameSettings.UseKd}");
         }
 
         [Command("UserGameResults")]
         [Summary("Toggle whether users are able to submit their own game results")]
-        public Task UserGameResultsAsync()
+        public async Task UserGameResultsAsync()
         {
             Context.Server.Settings.GameSettings.AllowUserSubmissions = !Context.Server.Settings.GameSettings.AllowUserSubmissions;
-            Context.Server.Save();
+            await Context.Server.Save();
 
-            return SimpleEmbedAsync($"Users are able to set game result: {Context.Server.Settings.GameSettings.AllowUserSubmissions}\n" + 
+            await SimpleEmbedAsync($"Users are able to set game result: {Context.Server.Settings.GameSettings.AllowUserSubmissions}\n" + 
                                     "This requires a player from both teams to submit the same game result.\n");
         }
     }

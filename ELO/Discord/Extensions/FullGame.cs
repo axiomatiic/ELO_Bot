@@ -22,7 +22,7 @@
                 if (users.Any(x => x == null))
                 {
                     context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
-                    context.Server.Save();
+                    await context.Server.Save();
                     await context.Channel.SendMessageAsync("Game Aborted, Missing Player in queue");
                     return;
                 }
@@ -77,11 +77,11 @@
                     context.Elo.Lobby.Game = new GuildModel.Lobby.CurrentGame();
                 }
 
-                context.Server.Save();
+                await context.Server.Save();
             }
         }
 
-        public static Task FullQueueCaptainsAsync(Context context, List<SocketGuildUser> users)
+        public static async Task FullQueueCaptainsAsync(Context context, List<SocketGuildUser> users)
         {
             var list = context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => context.Server.Users.First(u => u.UserID == x)).ToList();
             
@@ -139,7 +139,7 @@
             context.Elo.Lobby.Game.Team2.Players.Add(cap2.Id);
             context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(cap1.Id);
             context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(cap2.Id);
-            context.Channel.SendMessageAsync($"**Team1 Captain** {cap1.Mention}\n" +
+            await context.Channel.SendMessageAsync($"**Team1 Captain** {cap1.Mention}\n" +
                                                    $"**Team2 Captain** {cap2.Mention}\n\n" +
                                                    $"**Select Your Teams using `{context.Prefix}pick <@user>`**\n" +
                                                    "**Captain 1 Always Picks First**\n" +
@@ -149,8 +149,7 @@
             context.Elo.Lobby.Game.Team1.TurnToPick = true;
             context.Elo.Lobby.Game.Team2.TurnToPick = false;
 
-            context.Server.Save();
-            return Task.CompletedTask;
+            await context.Server.Save();
         }
 
         public static async Task AnnounceGameAsync(Context context)

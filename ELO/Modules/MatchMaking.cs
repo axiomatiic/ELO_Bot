@@ -55,7 +55,7 @@
                 }
 
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Add(Context.User.Id);
-                Context.Server.Save();
+                await Context.Server.Save();
                 await SimpleEmbedAsync($"[{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}] Added {Context.User.Mention} to queue");
                 if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
                 {
@@ -87,7 +87,7 @@
 
                 Context.Elo.Lobby.Game.QueuedPlayerIDs.Remove(Context.User.Id);
                 await SimpleEmbedAsync($"[{Context.Elo.Lobby.Game.QueuedPlayerIDs.Count}/{Context.Elo.Lobby.UserLimit}] Removed {Context.User.Mention} from queue");
-                Context.Server.Save();
+                await Context.Server.Save();
             }
             else
             {
@@ -109,7 +109,7 @@
             if (Context.Elo.Lobby.Game.QueuedPlayerIDs.Count != queuedPlayers.Count)
             {
                 Context.Elo.Lobby.Game.QueuedPlayerIDs = queuedPlayers.Select(x => x.Id).ToList();
-                Context.Server.Save();
+                await Context.Server.Save();
             }
 
             if (!Context.Elo.Lobby.Game.IsPickingTeams)
@@ -226,7 +226,7 @@
                 throw new Exception("Unknown Player Exception!");
             }
 
-            Context.Server.Save();
+            await Context.Server.Save();
             await SimpleEmbedAsync($"Success, {Context.User.Mention} replaced {userToReplace.Mention}");
             if (Context.Elo.Lobby.UserLimit >= Context.Elo.Lobby.Game.QueuedPlayerIDs.Count)
             {
@@ -341,7 +341,7 @@
                                        $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Guild.GetUser(x)?.Mention))}");
             }
 
-            Context.Server.Save();
+            await Context.Server.Save();
         }
 
         public async Task Pick2Captains(Context context, IGuildUser pickedUser)
@@ -481,7 +481,7 @@
                                            $"{string.Join(" ", Context.Elo.Lobby.Game.QueuedPlayerIDs.Select(x => Context.Guild.GetUser(x)?.Mention))}");
                 }
 
-                Context.Server.Save();
+               await Context.Server.Save();
             }
         }
 
@@ -559,7 +559,7 @@
                 throw new Exception("You must be on either team to submit the game result.");
             }
 
-            Context.Server.Save();
+            await Context.Server.Save();
             await SimpleEmbedAsync("Result Proposal\n" +
                                    $"Team1 Submission: {selectedGame.Proposal.R1} Player: {Context.Guild.GetUser(selectedGame.Proposal.P1)?.Mention ?? "N/A"}\n" +
                                    $"Team2 Submission: {selectedGame.Proposal.R2} Player: {Context.Guild.GetUser(selectedGame.Proposal.P2)?.Mention ?? "N/A"}");

@@ -87,9 +87,9 @@
         /// <summary>
         ///     Just shorthand for saving our guild config
         /// </summary>
-        public void Save()
+        public Task Save()
         {
-            Context.Server.Save();
+            return Context.Server.Save();
         }
 
         /// <summary>

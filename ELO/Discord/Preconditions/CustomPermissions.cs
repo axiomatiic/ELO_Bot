@@ -64,12 +64,6 @@
 
                 if (defaultPermissionLevel == DefaultPermissionLevel.AllUsers)
                 {
-                    LogHandler.LogMessage($"Default: {originalLevel}\n" +
-                                          $"New Level: {defaultPermissionLevel}\n" +
-                                          $"IsCommand: {resultInfo.IsCommand}\n" +
-                                          $"IsOverridden: {resultInfo.IsOverridden}\n" +
-                                          $"Match Name: {resultInfo.MatchName}\n" +
-                                          $"Command Name: {command.Name}");
                     return Task.FromResult(PreconditionResult.FromSuccess());
                 }
 
@@ -77,12 +71,6 @@
                 {
                     if (server.Users.Any(x => x.UserID == context.User.Id))
                     {
-                        LogHandler.LogMessage($"Default: {originalLevel}\n" +
-                                              $"New Level: {defaultPermissionLevel}\n" +
-                                              $"IsCommand: {resultInfo.IsCommand}\n" +
-                                              $"IsOverridden: {resultInfo.IsOverridden}\n" +
-                                              $"Match Name: {resultInfo.MatchName}\n" +
-                                              $"Command Name: {command.Name}");
                         return Task.FromResult(PreconditionResult.FromSuccess());
                     }
                 }
@@ -90,12 +78,6 @@
                 {
                     if (context.User.CastToSocketGuildUser().IsModeratorOrHigher(server.Settings.Moderation, context.Client))
                     {
-                        LogHandler.LogMessage($"Default: {originalLevel}\n" +
-                                              $"New Level: {defaultPermissionLevel}\n" +
-                                              $"IsCommand: {resultInfo.IsCommand}\n" +
-                                              $"IsOverridden: {resultInfo.IsOverridden}\n" +
-                                              $"Match Name: {resultInfo.MatchName}\n" +
-                                              $"Command Name: {command.Name}");
                         return Task.FromResult(PreconditionResult.FromSuccess());
                     }
                 }
@@ -103,12 +85,6 @@
                 {
                     if (context.User.CastToSocketGuildUser().IsAdminOrHigher(server.Settings.Moderation, context.Client))
                     {
-                        LogHandler.LogMessage($"Default: {originalLevel}\n" +
-                                              $"New Level: {defaultPermissionLevel}\n" +
-                                              $"IsCommand: {resultInfo.IsCommand}\n" +
-                                              $"IsOverridden: {resultInfo.IsOverridden}\n" +
-                                              $"Match Name: {resultInfo.MatchName}\n" +
-                                              $"Command Name: {command.Name}");
                         return Task.FromResult(PreconditionResult.FromSuccess());
                     }
                 }
@@ -117,12 +93,6 @@
                     if (context.User.Id == context.Guild.OwnerId
                         || context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id)
                     {
-                        LogHandler.LogMessage($"Default: {originalLevel}\n" +
-                                              $"New Level: {defaultPermissionLevel}\n" +
-                                              $"IsCommand: {resultInfo.IsCommand}\n" +
-                                              $"IsOverridden: {resultInfo.IsOverridden}\n" +
-                                              $"Match Name: {resultInfo.MatchName}\n" +
-                                              $"Command Name: {command.Name}");
                         return Task.FromResult(PreconditionResult.FromSuccess());
                     }
                 }
@@ -130,12 +100,6 @@
                 {
                     if (context.Client.GetApplicationInfoAsync().Result.Owner.Id == context.User.Id)
                     {
-                        LogHandler.LogMessage($"Default: {originalLevel}\n" +
-                                              $"New Level: {defaultPermissionLevel}\n" +
-                                              $"IsCommand: {resultInfo.IsCommand}\n" +
-                                              $"IsOverridden: {resultInfo.IsOverridden}\n" +
-                                              $"Match Name: {resultInfo.MatchName}\n" +
-                                              $"Command Name: {command.Name}");
                         return Task.FromResult(PreconditionResult.FromSuccess());
                     }
                 }

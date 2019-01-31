@@ -175,7 +175,7 @@
 
             await RegisterUpdatesAsync(con, server, newUser, user);
 
-            server.Save();
+            await server.Save();
 
             if (userSelfUpdate == null)
             {
